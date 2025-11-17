@@ -4,7 +4,7 @@
  * ===========================================
  */
 body {
-  background-color: #f3f4f6;
+  background-color: #ffffff;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -77,7 +77,7 @@ body {
   transition: background-color 0.2s ease;
 }
 .header-icon-button:hover {
-  background-color: #f3f4f6;
+  background-color: #fdf2f8;
 }
 
 .icon-hamburger,
@@ -148,7 +148,7 @@ body {
   transition: background-color 0.2s ease;
 }
 .sidebar-nav-item:hover {
-  background-color: #f3f4f6;
+  background-color: #fdf2f8;
 }
 
 .sidebar-nav-icon {
@@ -275,20 +275,20 @@ body {
 }
 
 .button-secondary-gray {
-  background-color: #f3f4f6;
+  background-color: #fdf2f8;
   color: #1f2937;
-  border-color: #d1d5db;
+  border-color: #f9a8d4;
 }
 .button-secondary-gray:hover {
-  background-color: #e5e7eb;
+  background-color: #fce7f3;
 }
 
 .button-primary-green {
-  background-color: #16a34a;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
   color: #ffffff;
 }
 .button-primary-green:hover {
-  background-color: #15803d;
+  background: linear-gradient(135deg, #db2777 0%, #9333ea 100%);
 }
 
 .button-text-sm { display: inline; }
@@ -395,7 +395,7 @@ body {
   text-decoration: none;
 }
 .popover-list-item:hover {
-  background-color: #f9fafb;
+  background-color: #fdf2f8;
 }
 
 .popover-list-item-icon {
@@ -407,7 +407,7 @@ body {
   text-decoration: none;
 }
 .popover-list-item-icon:hover {
-  background-color: #f3f4f6;
+  background-color: #fdf2f8;
 }
 .popover-icon {
   width: 1.25rem;
@@ -425,7 +425,7 @@ body {
   text-decoration: none;
 }
 .popover-list-item-status:hover {
-  background-color: #f3f4f6;
+  background-color: #fdf2f8;
 }
 
 .notification-preview {
@@ -482,12 +482,12 @@ body {
   border-top: none;
 }
 .revision-list-item:hover {
-  background-color: #f9fafb;
+  background-color: #fdf2f8;
 }
 .revision-list-title-active {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #4f46e5;
+  color: #a855f7;
 }
 .revision-list-title {
   font-size: 0.875rem;
@@ -510,13 +510,13 @@ body {
   border-radius: 9999px;
 }
 .status-badge-green {
-  color: #166534;
-  background-color: #dcfce7;
+  color: #7e22ce;
+  background-color: #f3e8ff;
 }
 
 .status-bar-container { margin-top: 1rem; }
 .status-bar-label { font-size: 0.875rem; color: #4b5563; }
-.status-bar-text-green { color: #15803d; font-weight: 600; }
+.status-bar-text-green { color: #9333ea; font-weight: 600; }
 .status-bar-track {
   width: 100%;
   background-color: #e5e7eb;
@@ -525,7 +525,7 @@ body {
   margin-top: 0.5rem;
 }
 .status-bar-fill-green {
-  background-color: #16a34a;
+  background: linear-gradient(90deg, #ec4899 0%, #a855f7 100%);
   height: 0.625rem;
   border-radius: 9999px;
   width: 100%;
@@ -543,7 +543,7 @@ body {
 }
 .status-dot-green {
   width: 0.5rem; height: 0.5rem; margin-right: 0.75rem;
-  background-color: #22c55e;
+  background-color: #a855f7;
   border-radius: 9999px;
 }
 
@@ -566,7 +566,7 @@ body {
   flex-shrink: 0;
   width: 2.5rem;
   height: 2.5rem;
-  color: #22c55e;
+  color: #a855f7;
 }
 
 .feedback-item-comment {
@@ -593,7 +593,7 @@ body {
   border-radius: 9999px;
   flex-shrink: 0;
   order: 2;
-  background-color: #4f46e5;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -645,7 +645,7 @@ body {
 .feedback-comment-bubble-shinlo {
   font-size: 0.875rem;
   color: #ffffff;
-  background-color: #4f46e5;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
   padding: 0.75rem;
   border-radius: 0.5rem;
   border-bottom-right-radius: 0;
@@ -661,7 +661,7 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
   color: #4b5563;
-  background-color: #f3f4f6;
+  background-color: #fdf2f8;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   border: none;
@@ -669,7 +669,7 @@ body {
   transition: background-color 0.2s ease;
 }
 .feedback-status-button:hover {
-  background-color: #e5e7eb;
+  background-color: #fce7f3;
 }
 
 .sr-only {
