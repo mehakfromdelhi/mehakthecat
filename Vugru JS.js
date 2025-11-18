@@ -11,6 +11,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
      * -------------------------------------------
+     * Authentication Check
+     * -------------------------------------------
+     * Redirects to login page if user is not authenticated
+     */
+    function checkAuthentication() {
+        const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+        
+        if (!auth) {
+            // Not authenticated, redirect to login
+            window.location.href = 'login.html';
+            return false;
+        }
+
+        try {
+            const authData = JSON.parse(auth);
+            // Check if session is still valid (24 hours)
+            const oneDay = 24 * 60 * 60 * 1000;
+            if (!authData.loggedIn || (Date.now() - authData.timestamp) > oneDay) {
+                // Session expired or invalid, clear and redirect
+                localStorage.removeItem('auth');
+                sessionStorage.removeItem('auth');
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        } catch (e) {
+            // Invalid auth data, clear and redirect
+            localStorage.removeItem('auth');
+            sessionStorage.removeItem('auth');
+            window.location.href = 'login.html';
+            return false;
+        }
+    }
+
+    // Check authentication before loading the page
+    if (!checkAuthentication()) {
+        return; // Stop execution if not authenticated
+    }
+
+    /*
+     * -------------------------------------------
      * Feature 1: Sidebar Logic
      * -------------------------------------------
      * This logic is specific to the sidebar because it
@@ -308,6 +349,24 @@ document.addEventListener('DOMContentLoaded', () => {
             //         }
             //     });
             // });
+        });
+    }
+
+    /*
+     * -------------------------------------------
+     * Logout Functionality
+     * -------------------------------------------
+     */
+    const logoutButton = document.getElementById('logout-button');
+    
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            // Clear authentication data
+            localStorage.removeItem('auth');
+            sessionStorage.removeItem('auth');
+            
+            // Redirect to login page
+            window.location.href = 'login.html';
         });
     }
 

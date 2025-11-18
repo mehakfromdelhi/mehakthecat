@@ -574,7 +574,7 @@ body {
   align-items: flex-start;
   gap: 0.75rem;
 }
-.feedback-item-comment-shinlo {
+.feedback-item-comment-vugru {
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
@@ -587,7 +587,7 @@ body {
   border-radius: 9999px;
   flex-shrink: 0;
 }
-.feedback-avatar-shinlo {
+.feedback-avatar-vugru {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 9999px;
@@ -605,7 +605,7 @@ body {
 .feedback-comment-bubble-container {
   flex: 1 1 0%;
 }
-.feedback-comment-bubble-container-shinlo {
+.feedback-comment-bubble-container-vugru {
   flex: 1 1 0%;
   order: 1;
   max-width: 80%;
@@ -616,7 +616,7 @@ body {
   font-weight: 600;
   color: #111827;
 }
-.feedback-author-shinlo {
+.feedback-author-vugru {
   font-size: 0.875rem;
   font-weight: 600;
   color: #111827;
@@ -628,7 +628,7 @@ body {
   color: #6b7280;
   margin-bottom: 0.25rem;
 }
-.feedback-timestamp-shinlo {
+.feedback-timestamp-vugru {
   font-size: 0.75rem;
   color: #6b7280;
   margin-bottom: 0.25rem;
@@ -642,7 +642,7 @@ body {
   padding: 0.75rem;
   border-radius: 0.5rem;
 }
-.feedback-comment-bubble-shinlo {
+.feedback-comment-bubble-vugru {
   font-size: 0.875rem;
   color: #ffffff;
   background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
@@ -876,4 +876,288 @@ body {
   font-weight: 500;
   color: #166534;
   margin: 0;
+}
+
+
+/*
+ * ===========================================
+ * Login Page
+ * ===========================================
+ */
+.login-page {
+  background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.login-card {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 2.5rem;
+  width: 100%;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.logo-icon {
+  width: 3rem;
+  height: 3rem;
+  color: #a855f7;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  color: #ffffff;
+}
+
+.login-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.login-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  color: #111827;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: #a855f7;
+}
+
+.eye-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: #a855f7;
+}
+
+.checkbox-text {
+  color: #374151;
+}
+
+.forgot-password {
+  color: #a855f7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: #9333ea;
+  text-decoration: underline;
+}
+
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.error-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.login-button {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-top: 0.5rem;
+}
+
+.login-button:hover {
+  background: linear-gradient(135deg, #db2777 0%, #9333ea 100%);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.button-arrow {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.login-footer {
+  margin-top: 2rem;
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.login-footer-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.signup-link {
+  color: #a855f7;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.signup-link:hover {
+  color: #9333ea;
+  text-decoration: underline;
+}
+
+/* Shake animation for form errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.login-form.shake {
+  animation: shake 0.5s;
+}
+
+/* Logout button in header */
+.logout-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  background-color: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logout-button:hover {
+  background-color: #fdf2f8;
+  border-color: #f9a8d4;
+  color: #a855f7;
+}
+
+.logout-icon {
+  width: 1rem;
+  height: 1rem;
 }
