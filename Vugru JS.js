@@ -117,4 +117,198 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    /*
+     * -------------------------------------------
+     * Feature 3: Upload Modal & File Upload
+     * -------------------------------------------
+     * Handles the upload button click, modal display,
+     * and file upload functionality for local, Google Drive, and OneDrive.
+     */
+    
+    const uploadButton = document.getElementById('upload-button');
+    const uploadModal = document.getElementById('upload-modal');
+    const uploadModalClose = document.getElementById('upload-modal-close');
+    const uploadModalBackdrop = uploadModal?.querySelector('.upload-modal-backdrop');
+    const localFileInput = document.getElementById('local-file-input');
+    const googleDriveButton = document.getElementById('google-drive-button');
+    const onedriveButton = document.getElementById('onedrive-button');
+    const uploadProgress = document.getElementById('upload-progress');
+    const uploadProgressFill = document.getElementById('upload-progress-fill');
+    const uploadProgressText = document.getElementById('upload-progress-text');
+    const uploadSuccess = document.getElementById('upload-success');
+
+    // Function to open the upload modal
+    const openUploadModal = () => {
+        if (uploadModal) {
+            uploadModal.classList.add('is-open');
+            // Reset modal state
+            if (uploadProgress) uploadProgress.style.display = 'none';
+            if (uploadSuccess) uploadSuccess.style.display = 'none';
+            if (uploadProgressFill) uploadProgressFill.style.width = '0%';
+        }
+    };
+
+    // Function to close the upload modal
+    const closeUploadModal = () => {
+        if (uploadModal) {
+            uploadModal.classList.remove('is-open');
+        }
+    };
+
+    // Open modal when upload button is clicked
+    if (uploadButton) {
+        uploadButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openUploadModal();
+        });
+    }
+
+    // Close modal when close button is clicked
+    if (uploadModalClose) {
+        uploadModalClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeUploadModal();
+        });
+    }
+
+    // Close modal when backdrop is clicked
+    if (uploadModalBackdrop) {
+        uploadModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === uploadModalBackdrop) {
+                closeUploadModal();
+            }
+        });
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && uploadModal?.classList.contains('is-open')) {
+            closeUploadModal();
+        }
+    });
+
+    // Handle local file upload
+    if (localFileInput) {
+        localFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('video/')) {
+                    alert('Please select a valid video file.');
+                    localFileInput.value = '';
+                    return;
+                }
+
+                // Validate file size (e.g., max 500MB)
+                const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+                if (file.size > maxSize) {
+                    alert('File size exceeds 500MB. Please select a smaller file.');
+                    localFileInput.value = '';
+                    return;
+                }
+
+                uploadFile(file);
+            }
+        });
+    }
+
+    // Function to simulate file upload (replace with actual upload logic)
+    const uploadFile = (file) => {
+        // Show progress
+        if (uploadProgress) {
+            uploadProgress.style.display = 'block';
+        }
+        if (uploadSuccess) {
+            uploadSuccess.style.display = 'none';
+        }
+
+        // Simulate upload progress
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 100) progress = 100;
+
+            if (uploadProgressFill) {
+                uploadProgressFill.style.width = progress + '%';
+            }
+            if (uploadProgressText) {
+                uploadProgressText.textContent = `Uploading ${file.name}... ${Math.round(progress)}%`;
+            }
+
+            if (progress >= 100) {
+                clearInterval(interval);
+                
+                // Show success message
+                setTimeout(() => {
+                    if (uploadProgress) {
+                        uploadProgress.style.display = 'none';
+                    }
+                    if (uploadSuccess) {
+                        uploadSuccess.style.display = 'flex';
+                    }
+
+                    // In a real application, you would:
+                    // 1. Send the file to your server
+                    // 2. Update the video player with the new video
+                    // 3. Refresh the revision history
+                    
+                    console.log('File uploaded:', file.name, file.size, 'bytes');
+                    
+                    // Close modal after 2 seconds
+                    setTimeout(() => {
+                        closeUploadModal();
+                        // Reset file input
+                        if (localFileInput) localFileInput.value = '';
+                    }, 2000);
+                }, 500);
+            }
+        }, 200);
+    };
+
+    // Handle Google Drive button click
+    if (googleDriveButton) {
+        googleDriveButton.addEventListener('click', () => {
+            // TODO: Integrate Google Picker API
+            // For now, show a message
+            alert('Google Drive integration requires Google Picker API setup.\n\nTo implement:\n1. Get a Google API key\n2. Enable Google Picker API\n3. Load the Google Picker API script\n4. Implement picker initialization');
+            
+            // Example implementation structure:
+            // loadGooglePickerAPI().then(() => {
+            //     const picker = new google.picker.PickerBuilder()
+            //         .addView(google.picker.ViewId.VIDEOS)
+            //         .setOAuthToken(oauthToken)
+            //         .setCallback(pickerCallback)
+            //         .build();
+            //     picker.setVisible(true);
+            // });
+        });
+    }
+
+    // Handle OneDrive button click
+    if (onedriveButton) {
+        onedriveButton.addEventListener('click', () => {
+            // TODO: Integrate Microsoft Graph API / OneDrive File Picker
+            // For now, show a message
+            alert('OneDrive integration requires Microsoft Graph API setup.\n\nTo implement:\n1. Register your app in Azure AD\n2. Get Microsoft Graph API credentials\n3. Load Microsoft Graph SDK\n4. Implement file picker using OneDrive API');
+            
+            // Example implementation structure:
+            // MicrosoftGraphClient.init({
+            //     authProvider: authProvider
+            // }).then((client) => {
+            //     // Use OneDrive file picker
+            //     OneDrive.open({
+            //         clientId: 'your-client-id',
+            //         action: 'query',
+            //         multiSelect: false,
+            //         advanced: {
+            //             filter: 'video',
+            //         },
+            //         success: (files) => {
+            //             // Handle selected file
+            //         }
+            //     });
+            // });
+        });
+    }
+
 });

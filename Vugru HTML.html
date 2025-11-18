@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- <script type="module" src="Vugru JS.js"></script> -->
+<!-- <link rel="stylesheet" href="Vugru CSS.css"> -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -111,7 +113,7 @@
                     </div>
                 </div>
                 
-                <button class="button button-secondary">
+                <button id="upload-button" class="button button-secondary">
                     <span class="button-text-sm">Upload</span>
                     <span class="button-text-md">Upload New Version</span>
                 </button>
@@ -330,6 +332,80 @@
 
         </div>
     </main>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="upload-modal">
+        <div class="upload-modal-backdrop"></div>
+        <div class="upload-modal-content">
+            <div class="upload-modal-header">
+                <h2 class="upload-modal-title">Upload Video</h2>
+                <button id="upload-modal-close" class="upload-modal-close" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="upload-close-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="upload-modal-body">
+                <div class="upload-options">
+                    <!-- Local Desktop Upload -->
+                    <div class="upload-option">
+                        <label for="local-file-input" class="upload-option-button">
+                            <svg class="upload-option-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5m-7.5 0h15" />
+                            </svg>
+                            <div class="upload-option-content">
+                                <h3 class="upload-option-title">Upload from Computer</h3>
+                                <p class="upload-option-description">Select a video file from your local desktop</p>
+                            </div>
+                        </label>
+                        <input type="file" id="local-file-input" accept="video/*" style="display: none;">
+                    </div>
+
+                    <!-- Google Drive Upload -->
+                    <div class="upload-option">
+                        <button id="google-drive-button" class="upload-option-button">
+                            <svg class="upload-option-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7.376 10.481L3.43 18.538a1.5 1.5 0 001.069 2.212l.154.016h15.894a1.5 1.5 0 001.38-2.106l-3.95-8.057H7.376zM12.75 2.5L8.6 9.481h7.8L12.75 2.5z"/>
+                            </svg>
+                            <div class="upload-option-content">
+                                <h3 class="upload-option-title">Upload from Google Drive</h3>
+                                <p class="upload-option-description">Select a video from your Google Drive</p>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- OneDrive Upload -->
+                    <div class="upload-option">
+                        <button id="onedrive-button" class="upload-option-button">
+                            <svg class="upload-option-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.5 2.5L6.5 8.5h6v6h6v-6h-6V2.5z"/>
+                            </svg>
+                            <div class="upload-option-content">
+                                <h3 class="upload-option-title">Upload from OneDrive</h3>
+                                <p class="upload-option-description">Select a video from your OneDrive</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Progress (hidden by default) -->
+                <div id="upload-progress" class="upload-progress" style="display: none;">
+                    <div class="upload-progress-bar">
+                        <div id="upload-progress-fill" class="upload-progress-fill"></div>
+                    </div>
+                    <p id="upload-progress-text" class="upload-progress-text">Uploading...</p>
+                </div>
+
+                <!-- Upload Success Message (hidden by default) -->
+                <div id="upload-success" class="upload-success" style="display: none;">
+                    <svg class="upload-success-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="upload-success-text">Video uploaded successfully!</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="Vugru JS.js" defer></script>
 
