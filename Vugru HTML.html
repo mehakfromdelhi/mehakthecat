@@ -1,420 +1,454 @@
 <!DOCTYPE html>
-<!-- <script type="module" src="Vugru JS.js"></script> -->
-<!-- <link rel="stylesheet" href="Vugru CSS.css"> -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vugru Dashboard - Project View</title>
+    <title>Vugru Dashboard - Creator Project Console</title>
+    <!-- Inter font for crisp UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Vugru CSS.css">
 </head>
 <body>
+  <div class="page">
 
-    <aside id="sidebar" class="sidebar-panel">
-        <nav class="sidebar-nav">
-            <ul class="sidebar-nav-list">
-                <li>
-                    <a href="#" class="sidebar-nav-item">
-                        <svg class="sidebar-nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0A2.25 2.25 0 004.5 15h15a2.25 2.25 0 002.25-2.25m-19.5 0l.241.631a2.25 2.25 0 002.008 1.619h15.002a2.25 2.25 0 002.008-1.619l.241-.631M3 10.5h18M3 15h18" />
-                        </svg>
-                        <span>All Projects</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-nav-item">
-                        <svg class="sidebar-nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.932c.755-.36 1.584-.554 2.443-.554s1.688.194 2.443.554a9.337 9.337 0 004.121.932 9.38 9.38 0 002.625-.372M15 19.128v-1.5a3 3 0 00-3-3H9a3 3 0 00-3 3v1.5m6 0a9.38 9.38 0 00-2.625-.372 9.337 9.337 0 00-4.121.932c-.755.36-1.584-.554-2.443-.554s-1.688-.194-2.443-.554a9.337 9.337 0 00-4.121.932A9.38 9.38 0 00-2.625 19.128m15 0a4.498 4.498 0 00-4.5-4.5h-3a4.498 4.498 0 00-4.5 4.5m12 0v-1.5a3 3 0 00-3-3H9a3 3 0 00-3 3v1.5m12 0m-6-6a3 3 0 11-6 0 3 3 0 016 0zM3 10.5a3 3 0 116 0 3 3 0 01-6 0z" />
-                        </svg>
-                        <span>Clients</span>
-                    </a>
-                </li>
-                <li class="sidebar-nav-separator"></li>
-                <li>
-                    <a href="#" class="sidebar-nav-item">
-                        <svg class="sidebar-nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Profile</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-nav-item">
-                        <svg class="sidebar-nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.26.716.53.966l.995.877c.417.365.65.902.65 1.451v2.25c0 .55-.232 1.086-.65 1.451l-.995.877c-.27.25-.467.592-.53.966l-.213 1.281c-.09.542-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.26-.716-.53-.966l-.995-.877c-.417-.365-.65-.902-.65-1.451v-2.25c0 .55.232 1.086.65-1.451l.995-.877c.27-.25.467.592.53-.966l.213-1.281z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Settings</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </aside>
+  <!-- SVG sprite (icons) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="ico-target" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="6" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="2" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5" stroke-width="1.5"/>
+      <path d="M10 20a2 2 0 0 0 4 0" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-list" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M8 6h13M8 12h13M8 18h13" stroke-width="1.5"/>
+      <circle cx="3" cy="6" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/>
+    </symbol>
+    <symbol id="ico-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/>
+      <path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M12 2l10 6-10 6L2 8l10-6z" stroke-width="1.5"/>
+      <path d="M2 12l10 6 10-6" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="3" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-external" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M14 3h7v7" stroke-width="1.5"/>
+      <path d="M10 14L21 3" stroke-width="1.5"/>
+      <path d="M5 7v14h14v-5" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-send" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M22 2L11 13" stroke-width="1.5"/>
+      <path d="M22 2l-7 20-4-9-9-4 20-7z" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M5 19l-1 4 4-1 11-11a3 3 0 0 0-4-4L5 19z" stroke-width="1.5"/>
+      <path d="M14 7l3 3" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-check" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M20 6L9 17l-5-5" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="9" stroke-width="1.5"/>
+      <path d="M12 7v5l3 2" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <rect x="5" y="11" width="14" height="10" rx="2" stroke-width="1.5"/>
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="5" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="ico-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M4 4v16M4 4h11l-1.5 3H4" stroke-width="1.5"/>
+    </symbol>
+  </svg>
 
-    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
-
-    <nav class="header">
-        <div class="header-content">
-            
-            <div class="header-left">
-                <button id="sidebar-toggle" class="header-icon-button">
-                    <span class="sr-only">Open sidebar</span>
-                    <svg class="icon-hamburger" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="header-title-container">
-                <h1 class="header-title">
-                    123 Main St - Property Tour
-                </h1>
-            </div>
-
-            <div class="header-actions">
-                
-                <div class="popover-wrapper">
-                    <button id="notifications-toggle" data-toggle="popover" data-target="#notifications-popover" class="header-icon-button">
-                        <span class="sr-only">View notifications</span>
-                        <svg class="icon-bell" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A2.25 2.25 0 0015.75 6.75h-7.5A2.25 2.25 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                        </svg>
-                        <span class="notification-dot"></span>
-                    </button>
-
-                    <div id="notifications-popover" class="popover-menu popover-menu-header">
-                        <div class="popover-header">
-                            <h3 class="popover-title">Client Notifications</h3>
-                        </div>
-                        <ul class="popover-list">
-                           <li>
-                                <a href="#" class="popover-list-item">
-                                    <p class="notification-title">
-                                        <strong>Jane Cooper</strong> commented on '123 Main St...'
-                                    </p>
-                                    <p class="notification-preview">
-                                        "Remove the shot of the messy closet at 1:32..."
-                                    </p>
-                                    <p class="notification-timestamp">2 hours ago</p>
-                                </a>
-                            </li>
-                            <li class="list_separator"></li>
-                            <li>
-                                <a href="#" class="popover-list-item">
-                                    <p class="notification-title">
-                                        <strong>Trader Joe</strong>
-                                        <span class="font-normal">approved</span>
-                                        <span class="font-normal text-gray-600">'123 Main St. Property Tour'</span>
-                                    </p>
-                                    <p class="notification-timestamp">5 hours ago</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <button id="upload-button" class="button button-secondary">
-                    <span class="button-text-sm">Upload</span>
-                    <span class="button-text-md">Upload New Version</span>
-                </button>
-
-                <button id="logout-button" class="logout-button">
-                    <svg class="logout-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                    </svg>
-                    <span class="button-text-sm">Logout</span>
-                </button>
-
-            </div>
-        </div>
-    </nav>
-
-
-    <main class="main-container">
-        
-        <div class="main-grid">
-            
-            <div class="grid-col-span-2">
-                
-                <section class="card">
-                    <div class="video-player-wrapper">
-                        <div class="video-player-placeholder">
-                            <span>Video Player Placeholder</span>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <h2 class="card-title-xl">
-                            Version 2 (Approved)
-                        </h2>
-                        <p class="card-subtitle">
-                            Uploaded by Vugru on Nov 8, 2025 at 2:30 PM
-                        </p>
-                    </div>
-                </section>
-
-                <section class="card">
-                    <div class="card-header">
-                        <h2 class="card-title-lg">
-                            Revision History
-                        </h2>
-                    </div>
-                    <ul class="revision-list">
-                        <li class="revision-list-item">
-                            <div>
-                                <h3 class="revision-list-title-active">Version 2</h3>
-                                <p class="revision-list-subtitle">Uploaded Nov 8, 2025</p>
-                            </div>
-                            <span class="status-badge status-badge-green">Approved</span>
-                        </li>
-                        <li class="revision-list-item">
-                            <div>
-                                <h3 class="revision-list-title">Version 1</h3>
-                                <p class="revision-list-subtitle">Uploaded Nov 7, 2025</p>
-                            </div>
-                            <span class="revision-list-status-old">Superseded</span>
-                        </li>
-                    </ul>
-                </section>
-            </div>
-
-            <div class="grid-col-span-1">
-                
-                <section class="card">
-                    <div class="card-content">
-                        <h2 class="card-title-lg">
-                            Project Status
-                        </h2>
-                        <div class="status-bar-container">
-                            <p class="status-bar-label">
-                                Current status: <strong class="status-bar-text-green">Approved</strong>
-                            </p>
-                            <div class="status-bar-track">
-                                <div class="status-bar-fill-green"></div>
-                            </div>
-                        </div>
-
-                        <div class="status-actions-container">
-                            
-                            <div class="popover-wrapper-full">
-                                
-                                <div id="publish-menu" class="popover-menu popover-menu-publish">
-                                    <div class="popover-list">
-                                        <a href="#" class="popover-list-item-icon">
-                                            <svg class="popover-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                                            </svg>
-                                            <span>Instagram</span>
-                                        </a>
-                                        <a href="#" class="popover-list-item-icon">
-                                            <svg class="popover-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path>
-                                            </svg>
-                                            <span>Facebook</span>
-                                        </a>
-                                        <a href="#" class="popover-list-item-icon">
-                                            <svg class="popover-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M21.582 7.188A2.78 2.78 0 0 0 19.6 5.21a48.28 48.28 0 0 0-7.6-1.01c-2.533 0-5.066.337-7.6-1.01A2.78 2.78 0 0 0 2.418 7.188 28.84 28.84 0 0 0 1.4 12a28.84 28.84 0 0 0 1.018 4.812A2.78 2.78 0 0 0 4.4 18.79a48.28 48.28 0 0 0 7.6 1.01c2.533 0 5.066-.337 7.6-1.01A2.78 2.78 0 0 0 21.582 16.812 28.84 28.84 0 0 0 22.6 12a28.84 28.84 0 0 0-1.018-4.812zM9.75 15.3V8.7l5.85 3.3-5.85 3.3z"></path>
-                                            </svg>
-                                            <span>YouTube</span>
-                                        </a>
-                                    </div>
-                                </div>
-
-                                <button id="publish-toggle" data-toggle="popover" data-target="#publish-menu" type="button" class="button button-primary-green">
-                                    Publish to Channels
-                                    <svg class="icon-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div class="popover-wrapper-full">
-                                
-                                <div id="share-menu" class="popover-menu popover-menu-share">
-                                    <div class="popover-list">
-                                        <a href="#" class="popover-list-item-icon">
-                                            <svg class="popover-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                                            </svg>
-                                            <span>Share via Email</span>
-                                        </a>
-                                        <a href="#" class="popover-list-item-icon">
-                                            <svg class="popover-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                              <path d="M12.001 2.002c-5.523 0-10 4.477-10 10 0 1.723.44 3.352 1.228 4.785-.07.13-.127.273-.168.423-.377 1.37-.22 2.848.418 4.022.327.604.75 1.13 1.248 1.562.63.55 1.362.96 2.148 1.202.348.107.7.19 1.05.248.102.017.202.04.304.056.12.02.24.028.36.043.14.018.28.02.42.033.16.012.32.01.48.017.18.006.36.002.54.002 5.523 0 10-4.477 10-10s-4.477-10-10-10zm0 18.016c-4.41 0-8.01-3.6-8.01-8.01S7.59 4.002 12 4.002s8.01 3.6 8.01 8.01-3.6 8.016-8.01 8.016zm3.32-5.45c-.13-.07-1.02-.5-1.18-.55-.16-.06-.27-.08-.39.08-.12.15-.45.55-.55.66-.1.1-.18.13-.34.04-.16-.08-1.29-.47-2.45-1.5-.91-.8-1.5-1.8-1.68-2.1-.18-.3-.02-.46.06-.61.07-.13.16-.32.24-.43.08-.1.13-.2.2-.33.06-.13.03-.24-.01-.32-.05-.08-.39-.93-.53-1.27-.14-.34-.28-.29-.38-.29-.1 0-.23-.01-.35-.01s-.3.04-.46.18c-.16.13-.6.58-.76 1.4-.16.82.1 1.63.2 1.76.1.13 1.03 1.65 2.5 2.3 1.48.65 1.9.9 2.2.98.6.17 1.1.1 1.48-.22.42-.36.6-.83.7-1.13.1-.3.05-.55-.02-.63z"/>
-                                            </svg>
-                                            <span>Share on Whatsapp</span>
-                                        </a>
-                                        <a href="#" class="popover-list-item-icon">
-                                            <svg class="popover-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                              <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                                            </svg>
-                                            <span>Copy URL</span>
-                                        </a>
-                                    </div>
-                                </div>
-                        
-                                <button id="share-toggle" data-toggle="popover" data-target="#share-menu" type="button" class="button button-secondary-gray">
-                                    <svg class="icon-share" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 100-2.186m0 2.186c-.18.324-.283.696-.283 1.093s.103.77.283 1.093m0 2.186l-9.566-5.314m9.566-7.5l-9.566 5.314" />
-                                    </svg>
-                                    Share with Client
-                                </button>
-                            </div>
-                            
-                        </div>
-                    </div>
-                </section>
-                
-                <section class="card">
-                    <div class="card-header">
-                        <h2 class="card-title-lg">
-                            Client Feedback
-                        </h2>
-                    </div>
-                    <ul class="feedback-list">
-                        <li class="feedback-list-item">
-                            <div class="feedback-item-event">
-                                <div class="feedback-event-icon-green">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="feedback-author">Client has approved v2!</h4>
-                                    <p class="feedback-timestamp">Nov 8, 2025 at 7:14 PM</p>
-                                </div>
-                            </div>
-                        </li>
-
-                        <li class="feedback-list-item">
-                            <div class="feedback-item-comment">
-                                <img class="feedback-avatar" src="https://i.pravatar.cc/40?u=jane" alt="Jane Cooper">
-                                <div class="feedback-comment-bubble-container">
-                                    <h4 class="feedback-author">Jane Cooper</h4>
-                                    <p class="feedback-timestamp">On V2 @ 1:32</p>
-                                    <p class="feedback-comment-bubble-client">
-                                        "Remove the shot of the messy closet at 1:32. Otherwise, looks great!"
-                                    </p>
-                                </div>
-                                <div class="popover-wrapper feedback-status-wrapper">
-                                    <button id="status-toggle-1" data-toggle="popover" data-target="#status-menu-1" type="button" class="feedback-status-button">
-                                        Status: New
-                                        <svg class="icon-chevron-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                          <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                    <div id="status-menu-1" class="popover-menu popover-menu-status">
-                                        <div class="popover-list">
-                                            <a href="#" class="popover-list-item-status">
-                                                <span class="status-dot-yellow"></span>
-                                                Work-in-Progress
-                                            </a>
-                                            <a href="#" class="popover-list-item-status">
-                                                <span class="status-dot-green"></span>
-                                                Complete
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-
-                        <li class="feedback-list-item">
-                            <div class="feedback-item-comment-vugru">
-                                <div class="feedback-avatar-vugru">
-                                    <span class="avatar-initials">V</span>
-                                </div>
-                                <div class="feedback-comment-bubble-container-vugru">
-                                    <h4 class="feedback-author-vugru">Vugru (You)</h4>
-                                    <p class="feedback-timestamp-vugru">Replying to Jane</p>
-                                    <p class="feedback-comment-bubble-vugru">
-                                        "No problem! I'll get that fixed and upload v3 shortly."
-                                    </p>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </section>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Upload Modal -->
-    <div id="upload-modal" class="upload-modal">
-        <div class="upload-modal-backdrop"></div>
-        <div class="upload-modal-content">
-            <div class="upload-modal-header">
-                <h2 class="upload-modal-title">Upload Video</h2>
-                <button id="upload-modal-close" class="upload-modal-close" aria-label="Close">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="upload-close-icon">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <div class="upload-modal-body">
-                <div class="upload-options">
-                    <!-- Local Desktop Upload -->
-                    <div class="upload-option">
-                        <label for="local-file-input" class="upload-option-button">
-                            <svg class="upload-option-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5m-7.5 0h15" />
-                            </svg>
-                            <div class="upload-option-content">
-                                <h3 class="upload-option-title">Upload from Computer</h3>
-                                <p class="upload-option-description">Select a video file from your local desktop</p>
-                            </div>
-                        </label>
-                        <input type="file" id="local-file-input" accept="video/*" style="display: none;">
-                    </div>
-
-                    <!-- Google Drive Upload -->
-                    <div class="upload-option">
-                        <button id="google-drive-button" class="upload-option-button">
-                            <svg class="upload-option-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M7.376 10.481L3.43 18.538a1.5 1.5 0 001.069 2.212l.154.016h15.894a1.5 1.5 0 001.38-2.106l-3.95-8.057H7.376zM12.75 2.5L8.6 9.481h7.8L12.75 2.5z"/>
-                            </svg>
-                            <div class="upload-option-content">
-                                <h3 class="upload-option-title">Upload from Google Drive</h3>
-                                <p class="upload-option-description">Select a video from your Google Drive</p>
-                            </div>
-                        </button>
-                    </div>
-
-                    <!-- OneDrive Upload -->
-                    <div class="upload-option">
-                        <button id="onedrive-button" class="upload-option-button">
-                            <svg class="upload-option-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12.5 2.5L6.5 8.5h6v6h6v-6h-6V2.5z"/>
-                            </svg>
-                            <div class="upload-option-content">
-                                <h3 class="upload-option-title">Upload from OneDrive</h3>
-                                <p class="upload-option-description">Select a video from your OneDrive</p>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Upload Progress (hidden by default) -->
-                <div id="upload-progress" class="upload-progress" style="display: none;">
-                    <div class="upload-progress-bar">
-                        <div id="upload-progress-fill" class="upload-progress-fill"></div>
-                    </div>
-                    <p id="upload-progress-text" class="upload-progress-text">Uploading...</p>
-                </div>
-
-                <!-- Upload Success Message (hidden by default) -->
-                <div id="upload-success" class="upload-success" style="display: none;">
-                    <svg class="upload-success-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="upload-success-text">Video uploaded successfully!</p>
-                </div>
-            </div>
-        </div>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">V</div>
+      <div>
+        <div class="brand-title">VuGru</div>
+        <div class="brand-sub">Built for creators</div>
+      </div>
     </div>
+    <nav class="nav">
+      <a class="nav-item active"><svg class="ico"><use href="#ico-target"/></svg>Commitments</a>
+      <a class="nav-item"><svg class="ico"><use href="#ico-bell"/></svg>Notifications</a>
+      <a class="nav-item"><svg class="ico"><use href="#ico-list"/></svg>Projects</a>
+      <a class="nav-item"><svg class="ico"><use href="#ico-calendar"/></svg>Calendar</a>
+      <a class="nav-item"><svg class="ico"><use href="#ico-layers"/></svg>Project Detail</a>
+    </nav>
+    <div class="foot">© VuGru — For photographers &amp; videographers</div>
+  </aside>
 
-    <script src="Vugru JS.js" defer></script>
+  <!-- Main -->
+  <main class="main">
+    <h1 class="page-title">Creator Project Console: Static Preview</h1>
 
+    <!-- Panel 1: Commitments -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><svg class="ico"><use href="#ico-target"/></svg>Commitments</h2>
+        <span class="badge">This week</span>
+      </div>
+
+      <div class="grid3">
+        <div class="card soft">
+          <div class="card-head">
+            <h3 class="card-title">Outcome</h3>
+          </div>
+          <p class="muted">Deliver on time with quality that matches each brand’s standards.</p>
+        </div>
+
+        <div class="card soft">
+          <div class="card-head">
+            <h3 class="card-title">Signals</h3>
+            <span class="badge">Leading</span>
+          </div>
+          <ul class="list">
+            <li>Blocked tasks cleared</li>
+            <li>Proof galleries shared</li>
+            <li>Client rounds resolved</li>
+          </ul>
+        </div>
+
+        <div class="card soft">
+          <div class="card-head">
+            <h3 class="card-title">Metrics</h3>
+            <span class="badge amber-soft">Lagging</span>
+          </div>
+          <ul class="list">
+            <li>On-time deliverables</li>
+            <li>Revision cycles ↓</li>
+            <li>CSAT / review score ↑</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4 class="block-title">This Week’s Focus</h4>
+      <div class="grid2">
+        <div class="card pill">
+          <div>
+            <div class="hint">Project</div>
+            <div class="strong">Neptune — Fashion Lookbook</div>
+          </div>
+          <div class="progress w-160"><span style="width:30%"></span></div>
+          <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-external"/></svg></button>
+        </div>
+
+        <div class="card pill">
+          <div>
+            <div class="hint">Project</div>
+            <div class="strong">Venus — Product Reels</div>
+          </div>
+          <div class="progress w-160"><span style="width:85%"></span></div>
+          <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-external"/></svg></button>
+        </div>
+      </div>
+
+      <div class="cta-row">
+        <button class="btn-primary"><svg class="ico"><use href="#ico-bell"/></svg>Review Priority Inbox</button>
+        <button class="icon-btn bordered" title="Calendar"><svg class="ico"><use href="#ico-calendar"/></svg></button>
+        <button class="icon-btn bordered" title="Projects"><svg class="ico"><use href="#ico-list"/></svg></button>
+      </div>
+    </section>
+
+    <!-- Panel 2: Notifications -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><svg class="ico"><use href="#ico-bell"/></svg>Notifications</h2>
+      </div>
+
+      <div class="stack">
+        <div class="card left-red">
+          <div class="row between">
+            <div class="strong red">URGENT — Client feedback</div>
+            <button class="icon-btn" title="Flag"><svg class="ico"><use href="#ico-flag"/></svg></button>
+          </div>
+          <p class="muted">Neptune: revise lookbook delivery. <b>Est. 3 hrs</b></p>
+        </div>
+
+        <div class="card left-amber">
+          <div class="row between">
+            <div class="strong amber">Due today</div>
+            <button class="icon-btn" title="Flag"><svg class="ico"><use href="#ico-flag"/></svg></button>
+          </div>
+          <p class="muted">Venus: export 4K reels &amp; upload proof gallery.</p>
+        </div>
+
+        <div class="card left-blue">
+          <div class="row between">
+            <div class="strong blue">Client message</div>
+            <button class="icon-btn" title="Flag"><svg class="ico"><use href="#ico-flag"/></svg></button>
+          </div>
+          <p class="muted">Mars: brand shared scene shortlist. Review before EOD.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 3: Projects -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><svg class="ico"><use href="#ico-list"/></svg>Projects</h2>
+      </div>
+      <p class="muted small">Scan KPIs to identify risk. Use “Glance” for context before opening the landing page.</p>
+
+      <div class="grid2">
+        <!-- Neptune -->
+        <div class="card soft">
+          <div class="row between">
+            <h3 class="card-title">Neptune — Fashion Lookbook</h3>
+            <div class="row">
+              <button class="icon-btn" title="Glance"><svg class="ico"><use href="#ico-eye"/></svg></button>
+              <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-send"/></svg></button>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div><span class="hint">Progress</span> <b class="red">30%</b></div>
+            <div><span class="hint">Open Tasks</span> <b>12</b></div>
+            <div><span class="hint">Client</span> <b>CRITICAL</b></div>
+            <div><span class="hint">Difficulty</span> <b>5/5</b></div>
+          </div>
+
+          <div class="mini-kpis">
+            <div class="mini"><b>Shots</b> 240</div>
+            <div class="mini"><b>Selects</b> 30</div>
+            <div class="mini"><b>Edits</b> 12</div>
+            <div class="mini"><b>Delivery</b> 4K / ProRes</div>
+          </div>
+
+          <p class="muted"><b>Next</b> Revise color grade to client palette.</p>
+
+          <div class="glance open">
+            <div class="glance-head">STATUS SNAPSHOT</div>
+            <p class="muted">Awaiting approvals/assets. Prioritize unblocked edits. If still at risk tomorrow, sync with client on revised handoff.</p>
+          </div>
+        </div>
+
+        <!-- Venus -->
+        <div class="card soft">
+          <div class="row between">
+            <h3 class="card-title">Venus — Product Reels</h3>
+            <div class="row">
+              <button class="icon-btn" title="Glance"><svg class="ico"><use href="#ico-eye"/></svg></button>
+              <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-send"/></svg></button>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div><span class="hint">Progress</span> <b class="green">85%</b></div>
+            <div><span class="hint">Open Tasks</span> <b>4</b></div>
+            <div><span class="hint">Client</span> <b>GOOD</b></div>
+            <div><span class="hint">Difficulty</span> <b>2/5</b></div>
+          </div>
+
+          <div class="mini-kpis">
+            <div class="mini"><b>Shots</b> 120</div>
+            <div class="mini"><b>Selects</b> 18</div>
+            <div class="mini"><b>Edits</b> 6</div>
+            <div class="mini"><b>Delivery</b> 4K / H.264</div>
+          </div>
+
+          <p class="muted"><b>Next</b> Export reels &amp; upload proof gallery.</p>
+
+          <div class="glance open">
+            <div class="glance-head">STATUS SNAPSHOT</div>
+            <p class="muted">QA pass pending on mobile exports. Book 30 minutes for final check and delivery scheduling.</p>
+          </div>
+        </div>
+
+        <!-- Mars -->
+        <div class="card soft">
+          <div class="row between">
+            <h3 class="card-title">Mars — Brand Campaign</h3>
+            <div class="row">
+              <button class="icon-btn" title="Glance"><svg class="ico"><use href="#ico-eye"/></svg></button>
+              <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-send"/></svg></button>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div><span class="hint">Progress</span> <b class="red">10%</b></div>
+            <div><span class="hint">Open Tasks</span> <b>30</b></div>
+            <div><span class="hint">Client</span> <b>N/A</b></div>
+            <div><span class="hint">Difficulty</span> <b>4/5</b></div>
+          </div>
+
+          <div class="mini-kpis">
+            <div class="mini"><b>Shots</b> 300</div>
+            <div class="mini"><b>Selects</b> 40</div>
+            <div class="mini"><b>Edits</b> 10</div>
+            <div class="mini"><b>Delivery</b> RAW + LUT</div>
+          </div>
+
+          <p class="muted"><b>Next</b> Lock schedule &amp; scene shortlist.</p>
+
+          <div class="glance open">
+            <div class="glance-head">STATUS SNAPSHOT</div>
+            <p class="muted">Kickoff next week; align on concept boards with marketing before shot list expansion.</p>
+          </div>
+        </div>
+
+        <!-- Saturn -->
+        <div class="card soft">
+          <div class="row between">
+            <h3 class="card-title">Saturn — Studio Migration</h3>
+            <div class="row">
+              <button class="icon-btn" title="Glance"><svg class="ico"><use href="#ico-eye"/></svg></button>
+              <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-send"/></svg></button>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div><span class="hint">Progress</span> <b class="amber">50%</b></div>
+            <div><span class="hint">Open Tasks</span> <b>15</b></div>
+            <div><span class="hint">Client</span> <b>WARNING</b></div>
+            <div><span class="hint">Difficulty</span> <b>5/5</b></div>
+          </div>
+
+          <div class="mini-kpis">
+            <div class="mini"><b>Shots</b> 0</div>
+            <div class="mini"><b>Selects</b> 0</div>
+            <div class="mini"><b>Edits</b> 0</div>
+            <div class="mini"><b>Delivery</b> Infra task</div>
+          </div>
+
+          <p class="muted"><b>Next</b> Merge PR #14 for media backups.</p>
+
+          <div class="glance open">
+            <div class="glance-head">STATUS SNAPSHOT</div>
+            <p class="muted">Storage migration in progress; cutover window booked for Friday 9–10pm to avoid client impact.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 4: Calendar -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><svg class="ico"><use href="#ico-calendar"/></svg>Calendar</h2>
+      </div>
+
+      <!-- Status legend -->
+      <div class="calendar-legend">
+        <span><i class="dot crit"></i>CRITICAL</span>
+        <span><i class="dot warn"></i>WARNING</span>
+        <span><i class="dot good"></i>GOOD</span>
+        <span><i class="dot na"></i>N/A</span>
+      </div>
+
+      <div class="calendar">
+        <div class="calendar-head">
+          <div class="weekday">SUN</div><div class="weekday">MON</div><div class="weekday">TUE</div>
+          <div class="weekday">WED</div><div class="weekday">THU</div><div class="weekday">FRI</div><div class="weekday">SAT</div>
+        </div>
+        <div class="calendar-grid">
+          <!-- First row (offset for month start) -->
+          <div class="day"></div><div class="day"></div><div class="day">1</div><div class="day">2</div>
+          <div class="day">3
+            <div class="tag blue">Shoot: Venus Reels</div>
+            <span class="status good">GOOD</span>
+          </div>
+          <div class="day">4</div><div class="day">5</div>
+
+          <!-- Second row -->
+          <div class="day">6</div><div class="day">7</div>
+          <div class="day">8
+            <div class="tag red">Client Review: Neptune</div>
+            <span class="status critical">CRITICAL</span>
+          </div>
+          <div class="day">9</div><div class="day">10</div><div class="day">11</div><div class="day">12</div>
+
+          <!-- Third row -->
+          <div class="day">13</div><div class="day">14</div>
+          <div class="day">15
+            <div class="tag emerald">Kickoff: Mars Campaign</div>
+            <span class="status na">N/A</span>
+          </div>
+          <div class="day">16</div><div class="day">17</div><div class="day">18</div><div class="day">19</div>
+
+          <!-- Fourth row -->
+          <div class="day">20</div><div class="day">21</div>
+          <div class="day">22
+            <div class="tag amber">Delivery: Venus Reels</div>
+            <span class="status good">GOOD</span>
+          </div>
+          <div class="day">23</div><div class="day">24</div><div class="day">25</div><div class="day">26</div>
+
+          <!-- Fifth row -->
+          <div class="day">27</div><div class="day">28</div>
+          <div class="day">29</div><div class="day">30</div><div class="day">31</div>
+          <div class="day"></div><div class="day"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel 5: Project Detail -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><svg class="ico"><use href="#ico-layers"/></svg>Project Detail</h2>
+      </div>
+
+      <div class="grid3">
+        <!-- Summary (1/3) -->
+        <div class="card soft">
+          <div class="card-title strong">Neptune — Fashion Lookbook</div>
+          <div class="progress"><span class="bg-red" style="width:30%"></span></div>
+          <div class="stats">
+            <div><span class="hint">Client</span> <b>CRITICAL</b></div>
+            <div><span class="hint">Open</span> <b>12</b></div>
+            <div><span class="hint">Difficulty</span> <b>5/5</b></div>
+          </div>
+          <button class="btn-primary full"><svg class="ico"><use href="#ico-rocket"/></svg>Decide: Work on this today</button>
+        </div>
+
+        <!-- Details (2/3) -->
+        <div class="card soft col-span-2">
+          <div class="card-title strong">Why is completion low?</div>
+          <div class="note">
+            Waiting for assets and approvals. Focus on unblocked edits now. If assets slip, align with client on revised handoff.
+          </div>
+
+          <div class="stack">
+            <div class="task done">
+              <svg class="ico"><use href="#ico-check"/></svg>
+              <span class="muted line-through flex-1">Cull selects from raw footage</span>
+              <span class="badge small">DONE</span>
+            </div>
+
+            <div class="task urgent">
+              <svg class="ico red"><use href="#ico-clock"/></svg>
+              <span class="red strong flex-1">Color pass aligned to brand palette</span>
+              <span class="badge small red-soft">URGENT</span>
+            </div>
+
+            <div class="task blocked">
+              <svg class="ico amber"><use href="#ico-lock"/></svg>
+              <span class="amber flex-1">Integrate brand overlays (BLOCKED)</span>
+              <span class="badge small amber-soft">BLOCKED</span>
+            </div>
+
+            <div class="task todo">
+              <svg class="ico"><use href="#ico-circle"/></svg>
+              <span>Final export &amp; proof upload</span>
+              <span class="badge small gray-soft">TO DO</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  </div>
+  <script src="Vugru JS.js" defer></script>
 </body>
 </html>
