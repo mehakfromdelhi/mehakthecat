@@ -238,32 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle local file upload
-    if (localFileInput) {
-        localFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                // Validate file type
-                if (!file.type.startsWith('video/')) {
-                    alert('Please select a valid video file.');
-                    localFileInput.value = '';
-                    return;
-                }
-
-                // Validate file size (e.g., max 500MB)
-                const maxSize = 500 * 1024 * 1024; // 500MB in bytes
-                if (file.size > maxSize) {
-                    alert('File size exceeds 500MB. Please select a smaller file.');
-                    localFileInput.value = '';
-                    return;
-                }
-
-                uploadFile(file);
-            }
-        });
-    }
-
     // Function to simulate file upload (replace with actual upload logic)
+    // Defined before the event listener to avoid ReferenceError
     const uploadFile = (file) => {
         // Show progress
         if (uploadProgress) {
@@ -315,6 +291,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 200);
     };
+
+    // Handle local file upload
+    if (localFileInput) {
+        localFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('video/')) {
+                    alert('Please select a valid video file.');
+                    localFileInput.value = '';
+                    return;
+                }
+
+                // Validate file size (e.g., max 500MB)
+                const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+                if (file.size > maxSize) {
+                    alert('File size exceeds 500MB. Please select a smaller file.');
+                    localFileInput.value = '';
+                    return;
+                }
+
+                uploadFile(file);
+            }
+        });
+    }
 
     // Handle Google Drive button click
     if (googleDriveButton) {
