@@ -8,51 +8,46 @@
 
 // Wait for the DOM to be fully loaded before running scripts
 document.addEventListener('DOMContentLoaded', () => {
-    try {
-        /*
-         * -------------------------------------------
-         * Authentication Check
-         * -------------------------------------------
-         * Redirects to login page if user is not authenticated
-         */
-        function checkAuthentication() {
-            try {
-                const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
-                
-                if (!auth) {
-                    // Not authenticated, redirect to login
-                    window.location.href = 'login.html';
-                    return false;
-                }
+    /*
+     * -------------------------------------------
+     * Authentication Check
+     * -------------------------------------------
+     * Redirects to login page if user is not authenticated
+     */
+    function checkAuthentication() {
+        try {
+            const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+            
+            if (!auth) {
+                // Not authenticated, redirect to login
+                window.location.href = 'login.html';
+                return false;
+            }
 
-                const authData = JSON.parse(auth);
-                // Check if session is still valid (24 hours)
-                const oneDay = 24 * 60 * 60 * 1000;
-                if (!authData.loggedIn || (Date.now() - authData.timestamp) > oneDay) {
-                    // Session expired or invalid, clear and redirect
-                    localStorage.removeItem('auth');
-                    sessionStorage.removeItem('auth');
-                    window.location.href = 'login.html';
-                    return false;
-                }
-                return true;
-            } catch (e) {
-                console.error('Authentication check error:', e);
-                // Invalid auth data, clear and redirect
+            const authData = JSON.parse(auth);
+            // Check if session is still valid (24 hours)
+            const oneDay = 24 * 60 * 60 * 1000;
+            if (!authData.loggedIn || (Date.now() - authData.timestamp) > oneDay) {
+                // Session expired or invalid, clear and redirect
                 localStorage.removeItem('auth');
                 sessionStorage.removeItem('auth');
                 window.location.href = 'login.html';
                 return false;
             }
+            return true;
+        } catch (e) {
+            console.error('Authentication check error:', e);
+            // Invalid auth data, clear and redirect
+            localStorage.removeItem('auth');
+            sessionStorage.removeItem('auth');
+            window.location.href = 'login.html';
+            return false;
         }
+    }
 
-        // Check authentication before loading the page
-        if (!checkAuthentication()) {
-            return; // Stop execution if not authenticated
-        }
-    } catch (error) {
-        console.error('Error in authentication check:', error);
-        // Don't block page if auth check fails - allow user to see page
+    // Check authentication before loading the page
+    if (!checkAuthentication()) {
+        return; // Stop execution if not authenticated
     }
 
     // Wrap all feature code in try-catch to prevent errors from breaking buttons
