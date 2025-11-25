@@ -37,3 +37,34 @@ For testing purposes, you can use any email and password (minimum 3 characters),
 - Email: `test@test.com` / Password: `test123`
 
 **Note:** In production, replace the authentication logic in `login.js` with actual API calls to your backend server.
+
+## Deployment (Cloud Publishing)
+
+This project is configured to automatically deploy to **GitHub Pages** when changes are pushed to the `main` branch.
+
+### How to Enable GitHub Pages Deployment
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings** > **Pages**
+3. Under **Source**, select **GitHub Actions**
+4. Push your changes to the `main` branch
+
+The site will be automatically deployed and available at:
+`https://<your-username>.github.io/<repository-name>/`
+
+### Manual Deployment
+
+You can also trigger a deployment manually:
+1. Go to the **Actions** tab in your repository
+2. Select the **Deploy to GitHub Pages** workflow
+3. Click **Run workflow**
+
+### Alternative Cloud Deployment Options
+
+This static website can also be deployed to other cloud platforms:
+
+- **Netlify**: Drag and drop your project folder or connect your GitHub repository
+- **Vercel**: Import your GitHub repository for automatic deployments
+- **AWS S3 + CloudFront**: Upload files to S3 and serve via CloudFront
+- **Firebase Hosting**: Use Firebase CLI to deploy static files
+- **Azure Static Web Apps**: Connect your repository for CI/CD deployments
