@@ -8,55 +8,62 @@
 
 // Wait for the DOM to be fully loaded before running scripts
 document.addEventListener('DOMContentLoaded', () => {
+    try {
+        /*
+         * -------------------------------------------
+         * Authentication Check
+         * -------------------------------------------
+         * Redirects to login page if user is not authenticated
+         */
+        function checkAuthentication() {
+            try {
+                const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+                
+                if (!auth) {
+                    // Not authenticated, redirect to login
+                    window.location.href = 'login.html';
+                    return false;
+                }
 
-    /*
-     * -------------------------------------------
-     * Authentication Check
-     * -------------------------------------------
-     * Redirects to login page if user is not authenticated
-     */
-    function checkAuthentication() {
-        const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
-        
-        if (!auth) {
-            // Not authenticated, redirect to login
-            window.location.href = 'login.html';
-            return false;
-        }
-
-        try {
-            const authData = JSON.parse(auth);
-            // Check if session is still valid (24 hours)
-            const oneDay = 24 * 60 * 60 * 1000;
-            if (!authData.loggedIn || (Date.now() - authData.timestamp) > oneDay) {
-                // Session expired or invalid, clear and redirect
+                const authData = JSON.parse(auth);
+                // Check if session is still valid (24 hours)
+                const oneDay = 24 * 60 * 60 * 1000;
+                if (!authData.loggedIn || (Date.now() - authData.timestamp) > oneDay) {
+                    // Session expired or invalid, clear and redirect
+                    localStorage.removeItem('auth');
+                    sessionStorage.removeItem('auth');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                console.error('Authentication check error:', e);
+                // Invalid auth data, clear and redirect
                 localStorage.removeItem('auth');
                 sessionStorage.removeItem('auth');
                 window.location.href = 'login.html';
                 return false;
             }
-            return true;
-        } catch (e) {
-            // Invalid auth data, clear and redirect
-            localStorage.removeItem('auth');
-            sessionStorage.removeItem('auth');
-            window.location.href = 'login.html';
-            return false;
         }
+
+        // Check authentication before loading the page
+        if (!checkAuthentication()) {
+            return; // Stop execution if not authenticated
+        }
+    } catch (error) {
+        console.error('Error in authentication check:', error);
+        // Don't block page if auth check fails - allow user to see page
     }
 
-    // Check authentication before loading the page
-    if (!checkAuthentication()) {
-        return; // Stop execution if not authenticated
-    }
-
-    /*
-     * -------------------------------------------
-     * Feature 1: Sidebar Logic
-     * -------------------------------------------
-     * This logic is specific to the sidebar because it
-     * includes the full-screen backdrop.
-     */
+    // Wrap all feature code in try-catch to prevent errors from breaking buttons
+    try {
+        /*
+         * -------------------------------------------
+         * Feature 1: Sidebar Logic
+         * -------------------------------------------
+         * This logic is specific to the sidebar because it
+         * includes the full-screen backdrop.
+         */
     
     // Get the elements needed for the sidebar
     const sidebarToggle = document.getElementById('sidebar-toggle');
@@ -199,9 +206,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Open modal when upload button is clicked
     if (uploadButton) {
         uploadButton.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             openUploadModal();
         });
+    } else {
+        console.warn('Upload button not found');
     }
 
     // Close modal when close button is clicked
@@ -378,8 +388,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarLinks = document.querySelectorAll('.sidebar-nav-item');
     sidebarLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            e.preventDefault();
+            const href = link.getAttribute('href');
             const linkText = link.querySelector('span')?.textContent || '';
+            
+            // If it's a real link (not #), allow it to navigate
+            if (href && href !== '#' && !href.startsWith('javascript:')) {
+                // Close sidebar on mobile after clicking
+                if (window.innerWidth < 1024) {
+                    toggleSidebar();
+                }
+                // Allow navigation to proceed
+                return true;
+            }
+            
+            // For placeholder links (#), prevent default and show alert
+            e.preventDefault();
             
             // Close sidebar on mobile after clicking
             if (window.innerWidth < 1024) {
@@ -549,5 +572,14 @@ document.addEventListener('DOMContentLoaded', () => {
             item.classList.add('revision-selected');
         });
     });
+
+    // Log successful initialization
+    console.log('Vugru Dashboard: All event listeners initialized successfully');
+
+    } catch (error) {
+        console.error('Error initializing Vugru Dashboard:', error);
+        // Show user-friendly error message
+        alert('There was an error loading the dashboard. Please refresh the page.');
+    }
 
 });

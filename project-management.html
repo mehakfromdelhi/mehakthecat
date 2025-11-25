@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management - Vugru Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="project-management.css" />
+</head>
+<body>
+    <div class="page">
+
+    <!-- SVG sprite (icons) -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <symbol id="ico-target" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="6" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="2" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5" stroke-width="1.5"/>
+            <path d="M10 20a2 2 0 0 0 4 0" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-list" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M8 6h13M8 12h13M8 18h13" stroke-width="1.5"/>
+            <circle cx="3" cy="6" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/>
+        </symbol>
+        <symbol id="ico-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/>
+            <path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 2l10 6-10 6L2 8l10-6z" stroke-width="1.5"/>
+            <path d="M2 12l10 6 10-6" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-external" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M14 3h7v7" stroke-width="1.5"/>
+            <path d="M10 14L21 3" stroke-width="1.5"/>
+            <path d="M5 7v14h14v-5" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-send" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M22 2L11 13" stroke-width="1.5"/>
+            <path d="M22 2l-7 20-4-9-9-4 20-7z" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M5 19l-1 4 4-1 11-11a3 3 0 0 0-4-4L5 19z" stroke-width="1.5"/>
+            <path d="M14 7l3 3" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-check" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M20 6L9 17l-5-5" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="9" stroke-width="1.5"/>
+            <path d="M12 7v5l3 2" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="5" y="11" width="14" height="10" rx="2" stroke-width="1.5"/>
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="5" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M4 4v16M4 4h11l-1.5 3H4" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-video" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" stroke-width="1.5"/>
+        </symbol>
+    </svg>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">V</div>
+            <div>
+                <div class="brand-title">VuGru</div>
+                <div class="brand-sub">Built for creators</div>
+            </div>
+        </div>
+        <nav class="nav">
+            <a href="project-management.html" class="nav-item active"><svg class="ico"><use href="#ico-target"/></svg>Commitments</a>
+            <a href="project-management.html#notifications" class="nav-item"><svg class="ico"><use href="#ico-bell"/></svg>Notifications</a>
+            <a href="project-management.html#projects" class="nav-item"><svg class="ico"><use href="#ico-list"/></svg>Projects</a>
+            <a href="project-management.html#calendar" class="nav-item"><svg class="ico"><use href="#ico-calendar"/></svg>Calendar</a>
+            <a href="project-management.html#project-detail" class="nav-item"><svg class="ico"><use href="#ico-layers"/></svg>Project Detail</a>
+            <a href="Vugru HTML.html" class="nav-item highlight"><svg class="ico"><use href="#ico-video"/></svg>Video Dashboard</a>
+        </nav>
+        <div class="foot">
+            <button id="pm-logout-button" class="icon-btn bordered" style="width: 100%; margin-top: 1rem; justify-content: center; gap: 0.5rem;" title="Logout">
+                <svg class="ico"><use href="#ico-logout"/></svg>
+                <span>Logout</span>
+            </button>
+            <p style="margin-top: 1rem; text-align: center;">© VuGru — For photographers & videographers</p>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+        <h1 class="page-title">Creator Project Console</h1>
+
+        <!-- Panel 1: Commitments -->
+        <section class="panel">
+            <div class="panel-head">
+                <h2 class="panel-title"><svg class="ico"><use href="#ico-target"/></svg>Commitments</h2>
+                <span class="badge">This week</span>
+            </div>
+
+            <div class="grid3">
+                <div class="card soft">
+                    <div class="card-head">
+                        <h3 class="card-title">Outcome</h3>
+                    </div>
+                    <p class="muted">Deliver on time with quality that matches each brand's standards.</p>
+                </div>
+
+                <div class="card soft">
+                    <div class="card-head">
+                        <h3 class="card-title">Signals</h3>
+                        <span class="badge">Leading</span>
+                    </div>
+                    <ul class="list">
+                        <li>Blocked tasks cleared</li>
+                        <li>Proof galleries shared</li>
+                        <li>Client rounds resolved</li>
+                    </ul>
+                </div>
+
+                <div class="card soft">
+                    <div class="card-head">
+                        <h3 class="card-title">Metrics</h3>
+                        <span class="badge amber-soft">Lagging</span>
+                    </div>
+                    <ul class="list">
+                        <li>On-time deliverables</li>
+                        <li>Revision cycles ↓</li>
+                        <li>CSAT / review score ↑</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h4 class="block-title">This Week's Focus</h4>
+            <div class="grid2">
+                <div class="card pill">
+                    <div>
+                        <div class="hint">Project</div>
+                        <div class="strong">Neptune — Fashion Lookbook</div>
+                    </div>
+                    <div class="progress w-160"><span style="width:30%"></span></div>
+                    <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-external"/></svg></button>
+                </div>
+
+                <div class="card pill">
+                    <div>
+                        <div class="hint">Project</div>
+                        <div class="strong">Venus — Product Reels</div>
+                    </div>
+                    <div class="progress w-160"><span style="width:85%"></span></div>
+                    <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-external"/></svg></button>
+                </div>
+            </div>
+
+            <div class="cta-row">
+                <button id="review-inbox-btn" class="btn-primary"><svg class="ico"><use href="#ico-bell"/></svg>Review Priority Inbox</button>
+                <button id="calendar-btn" class="icon-btn bordered" title="Calendar"><svg class="ico"><use href="#ico-calendar"/></svg></button>
+                <button id="projects-btn" class="icon-btn bordered" title="Projects"><svg class="ico"><use href="#ico-list"/></svg></button>
+            </div>
+        </section>
+
+        <!-- Panel 2: Notifications -->
+        <section id="notifications" class="panel">
+            <div class="panel-head">
+                <h2 class="panel-title"><svg class="ico"><use href="#ico-bell"/></svg>Notifications</h2>
+            </div>
+
+            <div class="stack">
+                <div class="card left-red">
+                    <div class="row between">
+                        <div class="strong red">URGENT — Client feedback</div>
+                        <button class="icon-btn" title="Flag"><svg class="ico"><use href="#ico-flag"/></svg></button>
+                    </div>
+                    <p class="muted">Neptune: revise lookbook delivery. <b>Est. 3 hrs</b></p>
+                </div>
+
+                <div class="card left-amber">
+                    <div class="row between">
+                        <div class="strong amber">Due today</div>
+                        <button class="icon-btn" title="Flag"><svg class="ico"><use href="#ico-flag"/></svg></button>
+                    </div>
+                    <p class="muted">Venus: export 4K reels & upload proof gallery.</p>
+                </div>
+
+                <div class="card left-blue">
+                    <div class="row between">
+                        <div class="strong blue">Client message</div>
+                        <button class="icon-btn" title="Flag"><svg class="ico"><use href="#ico-flag"/></svg></button>
+                    </div>
+                    <p class="muted">Mars: brand shared scene shortlist. Review before EOD.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 3: Projects -->
+        <section id="projects" class="panel">
+            <div class="panel-head">
+                <h2 class="panel-title"><svg class="ico"><use href="#ico-list"/></svg>Projects</h2>
+            </div>
+            <p class="muted small">Scan KPIs to identify risk. Use "Glance" for context before opening the landing page.</p>
+
+            <div class="grid2">
+                <!-- Neptune -->
+                <div class="card soft">
+                    <div class="row between">
+                        <h3 class="card-title">Neptune — Fashion Lookbook</h3>
+                        <div class="row">
+                            <button class="icon-btn" title="Glance"><svg class="ico"><use href="#ico-eye"/></svg></button>
+                            <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-send"/></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="kpis">
+                        <div><span class="hint">Progress</span> <b class="red">30%</b></div>
+                        <div><span class="hint">Open Tasks</span> <b>12</b></div>
+                        <div><span class="hint">Client</span> <b>CRITICAL</b></div>
+                        <div><span class="hint">Difficulty</span> <b>5/5</b></div>
+                    </div>
+
+                    <div class="mini-kpis">
+                        <div class="mini"><b>Shots</b> 240</div>
+                        <div class="mini"><b>Selects</b> 30</div>
+                        <div class="mini"><b>Edits</b> 12</div>
+                        <div class="mini"><b>Delivery</b> 4K / ProRes</div>
+                    </div>
+
+                    <p class="muted"><b>Next</b> Revise color grade to client palette.</p>
+
+                    <div class="glance open">
+                        <div class="glance-head">STATUS SNAPSHOT</div>
+                        <p class="muted">Awaiting approvals/assets. Prioritize unblocked edits. If still at risk tomorrow, sync with client on revised handoff.</p>
+                    </div>
+                </div>
+
+                <!-- Venus -->
+                <div class="card soft">
+                    <div class="row between">
+                        <h3 class="card-title">Venus — Product Reels</h3>
+                        <div class="row">
+                            <button class="icon-btn" title="Glance"><svg class="ico"><use href="#ico-eye"/></svg></button>
+                            <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-send"/></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="kpis">
+                        <div><span class="hint">Progress</span> <b class="green">85%</b></div>
+                        <div><span class="hint">Open Tasks</span> <b>4</b></div>
+                        <div><span class="hint">Client</span> <b>GOOD</b></div>
+                        <div><span class="hint">Difficulty</span> <b>2/5</b></div>
+                    </div>
+
+                    <div class="mini-kpis">
+                        <div class="mini"><b>Shots</b> 120</div>
+                        <div class="mini"><b>Selects</b> 18</div>
+                        <div class="mini"><b>Edits</b> 6</div>
+                        <div class="mini"><b>Delivery</b> 4K / H.264</div>
+                    </div>
+
+                    <p class="muted"><b>Next</b> Export reels & upload proof gallery.</p>
+
+                    <div class="glance open">
+                        <div class="glance-head">STATUS SNAPSHOT</div>
+                        <p class="muted">QA pass pending on mobile exports. Book 30 minutes for final check and delivery scheduling.</p>
+                    </div>
+                </div>
+
+                <!-- Mars -->
+                <div class="card soft">
+                    <div class="row between">
+                        <h3 class="card-title">Mars — Brand Campaign</h3>
+                        <div class="row">
+                            <button class="icon-btn" title="Glance"><svg class="ico"><use href="#ico-eye"/></svg></button>
+                            <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-send"/></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="kpis">
+                        <div><span class="hint">Progress</span> <b class="red">10%</b></div>
+                        <div><span class="hint">Open Tasks</span> <b>30</b></div>
+                        <div><span class="hint">Client</span> <b>N/A</b></div>
+                        <div><span class="hint">Difficulty</span> <b>4/5</b></div>
+                    </div>
+
+                    <div class="mini-kpis">
+                        <div class="mini"><b>Shots</b> 300</div>
+                        <div class="mini"><b>Selects</b> 40</div>
+                        <div class="mini"><b>Edits</b> 10</div>
+                        <div class="mini"><b>Delivery</b> RAW + LUT</div>
+                    </div>
+
+                    <p class="muted"><b>Next</b> Lock schedule & scene shortlist.</p>
+
+                    <div class="glance open">
+                        <div class="glance-head">STATUS SNAPSHOT</div>
+                        <p class="muted">Kickoff next week; align on concept boards with marketing before shot list expansion.</p>
+                    </div>
+                </div>
+
+                <!-- Saturn -->
+                <div class="card soft">
+                    <div class="row between">
+                        <h3 class="card-title">Saturn — Studio Migration</h3>
+                        <div class="row">
+                            <button class="icon-btn" title="Glance"><svg class="ico"><use href="#ico-eye"/></svg></button>
+                            <button class="icon-btn" title="Open"><svg class="ico"><use href="#ico-send"/></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="kpis">
+                        <div><span class="hint">Progress</span> <b class="amber">50%</b></div>
+                        <div><span class="hint">Open Tasks</span> <b>15</b></div>
+                        <div><span class="hint">Client</span> <b>WARNING</b></div>
+                        <div><span class="hint">Difficulty</span> <b>5/5</b></div>
+                    </div>
+
+                    <div class="mini-kpis">
+                        <div class="mini"><b>Shots</b> 0</div>
+                        <div class="mini"><b>Selects</b> 0</div>
+                        <div class="mini"><b>Edits</b> 0</div>
+                        <div class="mini"><b>Delivery</b> Infra task</div>
+                    </div>
+
+                    <p class="muted"><b>Next</b> Merge PR #14 for media backups.</p>
+
+                    <div class="glance open">
+                        <div class="glance-head">STATUS SNAPSHOT</div>
+                        <p class="muted">Storage migration in progress; cutover window booked for Friday 9–10pm to avoid client impact.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 4: Calendar -->
+        <section id="calendar" class="panel">
+            <div class="panel-head">
+                <h2 class="panel-title"><svg class="ico"><use href="#ico-calendar"/></svg>Calendar</h2>
+            </div>
+
+            <!-- Status legend -->
+            <div class="calendar-legend">
+                <span><i class="dot crit"></i>CRITICAL</span>
+                <span><i class="dot warn"></i>WARNING</span>
+                <span><i class="dot good"></i>GOOD</span>
+                <span><i class="dot na"></i>N/A</span>
+            </div>
+
+            <div class="calendar">
+                <div class="calendar-head">
+                    <div class="weekday">SUN</div><div class="weekday">MON</div><div class="weekday">TUE</div>
+                    <div class="weekday">WED</div><div class="weekday">THU</div><div class="weekday">FRI</div><div class="weekday">SAT</div>
+                </div>
+                <div class="calendar-grid">
+                    <!-- First row (offset for month start) -->
+                    <div class="day"></div><div class="day"></div><div class="day">1</div><div class="day">2</div>
+                    <div class="day">3
+                        <div class="tag blue">Shoot: Venus Reels</div>
+                        <span class="status good">GOOD</span>
+                    </div>
+                    <div class="day">4</div><div class="day">5</div>
+
+                    <!-- Second row -->
+                    <div class="day">6</div><div class="day">7</div>
+                    <div class="day">8
+                        <div class="tag red">Client Review: Neptune</div>
+                        <span class="status critical">CRITICAL</span>
+                    </div>
+                    <div class="day">9</div><div class="day">10</div><div class="day">11</div><div class="day">12</div>
+
+                    <!-- Third row -->
+                    <div class="day">13</div><div class="day">14</div>
+                    <div class="day">15
+                        <div class="tag emerald">Kickoff: Mars Campaign</div>
+                        <span class="status na">N/A</span>
+                    </div>
+                    <div class="day">16</div><div class="day">17</div><div class="day">18</div><div class="day">19</div>
+
+                    <!-- Fourth row -->
+                    <div class="day">20</div><div class="day">21</div>
+                    <div class="day">22
+                        <div class="tag amber">Delivery: Venus Reels</div>
+                        <span class="status good">GOOD</span>
+                    </div>
+                    <div class="day">23</div><div class="day">24</div><div class="day">25</div><div class="day">26</div>
+
+                    <!-- Fifth row -->
+                    <div class="day">27</div><div class="day">28</div>
+                    <div class="day">29</div><div class="day">30</div><div class="day">31</div>
+                    <div class="day"></div><div class="day"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel 5: Project Detail -->
+        <section id="project-detail" class="panel">
+            <div class="panel-head">
+                <h2 class="panel-title"><svg class="ico"><use href="#ico-layers"/></svg>Project Detail</h2>
+            </div>
+
+            <div class="grid3">
+                <!-- Summary (1/3) -->
+                <div class="card soft">
+                    <div class="card-title strong">Neptune — Fashion Lookbook</div>
+                    <div class="progress"><span class="bg-red" style="width:30%"></span></div>
+                    <div class="stats">
+                        <div><span class="hint">Client</span> <b>CRITICAL</b></div>
+                        <div><span class="hint">Open</span> <b>12</b></div>
+                        <div><span class="hint">Difficulty</span> <b>5/5</b></div>
+                    </div>
+                    <button id="work-today-btn" class="btn-primary full"><svg class="ico"><use href="#ico-rocket"/></svg>Decide: Work on this today</button>
+                </div>
+
+                <!-- Details (2/3) -->
+                <div class="card soft col-span-2">
+                    <div class="card-title strong">Why is completion low?</div>
+                    <div class="note">
+                        Waiting for assets and approvals. Focus on unblocked edits now. If assets slip, align with client on revised handoff.
+                    </div>
+
+                    <div class="stack">
+                        <div class="task done">
+                            <svg class="ico"><use href="#ico-check"/></svg>
+                            <span class="muted line-through flex-1">Cull selects from raw footage</span>
+                            <span class="badge small">DONE</span>
+                        </div>
+
+                        <div class="task urgent">
+                            <svg class="ico red"><use href="#ico-clock"/></svg>
+                            <span class="red strong flex-1">Color pass aligned to brand palette</span>
+                            <span class="badge small red-soft">URGENT</span>
+                        </div>
+
+                        <div class="task blocked">
+                            <svg class="ico amber"><use href="#ico-lock"/></svg>
+                            <span class="amber flex-1">Integrate brand overlays (BLOCKED)</span>
+                            <span class="badge small amber-soft">BLOCKED</span>
+                        </div>
+
+                        <div class="task todo">
+                            <svg class="ico"><use href="#ico-circle"/></svg>
+                            <span>Final export & proof upload</span>
+                            <span class="badge small gray-soft">TO DO</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    </div>
+
+    <script src="project-management.js"></script>
+</body>
+</html>
+
