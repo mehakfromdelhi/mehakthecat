@@ -1,20 +1,22 @@
+# Backup and original files
+Vugru CSS_original.css
+Vugru HTML_original.html
+Vugru HTML_restore.html
+
+# Temporary files
+*.txt
+!README.md
+
+# Node modules (if any)
+node_modules/
+
 # OS files
 .DS_Store
 Thumbs.db
-desktop.ini
 
-# Editor files
+# IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
 
 # Logs
 *.log
-npm-debug.log*
-
-# Temporary files
-*.tmp
-*.temp
-

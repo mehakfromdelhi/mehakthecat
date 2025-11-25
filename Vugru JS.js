@@ -569,13 +569,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Log successful initialization
+    // Log successful initialization with details
     console.log('Vugru Dashboard: All event listeners initialized successfully');
+    console.log('Buttons initialized:', {
+        uploadButton: !!uploadButton,
+        logoutButton: !!logoutButton,
+        publishOptions: publishOptions.length,
+        shareOptions: shareOptions.length,
+        statusOptions: statusOptions.length,
+        revisionItems: revisionItems.length
+    });
 
     } catch (error) {
         console.error('Error initializing Vugru Dashboard:', error);
+        console.error('Error stack:', error.stack);
         // Show user-friendly error message
-        alert('There was an error loading the dashboard. Please refresh the page.');
+        alert('There was an error loading the dashboard. Please check the console for details and refresh the page.');
     }
 
 });
