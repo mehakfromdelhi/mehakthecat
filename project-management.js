@@ -1,26 +1,28 @@
 // Authentication check
 function checkAuthentication() {
-    const authData = localStorage.getItem('vugru_auth') || sessionStorage.getItem('vugru_auth');
+    const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
     
-    if (!authData) {
+    if (!auth) {
         window.location.href = 'login.html';
         return false;
     }
     
     try {
-        const auth = JSON.parse(authData);
-        const now = new Date().getTime();
-        
-        // Check if auth has expired (24 hours)
-        if (now > auth.expiresAt) {
-            localStorage.removeItem('vugru_auth');
-            sessionStorage.removeItem('vugru_auth');
+        const authData = JSON.parse(auth);
+        // Check if session is still valid (24 hours)
+        const oneDay = 24 * 60 * 60 * 1000;
+        if (!authData.loggedIn || (Date.now() - authData.timestamp) > oneDay) {
+            // Session expired or invalid, clear and redirect
+            localStorage.removeItem('auth');
+            sessionStorage.removeItem('auth');
             window.location.href = 'login.html';
             return false;
         }
-        
         return true;
     } catch (e) {
+        // Invalid auth data, clear and redirect
+        localStorage.removeItem('auth');
+        sessionStorage.removeItem('auth');
         window.location.href = 'login.html';
         return false;
     }
@@ -36,8 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutButton = document.getElementById('pm-logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', function() {
-            localStorage.removeItem('vugru_auth');
-            sessionStorage.removeItem('vugru_auth');
+            localStorage.removeItem('auth');
+            sessionStorage.removeItem('auth');
             window.location.href = 'login.html';
         });
     }
