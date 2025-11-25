@@ -28,12 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle form submission
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const rememberMe = document.getElementById('remember-me').checked;
+            const submitButton = loginForm.querySelector('button[type="submit"]');
 
             // Hide any previous errors
             if (loginError) {
@@ -44,6 +45,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!email || !password) {
                 showError('Please fill in all fields');
                 return;
+            }
+
+            // Email format validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+
+            // Password length validation
+            if (password.length < 3) {
+                showError('Password must be at least 3 characters long');
+                return;
+            }
+
+            // Show loading state
+            if (submitButton) {
+                submitButton.disabled = true;
+                const originalText = submitButton.innerHTML;
+                submitButton.innerHTML = '<span>Signing in...</span>';
+                
+                // Simulate API call delay (remove in production)
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
 
             // Simple authentication (for demo purposes)
@@ -67,6 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Redirect to dashboard
                 window.location.href = 'Vugru HTML.html';
             } else {
+                // Reset button state
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<span>Sign In</span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="button-arrow"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>';
+                }
                 showError('Invalid email or password. Please try again.');
             }
         });
@@ -82,13 +111,14 @@ document.addEventListener('DOMContentLoaded', () => {
             'test@test.com': 'test123'
         };
 
-        // Check against demo credentials
-        if (demoCredentials[email.toLowerCase()] === password) {
+        // Check against demo credentials first
+        const normalizedEmail = email.toLowerCase().trim();
+        if (demoCredentials[normalizedEmail] === password) {
             return true;
         }
 
-        // For demo purposes: accept any email/password combination
-        // In production, remove this and only use the credentials above
+        // For demo purposes: accept any email/password combination with minimum length
+        // In production, remove this and only use the credentials above or make API call
         if (email.length > 0 && password.length >= 3) {
             return true;
         }
@@ -113,25 +143,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Check if user is already logged in
-    const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
-    if (auth) {
-        try {
-            const authData = JSON.parse(auth);
-            // Check if session is still valid (24 hours)
-            const oneDay = 24 * 60 * 60 * 1000;
-            if (authData.loggedIn && (Date.now() - authData.timestamp) < oneDay) {
-                // Already logged in, redirect to dashboard
-                window.location.href = 'Vugru HTML.html';
-            } else {
-                // Session expired, clear auth
+    function checkExistingAuth() {
+        const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+        if (auth) {
+            try {
+                const authData = JSON.parse(auth);
+                // Check if session is still valid (24 hours)
+                const oneDay = 24 * 60 * 60 * 1000;
+                if (authData.loggedIn && (Date.now() - authData.timestamp) < oneDay) {
+                    // Already logged in, redirect to dashboard
+                    window.location.href = 'Vugru HTML.html';
+                    return true;
+                } else {
+                    // Session expired, clear auth
+                    localStorage.removeItem('auth');
+                    sessionStorage.removeItem('auth');
+                }
+            } catch (e) {
+                // Invalid auth data, clear it
                 localStorage.removeItem('auth');
                 sessionStorage.removeItem('auth');
             }
-        } catch (e) {
-            // Invalid auth data, clear it
-            localStorage.removeItem('auth');
-            sessionStorage.removeItem('auth');
         }
+        return false;
+    }
+
+    // Check on page load
+    checkExistingAuth();
+
+    /*
+     * -------------------------------------------
+     * Forgot Password Link
+     * -------------------------------------------
+     */
+    const forgotPasswordLink = document.querySelector('.forgot-password');
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim() || prompt('Enter your email address:');
+            if (email) {
+                alert(`Password reset link has been sent to ${email}.\n\nIn production, this would send a password reset email.`);
+                console.log('Password reset requested for:', email);
+            }
+        });
+    }
+
+    /*
+     * -------------------------------------------
+     * Sign Up Link
+     * -------------------------------------------
+     */
+    const signupLink = document.querySelector('.signup-link');
+    if (signupLink) {
+        signupLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Sign up functionality would be implemented here.\n\nIn production, this would navigate to a registration page or open a signup modal.');
+            console.log('Sign up link clicked');
+            // In production: window.location.href = 'signup.html';
+        });
     }
 });
 

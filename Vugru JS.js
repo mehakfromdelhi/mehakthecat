@@ -370,4 +370,184 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /*
+     * -------------------------------------------
+     * Sidebar Navigation Links
+     * -------------------------------------------
+     */
+    const sidebarLinks = document.querySelectorAll('.sidebar-nav-item');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const linkText = link.querySelector('span')?.textContent || '';
+            
+            // Close sidebar on mobile after clicking
+            if (window.innerWidth < 1024) {
+                toggleSidebar();
+            }
+            
+            // Handle navigation (for demo, just show alert)
+            console.log(`Navigating to: ${linkText}`);
+            // In production, you would navigate to the appropriate page
+            // window.location.href = getPageUrl(linkText);
+        });
+    });
+
+    /*
+     * -------------------------------------------
+     * Publish to Channels Functionality
+     * -------------------------------------------
+     */
+    const publishOptions = document.querySelectorAll('#publish-menu .popover-list-item-icon');
+    publishOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            const channel = option.querySelector('span')?.textContent || 'Unknown';
+            
+            // Close the popover
+            const publishMenu = document.getElementById('publish-menu');
+            if (publishMenu) publishMenu.classList.remove('is-open');
+            
+            // Handle publish action
+            console.log(`Publishing to ${channel}`);
+            alert(`Publishing video to ${channel}...\n\nIn production, this would integrate with ${channel}'s API to publish the video.`);
+        });
+    });
+
+    /*
+     * -------------------------------------------
+     * Share with Client Functionality
+     * -------------------------------------------
+     */
+    const shareOptions = document.querySelectorAll('#share-menu .popover-list-item-icon');
+    shareOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            const shareMethod = option.querySelector('span')?.textContent || 'Unknown';
+            
+            // Close the popover
+            const shareMenu = document.getElementById('share-menu');
+            if (shareMenu) shareMenu.classList.remove('is-open');
+            
+            // Handle share action
+            if (shareMethod.includes('Email')) {
+                const email = prompt('Enter email address to share with:');
+                if (email) {
+                    console.log(`Sharing via email to: ${email}`);
+                    alert(`Sharing video with ${email}...\n\nIn production, this would send an email with the video link.`);
+                }
+            } else if (shareMethod.includes('Whatsapp')) {
+                const phone = prompt('Enter phone number (with country code):');
+                if (phone) {
+                    console.log(`Sharing via WhatsApp to: ${phone}`);
+                    // Create WhatsApp share link
+                    const videoUrl = window.location.href;
+                    const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Check out this video: ${videoUrl}`)}`;
+                    window.open(whatsappUrl, '_blank');
+                }
+            } else if (shareMethod.includes('Copy URL')) {
+                const videoUrl = window.location.href;
+                navigator.clipboard.writeText(videoUrl).then(() => {
+                    alert('Video URL copied to clipboard!');
+                    console.log('URL copied:', videoUrl);
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = videoUrl;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Video URL copied to clipboard!');
+                });
+                
+                // Close the popover
+                if (shareMenu) shareMenu.classList.remove('is-open');
+            }
+        });
+    });
+
+    /*
+     * -------------------------------------------
+     * Status Update Functionality
+     * -------------------------------------------
+     */
+    const statusOptions = document.querySelectorAll('.popover-list-item-status');
+    statusOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            const status = option.textContent.trim() || 'Unknown';
+            const statusButton = option.closest('.popover-wrapper')?.querySelector('.feedback-status-button');
+            
+            // Close the popover
+            const statusMenu = option.closest('.popover-menu');
+            if (statusMenu) statusMenu.classList.remove('is-open');
+            
+            // Update status button text
+            if (statusButton) {
+                statusButton.innerHTML = `Status: ${status} <svg class="icon-chevron-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`;
+            }
+            
+            console.log(`Status updated to: ${status}`);
+            // In production, this would send an API request to update the status
+        });
+    });
+
+    /*
+     * -------------------------------------------
+     * Notification Items Functionality
+     * -------------------------------------------
+     */
+    const notificationItems = document.querySelectorAll('#notifications-popover .popover-list-item');
+    notificationItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const notificationText = item.querySelector('.notification-title')?.textContent || '';
+            
+            // Close the popover
+            const notificationsMenu = document.getElementById('notifications-popover');
+            if (notificationsMenu) notificationsMenu.classList.remove('is-open');
+            
+            console.log(`Notification clicked: ${notificationText}`);
+            // In production, this would navigate to the specific notification/comment
+            // For now, just scroll to feedback section
+            const feedbackSection = document.querySelector('.card:has(.feedback-list)');
+            if (feedbackSection) {
+                feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    /*
+     * -------------------------------------------
+     * Revision History Items Functionality
+     * -------------------------------------------
+     */
+    const revisionItems = document.querySelectorAll('.revision-list-item');
+    revisionItems.forEach(item => {
+        item.style.cursor = 'pointer';
+        item.addEventListener('click', () => {
+            const versionTitle = item.querySelector('.revision-list-title, .revision-list-title-active')?.textContent || 'Unknown';
+            const versionStatus = item.querySelector('.status-badge, .revision-list-status-old')?.textContent || '';
+            
+            console.log(`Viewing ${versionTitle} - ${versionStatus}`);
+            
+            // Update video player placeholder (in production, this would load the actual video)
+            const videoPlaceholder = document.querySelector('.video-player-placeholder');
+            if (videoPlaceholder) {
+                videoPlaceholder.innerHTML = `<span>Playing ${versionTitle} (${versionStatus})</span>`;
+            }
+            
+            // Update card footer
+            const cardFooter = document.querySelector('.card-footer .card-title-xl');
+            if (cardFooter) {
+                cardFooter.textContent = `${versionTitle} (${versionStatus})`;
+            }
+            
+            // Highlight selected revision
+            revisionItems.forEach(rev => rev.classList.remove('revision-selected'));
+            item.classList.add('revision-selected');
+        });
+    });
+
 });
