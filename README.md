@@ -10,6 +10,16 @@ A video project management dashboard with upload functionality.
 - **Project Management**: View project status, revision history, and client feedback
 - **Responsive Design**: Modern UI that works on desktop and mobile devices
 
+## Branch Structure
+
+This repository uses separate branches for different parts of the application to enable parallel development:
+
+- **`main`**: Production-ready code (stable, tested)
+- **`project-management-dashboard`**: Development branch for project management features
+- **`video-dashboard`**: Development branch for video dashboard features
+
+For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Upload Functionality
 The upload button supports three methods:
 1. **Local Desktop**: Select and upload video files directly from your computer
