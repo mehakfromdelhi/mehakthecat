@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const workTodayBtn = document.getElementById('work-today-btn');
     if (workTodayBtn) {
         workTodayBtn.addEventListener('click', function() {
-            alert('Setting Neptune — Fashion Lookbook as today\'s focus project.\n\nAll notifications and tasks for this project will be prioritized.');
+            alert('Setting Sunset Ridge — Luxury Estate as today\'s focus project.\n\nAll notifications and tasks for this project will be prioritized.');
         });
     }
     
