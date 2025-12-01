@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Management - Vugru Dashboard</title>
+    <title>Project Overview - Vugru Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="project-management.css" />
 </head>
 <body>
-    <div class="page">
+    <div class="page no-sidebar">
 
     <!-- SVG sprite (icons) -->
     <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
@@ -36,32 +36,32 @@
         </symbol>
     </svg>
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-mark">V</div>
-            <div>
-                <div class="brand-title">VuGru</div>
-                <div class="brand-sub">Real estate video production</div>
+    <!-- Header with Logout -->
+    <header class="top-header">
+        <div class="header-content">
+            <div class="brand-header">
+                <div class="brand-mark">V</div>
+                <div>
+                    <div class="brand-title">VuGru</div>
+                    <div class="brand-sub">Real estate video production</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="Vugru HTML.html" class="header-link">
+                    <svg class="ico" style="width:20px;height:20px;"><use href="#ico-video"/></svg>
+                    <span>Video Dashboard</span>
+                </a>
+                <button id="pm-logout-button" class="icon-btn bordered" title="Logout">
+                    <svg class="ico"><use href="#ico-logout"/></svg>
+                    <span>Logout</span>
+                </button>
             </div>
         </div>
-        <nav class="nav">
-            <a href="#overview" class="nav-item active"><svg class="ico"><use href="#ico-target"/></svg>Project Overview</a>
-            <a href="#calendar" class="nav-item"><svg class="ico"><use href="#ico-calendar"/></svg>Calendar</a>
-            <a href="Vugru HTML.html" class="nav-item highlight"><svg class="ico"><use href="#ico-video"/></svg>Video Dashboard</a>
-        </nav>
-        <div class="foot">
-            <button id="pm-logout-button" class="icon-btn bordered" style="width: 100%; margin-top: 1rem; justify-content: center; gap: 0.5rem;" title="Logout">
-                <svg class="ico"><use href="#ico-logout"/></svg>
-                <span>Logout</span>
-            </button>
-            <p style="margin-top: 1rem; text-align: center;">© VuGru — Real estate video specialists</p>
-        </div>
-    </aside>
+    </header>
 
     <!-- Main -->
-    <main class="main">
-        <h1 class="page-title">Photographer Dashboard</h1>
+    <main class="main full-width">
+        <h1 class="page-title">Project Overview</h1>
 
         <!-- Panel 1: Project Overview (Priority-Ordered by Deadline) -->
         <section id="overview" class="panel">

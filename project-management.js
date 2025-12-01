@@ -348,23 +348,8 @@ function renderUpcomingDeadlines() {
 
 // ===================== Navigation =====================
 function initializeNavigation() {
-    const navItems = document.querySelectorAll('.nav-item[href^="#"]');
-    navItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href.startsWith('#')) {
-                e.preventDefault();
-                const targetId = href.substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth' });
-                    // Update active nav item
-                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                    this.classList.add('active');
-                }
-            }
-        });
-    });
+    // Navigation removed - direct access to sections
+    // Smooth scroll can be added if needed for anchor links
 }
 
 // ===================== Logout =====================
