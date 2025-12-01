@@ -88,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('auth', JSON.stringify(authData));
                 }
 
-                // Redirect to dashboard
-                window.location.href = 'Vugru HTML.html';
+                // Redirect to project management dashboard
+                window.location.href = 'project-management.html';
             } else {
                 // Reset button state
                 if (submitButton) {

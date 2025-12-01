@@ -569,6 +569,83 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    /*
+     * -------------------------------------------
+     * Comment Reply Functionality
+     * -------------------------------------------
+     */
+    const feedbackReplyInput = document.getElementById('feedback-reply-input');
+    const feedbackReplySend = document.getElementById('feedback-reply-send');
+    
+    if (feedbackReplySend) {
+        feedbackReplySend.addEventListener('click', () => {
+            if (!feedbackReplyInput || !feedbackReplyInput.value.trim()) {
+                return;
+            }
+            
+            const replyText = feedbackReplyInput.value.trim();
+            
+            // Create new reply element
+            const feedbackList = document.querySelector('.feedback-list');
+            if (feedbackList) {
+                const newReplyItem = document.createElement('li');
+                newReplyItem.className = 'feedback-list-item';
+                newReplyItem.innerHTML = `
+                    <div class="feedback-item-comment-vugru">
+                        <div class="feedback-avatar-vugru">
+                            <span class="avatar-initials">V</span>
+                        </div>
+                        <div class="feedback-comment-bubble-container-vugru">
+                            <h4 class="feedback-author-vugru">Vugru (You)</h4>
+                            <p class="feedback-timestamp-vugru">Just now</p>
+                            <p class="feedback-comment-bubble-vugru">
+                                "${replyText}"
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                // Append to feedback list
+                feedbackList.appendChild(newReplyItem);
+                
+                // Clear input
+                feedbackReplyInput.value = '';
+                
+                // Scroll to new reply
+                newReplyItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                console.log('Reply sent:', replyText);
+            }
+        });
+    }
+    
+    // Allow Enter key to send (Shift+Enter for new line)
+    if (feedbackReplyInput) {
+        feedbackReplyInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (feedbackReplySend) {
+                    feedbackReplySend.click();
+                }
+            }
+        });
+    }
+    
+    // Load selected project from sessionStorage
+    const selectedProject = sessionStorage.getItem('selectedProject');
+    if (selectedProject) {
+        try {
+            const project = JSON.parse(selectedProject);
+            const headerTitle = document.querySelector('.header-title');
+            if (headerTitle) {
+                headerTitle.textContent = project.name;
+            }
+            console.log('Loaded project:', project);
+        } catch (e) {
+            console.error('Error parsing selected project:', e);
+        }
+    }
+
     // Log successful initialization with details
     console.log('Vugru Dashboard: All event listeners initialized successfully');
     console.log('Buttons initialized:', {
@@ -577,7 +654,8 @@ document.addEventListener('DOMContentLoaded', () => {
         publishOptions: publishOptions.length,
         shareOptions: shareOptions.length,
         statusOptions: statusOptions.length,
-        revisionItems: revisionItems.length
+        revisionItems: revisionItems.length,
+        feedbackReplySend: !!feedbackReplySend
     });
 
     } catch (error) {
