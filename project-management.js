@@ -173,8 +173,8 @@ function getStatusLabel(status) {
         'completed': 'Completed'
     };
     return labels[status] || status;
-}
-
+    }
+    
 // ===================== Calendar with Deadlines =====================
 let currentCalendarDate = new Date();
 
@@ -271,7 +271,7 @@ function renderCalendar() {
                 let tagClass = 'tag red';
                 if (daysUntil > 3) tagClass = 'tag amber';
                 html += `<div class="${tagClass}" style="font-size:10px;padding:2px 6px;margin-bottom:2px;">${project.name}</div>`;
-            });
+        });
         }
         
         html += '</div>';
@@ -343,13 +343,28 @@ function renderUpcomingDeadlines() {
         });
         
         list.appendChild(item);
-    });
+        });
 }
-
+    
 // ===================== Navigation =====================
 function initializeNavigation() {
-    // Navigation removed - direct access to sections
-    // Smooth scroll can be added if needed for anchor links
+    const navItems = document.querySelectorAll('.nav-item[href^="#"]');
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href.startsWith('#')) {
+                e.preventDefault();
+                const targetId = href.substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                    // Update active nav item
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            }
+        });
+    });
 }
 
 // ===================== Logout =====================
@@ -360,6 +375,6 @@ function initializeLogout() {
             localStorage.removeItem('auth');
             sessionStorage.removeItem('auth');
             window.location.href = 'login.html';
-        });
+});
     }
 }
