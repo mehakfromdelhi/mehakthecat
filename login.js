@@ -151,8 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Check if session is still valid (24 hours)
                 const oneDay = 24 * 60 * 60 * 1000;
                 if (authData.loggedIn && (Date.now() - authData.timestamp) < oneDay) {
-                    // Already logged in, redirect to dashboard
-                    window.location.href = 'Vugru HTML.html';
+                    // Already logged in, redirect to project overview
+                    window.location.href = 'project-management.html';
                     return true;
                 } else {
                     // Session expired, clear auth
