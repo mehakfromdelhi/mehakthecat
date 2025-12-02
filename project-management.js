@@ -18,6 +18,14 @@ function checkAuthentication() {
             window.location.href = 'login.html';
             return false;
         }
+        
+        // Verify user is an agent (this is an agent-facing page)
+        if (authData.userType !== 'agent') {
+            // User is a client, redirect to client dashboard
+            window.location.href = 'client-dashboard.html';
+            return false;
+        }
+        
         return true;
     } catch (e) {
         // Invalid auth data, clear and redirect
