@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard - Vugru</title>
+    <link rel="stylesheet" href="Vugru CSS.css">
+    <style>
+        .client-placeholder {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 100%);
+            padding: 2rem;
+        }
+        .client-message {
+            background: white;
+            border-radius: 1rem;
+            padding: 3rem;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .client-message h1 {
+            color: #111827;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        .client-message p {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .logout-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #db2777 0%, #9333ea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="client-placeholder">
+        <div class="client-message">
+            <h1>Welcome to Your Client Dashboard</h1>
+            <p>
+                This is a placeholder page for the client-facing dashboard. 
+                The client dashboard will be developed here to allow clients to view 
+                their property videos, track project progress, and communicate with agents.
+            </p>
+            <p style="font-size: 0.875rem; color: #9ca3af; margin-top: 1rem;">
+                You are currently logged in as a <strong>Client</strong>.
+            </p>
+            <a href="login.html" class="logout-btn" onclick="logout()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication and user type
+        function checkAuth() {
+            const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+            if (!auth) {
+                window.location.href = 'login.html';
+                return;
+            }
+            try {
+                const authData = JSON.parse(auth);
+                const oneDay = 24 * 60 * 60 * 1000;
+                if (!authData.loggedIn || (Date.now() - authData.timestamp) > oneDay) {
+                    localStorage.removeItem('auth');
+                    sessionStorage.removeItem('auth');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                // Verify user is a client
+                if (authData.userType !== 'client') {
+                    // User is an agent, redirect to agent dashboard
+                    window.location.href = 'project-management.html';
+                    return;
+                }
+            } catch (e) {
+                localStorage.removeItem('auth');
+                sessionStorage.removeItem('auth');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('auth');
+            sessionStorage.removeItem('auth');
+        }
+
+        // Check on page load
+        checkAuth();
+    </script>
+</body>
+</html>
