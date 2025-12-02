@@ -15,6 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const eyeOffIcon = document.getElementById('eye-off-icon');
     const loginError = document.getElementById('login-error');
     const errorMessage = document.getElementById('error-message');
+    const userTypeRadios = document.querySelectorAll('input[name="user-type"]');
+
+    // Handle user type selection styling (for browsers without :has() support)
+    userTypeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            document.querySelectorAll('.user-type-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            if (radio.checked) {
+                radio.closest('.user-type-option').classList.add('selected');
+            }
+        });
+    });
+
+    // Set initial selected state
+    const checkedRadio = document.querySelector('input[name="user-type"]:checked');
+    if (checkedRadio) {
+        checkedRadio.closest('.user-type-option').classList.add('selected');
+    }
 
     // Toggle password visibility
     if (togglePasswordButton) {
@@ -34,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const rememberMe = document.getElementById('remember-me').checked;
+            const userType = document.querySelector('input[name="user-type"]:checked')?.value || 'agent';
             const submitButton = loginForm.querySelector('button[type="submit"]');
 
             // Hide any previous errors
@@ -76,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Store authentication state
                 const authData = {
                     email: email,
+                    userType: userType, // 'client' or 'agent'
                     loggedIn: true,
                     timestamp: Date.now()
                 };
@@ -88,8 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('auth', JSON.stringify(authData));
                 }
 
-                // Redirect to project management dashboard
-                window.location.href = 'project-management.html';
+                // Redirect based on user type
+                if (userType === 'client') {
+                    // Redirect to client dashboard (to be created)
+                    window.location.href = 'client-dashboard.html';
+                } else {
+                    // Redirect to agent dashboard (project management)
+                    window.location.href = 'project-management.html';
+                }
             } else {
                 // Reset button state
                 if (submitButton) {
@@ -151,8 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Check if session is still valid (24 hours)
                 const oneDay = 24 * 60 * 60 * 1000;
                 if (authData.loggedIn && (Date.now() - authData.timestamp) < oneDay) {
-                    // Already logged in, redirect to project overview
-                    window.location.href = 'project-management.html';
+                    // Already logged in, redirect based on user type
+                    const userType = authData.userType || 'agent';
+                    if (userType === 'client') {
+                        window.location.href = 'client-dashboard.html';
+                    } else {
+                        window.location.href = 'project-management.html';
+                    }
                     return true;
                 } else {
                     // Session expired, clear auth

@@ -21,6 +21,20 @@
 
             <form id="login-form" class="login-form">
                 <div class="form-group">
+                    <label for="user-type" class="form-label">I am a</label>
+                    <div class="user-type-selector">
+                        <label class="user-type-option">
+                            <input type="radio" name="user-type" value="client" id="user-type-client" required>
+                            <span class="user-type-label">Client</span>
+                        </label>
+                        <label class="user-type-option">
+                            <input type="radio" name="user-type" value="agent" id="user-type-agent" checked required>
+                            <span class="user-type-label">Agent</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label for="email" class="form-label">Email</label>
                     <input 
                         type="email" 
