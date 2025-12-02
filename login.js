@@ -73,11 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Simple authentication (for demo purposes)
             // In production, this would make an API call to your backend
             if (authenticateUser(email, password)) {
+                // Check if this is a client login
+                const isClient = isClientEmail(email);
+                
                 // Store authentication state
                 const authData = {
                     email: email,
                     loggedIn: true,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    userType: isClient ? 'client' : 'user'
                 };
 
                 if (rememberMe) {
@@ -88,8 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('auth', JSON.stringify(authData));
                 }
 
-                // Redirect to project management dashboard
-                window.location.href = 'project-management.html';
+                // Redirect based on user type
+                if (isClient) {
+                    window.location.href = 'clients.html';
+                } else {
+                    window.location.href = 'project-management.html';
+                }
             } else {
                 // Reset button state
                 if (submitButton) {
@@ -101,6 +109,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Check if email belongs to a client
+    function isClientEmail(email) {
+        const normalizedEmail = email.toLowerCase().trim();
+        
+        // Client emails (matching clients.js data)
+        const clientEmails = [
+            'john.smith@example.com',
+            'sarah.johnson@example.com',
+            'mike.davis@example.com',
+            'emily.chen@example.com'
+        ];
+        
+        return clientEmails.includes(normalizedEmail);
+    }
+
     // Authentication function (demo - replace with actual API call)
     function authenticateUser(email, password) {
         // Demo credentials (in production, this would be an API call)
@@ -108,7 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
             'demo@vugru.com': 'demo123',
             'admin@vugru.com': 'admin123',
             'user@example.com': 'password123',
-            'test@test.com': 'test123'
+            'test@test.com': 'test123',
+            // Client credentials (password same as email username for demo)
+            'john.smith@example.com': 'john123',
+            'sarah.johnson@example.com': 'sarah123',
+            'mike.davis@example.com': 'mike123',
+            'emily.chen@example.com': 'emily123'
         };
 
         // Check against demo credentials first
@@ -151,8 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Check if session is still valid (24 hours)
                 const oneDay = 24 * 60 * 60 * 1000;
                 if (authData.loggedIn && (Date.now() - authData.timestamp) < oneDay) {
-                    // Already logged in, redirect to project overview
-                    window.location.href = 'project-management.html';
+                    // Already logged in, redirect based on user type
+                    if (authData.userType === 'client') {
+                        window.location.href = 'clients.html';
+                    } else {
+                        window.location.href = 'project-management.html';
+                    }
                     return true;
                 } else {
                     // Session expired, clear auth

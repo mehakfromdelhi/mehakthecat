@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Overview - Vugru Dashboard</title>
+    <title>Clients - Vugru Dashboard</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -42,6 +42,12 @@
             <circle cx="9" cy="7" r="4" stroke-width="1.5"/>
             <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke-width="1.5"/>
         </symbol>
+        <symbol id="ico-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-width="1.5"/>
+        </symbol>
+        <symbol id="ico-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke-width="1.5"/>
+        </symbol>
     </svg>
 
     <!-- Sidebar -->
@@ -54,9 +60,9 @@
             </div>
         </div>
         <nav class="nav">
-            <a href="project-management.html" class="nav-item active"><svg class="ico"><use href="#ico-target"/></svg>Project Overview</a>
+            <a href="project-management.html" class="nav-item"><svg class="ico"><use href="#ico-target"/></svg>Project Overview</a>
             <a href="calendar.html" class="nav-item"><svg class="ico"><use href="#ico-calendar"/></svg>Calendar</a>
-            <a href="clients.html" class="nav-item"><svg class="ico"><use href="#ico-users"/></svg>Clients</a>
+            <a href="clients.html" class="nav-item active"><svg class="ico"><use href="#ico-users"/></svg>Clients</a>
             <a href="Vugru HTML.html" class="nav-item highlight"><svg class="ico"><use href="#ico-video"/></svg>Video Dashboard</a>
         </nav>
         <div class="foot">
@@ -70,26 +76,27 @@
 
     <!-- Main -->
     <main class="main">
-        <h1 class="page-title">Project Overview</h1>
+        <h1 class="page-title">Clients</h1>
 
-        <!-- Project Overview (Priority-Ordered by Deadline) -->
-        <section id="overview" class="panel">
+        <!-- Client Directory -->
+        <section id="clients-directory" class="panel">
             <div class="panel-head">
-                <h2 class="panel-title"><svg class="ico"><use href="#ico-target"/></svg>Project Overview</h2>
+                <h2 class="panel-title"><svg class="ico"><use href="#ico-users"/></svg>Client Directory</h2>
                 <div class="sort-controls">
-                    <span class="hint">Sorted by deadline priority</span>
+                    <input type="text" id="client-search" placeholder="Search clients..." class="search-input" style="padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; font-size: var(--fs-base);">
                 </div>
             </div>
-            <p class="muted small">Click on any project to open the video dashboard and start working.</p>
+            <p class="muted small">Manage your client relationships and view all client information in one place.</p>
 
-            <div id="projects-list" class="projects-grid">
-                <!-- Projects will be dynamically inserted here by JavaScript -->
+            <div id="clients-list" class="projects-grid">
+                <!-- Clients will be dynamically inserted here by JavaScript -->
             </div>
         </section>
 
     </main>
     </div>
 
-    <script src="project-management.js"></script>
+    <script src="clients.js"></script>
 </body>
 </html>
+
