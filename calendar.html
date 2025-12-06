@@ -97,6 +97,24 @@
     </main>
     </div>
 
+    <!-- Comments Section -->
+    <section id="calendar-comments" class="panel" style="margin-top: 2rem; display: none;">
+        <div class="panel-head">
+            <h2 class="panel-title">Project Comments</h2>
+        </div>
+        <div class="card" style="margin-top: 1rem;">
+            <div id="calendar-comments-list" class="feedback-list" style="max-height: 400px; overflow-y: auto;">
+                <!-- Comments will be dynamically loaded here -->
+            </div>
+        </div>
+        <div style="padding: 1rem; border-top: 1px solid var(--border); margin-top: 1rem;">
+            <textarea id="calendar-comment-input" rows="3" style="width: 100%; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem; font-size: var(--fs-sm); font-family: inherit; resize: vertical; margin-bottom: 0.5rem;" placeholder="Add a comment..."></textarea>
+            <button id="calendar-comment-send" style="background-color: var(--blue); color: white; font-size: var(--fs-sm); font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer;">Post Comment</button>
+        </div>
+    </section>
+
+    <script src="project-data-manager.js"></script>
+    <script src="comments-manager.js"></script>
     <script src="calendar.js"></script>
 </body>
 </html>

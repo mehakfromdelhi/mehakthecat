@@ -548,56 +548,79 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    /*
-     * -------------------------------------------
-     * Status Update Functionality
-     * -------------------------------------------
-     */
-    const statusOptions = document.querySelectorAll('.popover-list-item-status');
-    statusOptions.forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-            const status = option.textContent.trim() || 'Unknown';
-            const statusButton = option.closest('.popover-wrapper')?.querySelector('.feedback-status-button');
-            
-            // Close the popover
-            const statusMenu = option.closest('.popover-menu');
-            if (statusMenu) statusMenu.classList.remove('is-open');
-            
-            // Update status button text
-            if (statusButton) {
-                statusButton.innerHTML = `Status: ${status} <svg class="icon-chevron-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`;
-            }
-            
-            console.log(`Status updated to: ${status}`);
-            // In production, this would send an API request to update the status
-        });
-    });
+    // Comment status update functionality is now handled via event delegation in the comment system section
 
     /*
      * -------------------------------------------
-     * Notification Items Functionality
+     * Load Project Data and Update UI
      * -------------------------------------------
      */
-    const notificationItems = document.querySelectorAll('#notifications-popover .popover-list-item');
-    notificationItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const notificationText = item.querySelector('.notification-title')?.textContent || '';
+    const selectedProject = sessionStorage.getItem('selectedProject');
+    let currentProject = null;
+    
+    if (selectedProject) {
+        try {
+            currentProject = JSON.parse(selectedProject);
             
-            // Close the popover
-            const notificationsMenu = document.getElementById('notifications-popover');
-            if (notificationsMenu) notificationsMenu.classList.remove('is-open');
-            
-            console.log(`Notification clicked: ${notificationText}`);
-            // In production, this would navigate to the specific notification/comment
-            // For now, just scroll to feedback section
-            const feedbackSection = document.querySelector('.card:has(.feedback-list)');
-            if (feedbackSection) {
-                feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Update header title with project name
+            const headerTitle = document.querySelector('.header-title');
+            if (headerTitle && currentProject.name) {
+                headerTitle.textContent = currentProject.name;
             }
-        });
-    });
+            
+            // Update project status in the status card
+            const statusText = document.getElementById('project-status-text');
+            const statusBar = document.getElementById('project-status-bar');
+            const clientName = document.getElementById('project-client-name');
+            
+            if (currentProject.status && statusText) {
+                statusText.textContent = ProjectDataManager.getStatusLabel(currentProject.status);
+                // Update status bar color based on status
+                const statusClass = currentProject.status === 'completed' ? 'green' : 
+                                   currentProject.status === 'in-review' ? 'amber' : 
+                                   currentProject.status === 'awaiting-feedback' ? 'yellow' : 'blue';
+                statusText.className = `status-bar-text-${statusClass}`;
+                
+                // Update status bar fill
+                if (statusBar) {
+                    statusBar.className = `status-bar-fill-${statusClass}`;
+                    statusBar.style.width = `${currentProject.progress || 0}%`;
+                }
+            }
+            
+            // Update client name
+            if (currentProject.client && clientName) {
+                clientName.textContent = currentProject.client;
+            }
+            
+            console.log('Loaded project:', currentProject);
+        } catch (e) {
+            console.error('Error parsing selected project:', e);
+        }
+    } else {
+        // If no project selected, try to get from ProjectDataManager
+        const projectId = CommentsManager.getCurrentProjectId();
+        if (projectId && typeof ProjectDataManager !== 'undefined') {
+            currentProject = ProjectDataManager.getProject(projectId);
+            if (currentProject) {
+                // Store in sessionStorage for consistency
+                sessionStorage.setItem('selectedProject', JSON.stringify({
+                    id: currentProject.id,
+                    name: currentProject.name,
+                    client: currentProject.client,
+                    clientEmail: currentProject.clientEmail,
+                    projectId: currentProject.id,
+                    status: currentProject.status
+                }));
+                
+                // Update header
+                const headerTitle = document.querySelector('.header-title');
+                if (headerTitle) {
+                    headerTitle.textContent = currentProject.name;
+                }
+            }
+        }
+    }
 
     /*
      * -------------------------------------------
@@ -660,6 +683,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize sync listener for real-time updates
     CommentsManager.initSyncListener(projectId, renderComments);
     
+    /*
+     * -------------------------------------------
+     * Comment Status Update Functionality (Event Delegation)
+     * -------------------------------------------
+     * Uses event delegation to handle dynamically added status buttons
+     */
+    document.addEventListener('click', (e) => {
+        const statusOption = e.target.closest('.popover-list-item-status');
+        if (statusOption) {
+            e.preventDefault();
+            const newStatus = statusOption.getAttribute('data-status');
+            const commentId = statusOption.getAttribute('data-comment-id');
+            const projectId = CommentsManager.getCurrentProjectId();
+            
+            if (!newStatus || !commentId || !projectId) return;
+            
+            // Update comment status
+            CommentsManager.updateCommentStatus(projectId, commentId, newStatus);
+            
+            // Close the popover
+            const statusMenu = statusOption.closest('.popover-menu');
+            if (statusMenu) statusMenu.classList.remove('is-open');
+            
+            // Re-render comments to show updated status
+            renderComments();
+            
+            console.log(`Comment ${commentId} status updated to: ${newStatus}`);
+        }
+    });
+    
     // Comment posting logic for agent
     if (feedbackReplySend) {
         feedbackReplySend.addEventListener('click', () => {
@@ -711,20 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Load selected project from sessionStorage
-    const selectedProject = sessionStorage.getItem('selectedProject');
-    if (selectedProject) {
-        try {
-            const project = JSON.parse(selectedProject);
-            const headerTitle = document.querySelector('.header-title');
-            if (headerTitle) {
-                headerTitle.textContent = project.name;
-            }
-            console.log('Loaded project:', project);
-        } catch (e) {
-            console.error('Error parsing selected project:', e);
-        }
-    }
+    // Project data loading is now handled above in the "Load Project Data" section
 
     // Log successful initialization with details
     console.log('Vugru Dashboard: All event listeners initialized successfully');
@@ -733,9 +773,9 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutButton: !!logoutButton,
         publishOptions: publishOptions.length,
         shareOptions: shareOptions.length,
-        statusOptions: statusOptions.length,
         revisionItems: revisionItems.length,
-        feedbackReplySend: !!feedbackReplySend
+        feedbackReplySend: !!feedbackReplySend,
+        currentProject: currentProject ? currentProject.name : 'None'
     });
 
     } catch (error) {

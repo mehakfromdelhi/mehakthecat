@@ -28,41 +28,7 @@ function checkAuthentication() {
     }
 }
 
-// Sample project data (shared with project-management.js - in production, this would come from an API)
-let projectsData = [
-    {
-        id: 1,
-        name: "Sunset Ridge Luxury Estate",
-        deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-        status: "in-review",
-        progress: 30,
-        client: "John Smith"
-    },
-    {
-        id: 2,
-        name: "Downtown Loft Condo Tour",
-        deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
-        status: "active",
-        progress: 85,
-        client: "Sarah Johnson"
-    },
-    {
-        id: 3,
-        name: "Mountain View Family Home",
-        deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        status: "awaiting-feedback",
-        progress: 10,
-        client: "Mike Davis"
-    },
-    {
-        id: 4,
-        name: "Oceanfront Villa Premium Listing",
-        deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-        status: "active",
-        progress: 50,
-        client: "Emily Chen"
-    }
-];
+// Projects are now managed by ProjectDataManager
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -72,21 +38,166 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize all features
     initializeCalendar();
+    initializeComments();
     initializeNavigation();
     initializeLogout();
     
     console.log('Calendar Dashboard initialized');
 });
 
-function getStatusLabel(status) {
-    const labels = {
-        'active': 'Active',
-        'in-review': 'In Review',
-        'awaiting-feedback': 'Awaiting Feedback',
-        'completed': 'Completed'
-    };
-    return labels[status] || status;
+// ===================== Comments System =====================
+let selectedProjectForComments = null;
+
+function initializeComments() {
+    const commentsList = document.getElementById('calendar-comments-list');
+    const commentInput = document.getElementById('calendar-comment-input');
+    const commentSend = document.getElementById('calendar-comment-send');
+    
+    if (!commentsList || !commentInput || !commentSend) {
+        // Comments section might not be visible initially
+        return;
+    }
+    
+    // Initially hide comments section
+    const commentsSection = document.getElementById('calendar-comments');
+    if (commentsSection) {
+        commentsSection.style.display = 'none';
+    }
+    
+    // Listen for project selection from deadline items
+    document.addEventListener('click', (e) => {
+        const deadlineItem = e.target.closest('.deadline-item');
+        if (deadlineItem) {
+            // Extract project info from the deadline item
+            const projectName = deadlineItem.querySelector('.deadline-project')?.textContent;
+            if (projectName) {
+                // Find project in ProjectDataManager
+                const projects = ProjectDataManager.getAllProjects();
+                const project = projects.find(p => p.name === projectName);
+                if (project) {
+                    selectProjectForComments(project);
+                }
+            }
+        }
+    });
+    
+    // Comment posting
+    if (commentSend) {
+        commentSend.addEventListener('click', () => {
+            if (!selectedProjectForComments) {
+                alert('Please select a project first by clicking on a deadline item.');
+                return;
+            }
+            
+            const text = commentInput.value.trim();
+            if (!text) return;
+            
+            // Get author name from auth
+            let authorName = 'Vugru (Agent)';
+            const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+            if (auth) {
+                try {
+                    const authData = JSON.parse(auth);
+                    authorName = authData.email ? `Vugru (${authData.email})` : 'Vugru (Agent)';
+                } catch (e) {
+                    console.error('Error parsing auth data:', e);
+                }
+            }
+            
+            // Save comment
+            CommentsManager.saveComment(selectedProjectForComments.id, text, 'agent', authorName);
+            
+            // Clear input
+            commentInput.value = '';
+            
+            // Re-render comments
+            renderComments();
+        });
+    }
+    
+    // Allow Enter key to send (Shift+Enter for new line)
+    if (commentInput) {
+        commentInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (commentSend) {
+                    commentSend.click();
+                }
+            }
+        });
+    }
+    
+    // Initialize comment status update handlers
+    document.addEventListener('click', (e) => {
+        const statusOption = e.target.closest('.popover-list-item-status');
+        if (statusOption) {
+            e.preventDefault();
+            const newStatus = statusOption.getAttribute('data-status');
+            const commentId = statusOption.getAttribute('data-comment-id');
+            
+            if (!selectedProjectForComments || !newStatus || !commentId) return;
+            
+            // Update comment status
+            CommentsManager.updateCommentStatus(selectedProjectForComments.id, commentId, newStatus);
+            
+            // Close the popover
+            const statusMenu = statusOption.closest('.popover-menu');
+            if (statusMenu) statusMenu.classList.remove('is-open');
+            
+            // Re-render comments
+            renderComments();
+            
+            console.log(`Comment ${commentId} status updated to: ${newStatus}`);
+        }
+    });
 }
+
+function selectProjectForComments(project) {
+    selectedProjectForComments = project;
+    
+    // Show comments section
+    const commentsSection = document.getElementById('calendar-comments');
+    if (commentsSection) {
+        commentsSection.style.display = 'block';
+        
+        // Update section title
+        const sectionTitle = commentsSection.querySelector('.panel-title');
+        if (sectionTitle) {
+            sectionTitle.textContent = `Comments - ${project.name}`;
+        }
+    }
+    
+    // Render comments for selected project
+    renderComments();
+    
+    // Scroll to comments section
+    if (commentsSection) {
+        commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function renderComments() {
+    const commentsList = document.getElementById('calendar-comments-list');
+    if (!commentsList || !selectedProjectForComments) return;
+    
+    // Use CommentsManager to render comments in agent view style
+    // The renderCommentsAgent expects a container with a .card class
+    const commentsSection = document.getElementById('calendar-comments');
+    if (commentsSection) {
+        // Find the card wrapper
+        const cardWrapper = commentsSection.querySelector('.card');
+        if (cardWrapper) {
+            CommentsManager.renderCommentsAgent(selectedProjectForComments.id, cardWrapper);
+        }
+    }
+    
+    // Initialize sync listener for real-time updates
+    CommentsManager.initSyncListener(selectedProjectForComments.id, () => {
+        renderComments();
+    });
+}
+
+// getStatusLabel is now in ProjectDataManager
 
 // ===================== Calendar with Deadlines =====================
 let currentCalendarDate = new Date();
@@ -117,6 +228,9 @@ function initializeCalendar() {
 function renderCalendar() {
     const container = document.getElementById('calendar-container');
     if (!container) return;
+    
+    // Get projects from ProjectDataManager
+    const projectsData = ProjectDataManager.getAllProjects();
     
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
@@ -180,7 +294,7 @@ function renderCalendar() {
         
         if (hasDeadline) {
             deadlineProjects.forEach(project => {
-                const daysUntil = Math.ceil((project.deadline - Date.now()) / (24 * 60 * 60 * 1000));
+                const daysUntil = ProjectDataManager.getDaysUntilDeadline(project.deadline);
                 let tagClass = 'tag red';
                 if (daysUntil > 3) tagClass = 'tag amber';
                 html += `<div class="${tagClass}" style="font-size:10px;padding:2px 6px;margin-bottom:2px;">${project.name}</div>`;
@@ -198,10 +312,13 @@ function renderUpcomingDeadlines() {
     const list = document.getElementById('deadlines-list');
     if (!list) return;
     
+    // Get projects from ProjectDataManager
+    const projectsData = ProjectDataManager.getAllProjects();
+    
     // Get upcoming deadlines (next 14 days)
     const upcoming = projectsData
         .filter(project => {
-            const daysUntil = Math.ceil((project.deadline - Date.now()) / (24 * 60 * 60 * 1000));
+            const daysUntil = ProjectDataManager.getDaysUntilDeadline(project.deadline);
             return daysUntil >= 0 && daysUntil <= 14;
         })
         .sort((a, b) => a.deadline - b.deadline);
@@ -214,7 +331,7 @@ function renderUpcomingDeadlines() {
     }
     
     upcoming.forEach(project => {
-        const daysUntil = Math.ceil((project.deadline - Date.now()) / (24 * 60 * 60 * 1000));
+        const daysUntil = ProjectDataManager.getDaysUntilDeadline(project.deadline);
         let itemClass = 'deadline-item';
         if (daysUntil <= 1) {
             itemClass += ' urgent';
@@ -231,6 +348,17 @@ function renderUpcomingDeadlines() {
             year: 'numeric'
         });
         
+        // Get comment count for this project
+        const commentCount = CommentsManager.getCommentCount(project.id);
+        const commentBadge = commentCount > 0 ? `
+            <div class="deadline-comments" style="display: flex; align-items: center; gap: 0.25rem; margin-top: 0.25rem;">
+                <svg style="width:14px;height:14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span style="font-size: 0.75rem; color: #6b7280;">${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}</span>
+            </div>
+        ` : '';
+        
         const item = document.createElement('div');
         item.className = itemClass;
         item.innerHTML = `
@@ -240,8 +368,9 @@ function renderUpcomingDeadlines() {
                     <svg class="ico" style="width:14px;height:14px;"><use href="#ico-clock"/></svg>
                     <span>${deadlineDate} (${daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil} days`})</span>
                 </div>
+                ${commentBadge}
             </div>
-            <span class="status-badge-large ${project.status}">${getStatusLabel(project.status)}</span>
+            <span class="status-badge-large ${project.status}">${ProjectDataManager.getStatusLabel(project.status)}</span>
         `;
         
         // Make deadline item clickable to jump to video dashboard
@@ -250,7 +379,11 @@ function renderUpcomingDeadlines() {
             sessionStorage.setItem('selectedProject', JSON.stringify({
                 id: project.id,
                 name: project.name,
-                client: project.client
+                client: project.client,
+                clientEmail: project.clientEmail,
+                projectId: project.id,
+                status: project.status,
+                progress: project.progress
             }));
             window.location.href = 'Vugru HTML.html';
         });

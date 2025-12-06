@@ -65,7 +65,8 @@ const CommentsManager = {
             author: userType, // 'client' or 'agent'
             authorName: authorName || (userType === 'client' ? 'Client' : 'Vugru (Agent)'),
             timestamp: Date.now(),
-            version: this.getCurrentVersion() // Optional: link to video version
+            version: this.getCurrentVersion(), // Optional: link to video version
+            status: 'new' // Default status: 'new', 'work-in-progress', 'complete'
         };
         
         const comments = this.getComments(projectId);
@@ -239,6 +240,9 @@ const CommentsManager = {
                 `;
             } else {
                 // Client comment style (left-aligned, gray background)
+                const commentStatus = comment.status || 'new';
+                const statusId = `status-${comment.id}`;
+                
                 listItem.innerHTML = `
                     <div class="feedback-item-comment">
                         <img class="feedback-avatar" src="https://i.pravatar.cc/40?u=client" alt="Client">
@@ -246,6 +250,30 @@ const CommentsManager = {
                             <h4 class="feedback-author">${this.escapeHtml(comment.authorName)}</h4>
                             <p class="feedback-timestamp">${this.formatTimestamp(comment.timestamp)}</p>
                             <p class="feedback-comment-bubble-client">"${this.escapeHtml(comment.text)}"</p>
+                        </div>
+                        <div class="popover-wrapper feedback-status-wrapper">
+                            <button id="${statusId}" data-toggle="popover" data-target="#status-menu-${comment.id}" type="button" class="feedback-status-button" data-comment-id="${comment.id}">
+                                Status: ${this.getStatusLabel(commentStatus)}
+                                <svg class="icon-chevron-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <div id="status-menu-${comment.id}" class="popover-menu popover-menu-status">
+                                <div class="popover-list">
+                                    <a href="#" class="popover-list-item-status" data-status="new" data-comment-id="${comment.id}">
+                                        <span class="status-dot-blue"></span>
+                                        New
+                                    </a>
+                                    <a href="#" class="popover-list-item-status" data-status="work-in-progress" data-comment-id="${comment.id}">
+                                        <span class="status-dot-yellow"></span>
+                                        Work in Progress
+                                    </a>
+                                    <a href="#" class="popover-list-item-status" data-status="complete" data-comment-id="${comment.id}">
+                                        <span class="status-dot-green"></span>
+                                        Complete
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -303,6 +331,43 @@ const CommentsManager = {
     getUnreadCount(projectId, lastViewTime) {
         const comments = this.getComments(projectId);
         return comments.filter(c => c.timestamp > lastViewTime).length;
+    },
+    
+    /**
+     * Update comment status
+     */
+    updateCommentStatus(projectId, commentId, newStatus) {
+        const comments = this.getComments(projectId);
+        const comment = comments.find(c => c.id === commentId);
+        
+        if (!comment) {
+            console.error('Comment not found:', commentId);
+            return null;
+        }
+        
+        comment.status = newStatus; // 'new', 'work-in-progress', 'complete'
+        
+        const storageKey = this.getStorageKey(projectId);
+        localStorage.setItem(storageKey, JSON.stringify(comments));
+        
+        // Trigger custom event for same-tab updates
+        window.dispatchEvent(new CustomEvent('commentsUpdated', {
+            detail: { projectId, comments }
+        }));
+        
+        return comment;
+    },
+    
+    /**
+     * Get status label
+     */
+    getStatusLabel(status) {
+        const labels = {
+            'new': 'New',
+            'work-in-progress': 'Work in Progress',
+            'complete': 'Complete'
+        };
+        return labels[status] || status;
     }
 };
 
