@@ -242,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to handle file upload
     const uploadFile = (file) => {
+        const projectId = CommentsManager.getCurrentProjectId();
         // Show progress
         if (uploadProgress) {
             uploadProgress.style.display = 'block';
@@ -278,6 +279,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         uploadSuccess.style.display = 'flex';
                     }
 
+                    // Save video to VideoStorageManager
+                    if (projectId && typeof VideoStorageManager !== 'undefined') {
+                        VideoStorageManager.saveVideo(projectId, {
+                            fileName: file.name,
+                            url: videoUrl,
+                            notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+                        });
+                    }
+                    
                     // Update video player with uploaded video
                     updateVideoPlayer(videoUrl, file);
                     
@@ -495,58 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    /*
-     * -------------------------------------------
-     * Share with Client Functionality
-     * -------------------------------------------
-     */
-    const shareOptions = document.querySelectorAll('#share-menu .popover-list-item-icon');
-    shareOptions.forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-            const shareMethod = option.querySelector('span')?.textContent || 'Unknown';
-            
-            // Close the popover
-            const shareMenu = document.getElementById('share-menu');
-            if (shareMenu) shareMenu.classList.remove('is-open');
-            
-            // Handle share action
-            if (shareMethod.includes('Email')) {
-                const email = prompt('Enter email address to share with:');
-                if (email) {
-                    console.log(`Sharing via email to: ${email}`);
-                    alert(`Sharing video with ${email}...\n\nIn production, this would send an email with the video link.`);
-                }
-            } else if (shareMethod.includes('Whatsapp')) {
-                const phone = prompt('Enter phone number (with country code):');
-                if (phone) {
-                    console.log(`Sharing via WhatsApp to: ${phone}`);
-                    // Create WhatsApp share link
-                    const videoUrl = window.location.href;
-                    const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Check out this video: ${videoUrl}`)}`;
-                    window.open(whatsappUrl, '_blank');
-                }
-            } else if (shareMethod.includes('Copy URL')) {
-                const videoUrl = window.location.href;
-                navigator.clipboard.writeText(videoUrl).then(() => {
-                    alert('Video URL copied to clipboard!');
-                    console.log('URL copied:', videoUrl);
-                }).catch(() => {
-                    // Fallback for older browsers
-                    const textArea = document.createElement('textarea');
-                    textArea.value = videoUrl;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    alert('Video URL copied to clipboard!');
-                });
-                
-                // Close the popover
-                if (shareMenu) shareMenu.classList.remove('is-open');
-            }
-        });
-    });
+    // Share button removed - no longer needed
 
     // Comment status update functionality is now handled via event delegation in the comment system section
 
@@ -736,6 +695,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Save comment using comment manager
             CommentsManager.saveComment(projectId, replyText, 'agent', authorName);
+            
+            // Add notification for client about new agent comment
+            if (typeof VideoStorageManager !== 'undefined') {
+                VideoStorageManager.addNotification(projectId, 'comment-awaiting', `Agent commented: "${replyText}"`);
+            }
             
             // Re-render comments to show the new one
             renderComments();

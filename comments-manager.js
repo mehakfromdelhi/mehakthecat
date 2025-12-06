@@ -243,11 +243,20 @@ const CommentsManager = {
                 const commentStatus = comment.status || 'new';
                 const statusId = `status-${comment.id}`;
                 
+                // Get client name from project data if available
+                let clientName = comment.authorName || 'Client';
+                if (typeof ProjectDataManager !== 'undefined') {
+                    const project = ProjectDataManager.getProject(projectId);
+                    if (project && project.client) {
+                        clientName = project.client;
+                    }
+                }
+                
                 listItem.innerHTML = `
                     <div class="feedback-item-comment">
-                        <img class="feedback-avatar" src="https://i.pravatar.cc/40?u=client" alt="Client">
+                        <img class="feedback-avatar" src="https://i.pravatar.cc/40?u=${encodeURIComponent(clientName)}" alt="${this.escapeHtml(clientName)}">
                         <div class="feedback-comment-bubble-container">
-                            <h4 class="feedback-author">${this.escapeHtml(comment.authorName)}</h4>
+                            <h4 class="feedback-author">${this.escapeHtml(clientName)}</h4>
                             <p class="feedback-timestamp">${this.formatTimestamp(comment.timestamp)}</p>
                             <p class="feedback-comment-bubble-client">"${this.escapeHtml(comment.text)}"</p>
                         </div>
