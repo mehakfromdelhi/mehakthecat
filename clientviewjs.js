@@ -397,4 +397,16 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         loadNotifications();
     }, 5000);
+
+    // --- Logout Functionality ---
+    const logoutBtn = document.getElementById('client-logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            // Clear authentication data
+            localStorage.removeItem('auth');
+            sessionStorage.removeItem('auth');
+            // Redirect to login page
+            window.location.href = 'login.html';
+        });
+    }
 });
