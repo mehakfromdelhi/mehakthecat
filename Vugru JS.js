@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to handle file upload
     const uploadFile = (file) => {
-        const projectId = CommentsManager.getCurrentProjectId();
+        const currentProjectId = CommentsManager.getCurrentProjectId();
         // Show progress
         if (uploadProgress) {
             uploadProgress.style.display = 'block';
@@ -280,19 +280,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // Save photo to PhotoStorageManager
-                    if (projectId && typeof PhotoStorageManager !== 'undefined') {
-                        PhotoStorageManager.savePhoto(projectId, {
+                    if (currentProjectId && typeof PhotoStorageManager !== 'undefined') {
+                        PhotoStorageManager.savePhoto(currentProjectId, {
                             fileName: file.name,
                             url: photoUrl,
                             notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
                         });
                         
-                        // Refresh revision history immediately
+                        // Refresh photo viewer and revision history immediately
+                        loadCurrentPhoto();
                         loadRevisionHistory();
+                    } else {
+                        // Fallback: Update photo viewer directly if PhotoStorageManager not available
+                        updatePhotoViewer(photoUrl, file);
                     }
-                    
-                    // Update photo viewer with uploaded photo
-                    updatePhotoViewer(photoUrl, file);
                     
                     console.log('File uploaded:', file.name, file.size, 'bytes');
                     
@@ -333,8 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (cardTitle) {
                 // Get the latest photo to show version number
-                if (typeof PhotoStorageManager !== 'undefined' && projectId) {
-                    const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+                const currentProjectId = CommentsManager.getCurrentProjectId();
+                if (typeof PhotoStorageManager !== 'undefined' && currentProjectId) {
+                    const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProjectId);
                     if (currentPhoto) {
                         cardTitle.textContent = `Version ${currentPhoto.version} (New Upload)`;
                     } else {
@@ -535,20 +537,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
      * -------------------------------------------
+     * Load Current Photo into Photo Viewer
+     * -------------------------------------------
+     */
+    function loadCurrentPhoto() {
+        const currentProjectId = CommentsManager.getCurrentProjectId();
+        if (!currentProjectId || typeof PhotoStorageManager === 'undefined') return;
+        
+        const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
+        const videoPlayerPlaceholder = document.querySelector('.video-player-placeholder');
+        
+        if (!videoPlayerWrapper) return;
+        
+        const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProjectId);
+        
+        if (currentPhoto && currentPhoto.url) {
+            // Remove existing image/video
+            const existingMedia = videoPlayerWrapper.querySelector('img, video');
+            if (existingMedia) {
+                existingMedia.remove();
+            }
+            
+            // Create and show image
+            const imageElement = document.createElement('img');
+            imageElement.src = currentPhoto.url;
+            imageElement.alt = currentPhoto.fileName || 'Property Photo';
+            imageElement.style.width = '100%';
+            imageElement.style.height = '100%';
+            imageElement.style.objectFit = 'contain';
+            imageElement.style.borderRadius = '0.5rem';
+            
+            if (videoPlayerPlaceholder) {
+                videoPlayerPlaceholder.style.display = 'none';
+            }
+            videoPlayerWrapper.appendChild(imageElement);
+            
+            // Update card footer
+            const cardTitle = document.querySelector('.card-footer .card-title-xl');
+            const cardSubtitle = document.querySelector('.card-footer .card-subtitle');
+            
+            if (cardTitle) {
+                const statusText = currentPhoto.status === 'approved' ? 'Approved' : 
+                                  currentPhoto.status === 'not-approved' ? 'Not Approved' : 
+                                  'Under Review';
+                cardTitle.textContent = `Version ${currentPhoto.version} (${statusText})`;
+            }
+            
+            if (cardSubtitle && currentPhoto.uploadedAt) {
+                const date = new Date(currentPhoto.uploadedAt);
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                cardSubtitle.textContent = `Uploaded by Vugru on ${dateStr} at ${timeStr}`;
+            }
+        } else {
+            // No photo, show placeholder
+            if (videoPlayerPlaceholder) {
+                videoPlayerPlaceholder.style.display = 'flex';
+            }
+            const existingMedia = videoPlayerWrapper.querySelector('img, video');
+            if (existingMedia) {
+                existingMedia.remove();
+            }
+            
+            // Update card footer
+            const cardTitle = document.querySelector('.card-footer .card-title-xl');
+            if (cardTitle) {
+                cardTitle.textContent = 'No photo uploaded yet';
+            }
+        }
+    }
+
+    /*
+     * -------------------------------------------
      * Load Revision History from PhotoStorageManager
      * -------------------------------------------
      */
     function loadRevisionHistory() {
         const revisionList = document.querySelector('.revision-list');
-        if (!revisionList || !projectId) return;
+        const currentProjectId = CommentsManager.getCurrentProjectId();
+        if (!revisionList || !currentProjectId) return;
         
         if (typeof PhotoStorageManager === 'undefined') {
             revisionList.innerHTML = '<li class="revision-list-item"><div><p class="revision-list-subtitle">Loading...</p></div></li>';
             return;
         }
         
-        const photos = PhotoStorageManager.getPhotos(projectId);
-        const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+        const photos = PhotoStorageManager.getPhotos(currentProjectId);
+        const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProjectId);
         
         if (photos.length === 0) {
             revisionList.innerHTML = '<li class="revision-list-item"><div><p class="revision-list-subtitle">No photos uploaded yet</p></div></li>';
@@ -638,12 +713,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Load revision history on page load
+    // Load current photo and revision history on page load
+    loadCurrentPhoto();
     loadRevisionHistory();
     
-    // Listen for photo updates to refresh revision history
+    // Listen for photo updates to refresh photo viewer and revision history
     window.addEventListener('photosUpdated', (e) => {
-        if (e.detail && e.detail.projectId === projectId) {
+        const currentProjectId = CommentsManager.getCurrentProjectId();
+        if (e.detail && e.detail.projectId === currentProjectId) {
+            loadCurrentPhoto();
             loadRevisionHistory();
         }
     });
