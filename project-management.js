@@ -36,41 +36,7 @@ function checkAuthentication() {
     }
 }
 
-// Sample project data (in production, this would come from an API)
-let projectsData = [
-    {
-        id: 1,
-        name: "Sunset Ridge Luxury Estate",
-        deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-        status: "in-review",
-        progress: 30,
-        client: "John Smith"
-    },
-    {
-        id: 2,
-        name: "Downtown Loft Condo Tour",
-        deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
-        status: "active",
-        progress: 85,
-        client: "Sarah Johnson"
-    },
-    {
-        id: 3,
-        name: "Mountain View Family Home",
-        deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        status: "awaiting-feedback",
-        progress: 10,
-        client: "Mike Davis"
-    },
-    {
-        id: 4,
-        name: "Oceanfront Villa Premium Listing",
-        deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-        status: "active",
-        progress: 50,
-        client: "Emily Chen"
-    }
-];
+// Use ProjectDataManager for project data
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -91,8 +57,11 @@ function initializeProjects() {
     const projectsList = document.getElementById('projects-list');
     if (!projectsList) return;
     
+    // Get projects from ProjectDataManager
+    const projects = ProjectDataManager.getAllProjects();
+    
     // Sort projects by deadline (most urgent first)
-    const sortedProjects = [...projectsData].sort((a, b) => {
+    const sortedProjects = [...projects].sort((a, b) => {
         return a.deadline - b.deadline;
     });
     
@@ -110,31 +79,13 @@ function createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card';
     
-    // Determine priority based on deadline
-    const daysUntilDeadline = Math.ceil((project.deadline - Date.now()) / (24 * 60 * 60 * 1000));
-    let priorityClass = 'priority-normal';
-    let deadlineClass = '';
-    let deadlineText = '';
-    
-    if (daysUntilDeadline <= 1) {
-        priorityClass = 'priority-urgent';
-        deadlineClass = 'urgent';
-        deadlineText = 'Due today';
-    } else if (daysUntilDeadline <= 3) {
-        priorityClass = 'priority-high';
-        deadlineClass = 'due-soon';
-        deadlineText = `Due in ${daysUntilDeadline} days`;
-    } else {
-        deadlineText = `Due in ${daysUntilDeadline} days`;
-    }
+    // Get project status details from ProjectDataManager
+    const { priorityClass, deadlineClass, deadlineText, deadlineDate, statusLabel, statusClass } = ProjectDataManager.getProjectStatusDetails(project);
     
     card.classList.add(priorityClass);
     
-    const deadlineDate = project.deadline.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric',
-        year: 'numeric'
-    });
+    // Get comment count
+    const commentCount = CommentsManager ? CommentsManager.getCommentCount(project.id) : 0;
     
     card.innerHTML = `
         <div class="project-card-header">
@@ -152,19 +103,21 @@ function createProjectCard(project) {
         <div>
             <span class="hint">Client:</span> <b>${project.client}</b>
         </div>
-        <div>
-            <span class="project-card-status status-badge-large ${project.status}">${getStatusLabel(project.status)}</span>
+        <div class="project-card-status-wrapper">
+            <span class="project-card-status status-badge-large ${statusClass}">${statusLabel}</span>
+            ${commentCount > 0 ? `<div class="project-card-comments">
+                <svg class="ico" style="width:14px;height:14px;margin-right:4px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span>${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}</span>
+            </div>` : ''}
         </div>
     `;
     
     // Make card clickable to jump to video dashboard
     card.addEventListener('click', function() {
         // Store selected project in sessionStorage for video dashboard
-        sessionStorage.setItem('selectedProject', JSON.stringify({
-            id: project.id,
-            name: project.name,
-            client: project.client
-        }));
+        sessionStorage.setItem('selectedProject', JSON.stringify(project));
         // Navigate to video dashboard
         window.location.href = 'Vugru HTML.html';
     });
@@ -172,15 +125,7 @@ function createProjectCard(project) {
     return card;
 }
 
-function getStatusLabel(status) {
-    const labels = {
-        'active': 'Active',
-        'in-review': 'In Review',
-        'awaiting-feedback': 'Awaiting Feedback',
-        'completed': 'Completed'
-    };
-    return labels[status] || status;
-}
+// Status label function removed - using ProjectDataManager.getStatusLabel instead
 
 // ===================== Navigation =====================
 function initializeNavigation() {

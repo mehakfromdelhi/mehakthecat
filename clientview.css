@@ -1,0 +1,66 @@
+/* 
+ * Client View Styles
+ * Additional styles for client view page
+ * Most styling is handled by Tailwind CSS
+ */
+
+/* Notification dropdown styles */
+#notif-dropdown {
+  z-index: 50;
+}
+
+#notif-dropdown.hidden {
+  display: none;
+}
+
+/* Video player styles */
+#video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#video-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Status badge styles */
+#status-badge {
+  transition: all 0.2s ease;
+}
+
+/* Button disabled states */
+#approve-btn:disabled,
+#reject-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Version history hover effect */
+#version-history li {
+  transition: background-color 0.2s ease;
+}
+
+/* Comments section */
+#comments-section {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Notification dot animation */
+#notif-dot {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
