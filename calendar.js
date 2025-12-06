@@ -28,41 +28,7 @@ function checkAuthentication() {
     }
 }
 
-// Sample project data (shared with project-management.js - in production, this would come from an API)
-let projectsData = [
-    {
-        id: 1,
-        name: "Sunset Ridge Luxury Estate",
-        deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-        status: "in-review",
-        progress: 30,
-        client: "John Smith"
-    },
-    {
-        id: 2,
-        name: "Downtown Loft Condo Tour",
-        deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
-        status: "active",
-        progress: 85,
-        client: "Sarah Johnson"
-    },
-    {
-        id: 3,
-        name: "Mountain View Family Home",
-        deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        status: "awaiting-feedback",
-        progress: 10,
-        client: "Mike Davis"
-    },
-    {
-        id: 4,
-        name: "Oceanfront Villa Premium Listing",
-        deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-        status: "active",
-        progress: 50,
-        client: "Emily Chen"
-    }
-];
+// Use ProjectDataManager for project data
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -78,15 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Calendar Dashboard initialized');
 });
 
-function getStatusLabel(status) {
-    const labels = {
-        'active': 'Active',
-        'in-review': 'In Review',
-        'awaiting-feedback': 'Awaiting Feedback',
-        'completed': 'Completed'
-    };
-    return labels[status] || status;
-}
+// Status label function removed - using ProjectDataManager.getStatusLabel instead
 
 // ===================== Calendar with Deadlines =====================
 let currentCalendarDate = new Date();
@@ -158,6 +116,9 @@ function renderCalendar() {
         html += '<div class="day"></div>';
     }
     
+    // Get projects from ProjectDataManager
+    const projectsData = ProjectDataManager.getAllProjects();
+    
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
@@ -184,6 +145,19 @@ function renderCalendar() {
                 let tagClass = 'tag red';
                 if (daysUntil > 3) tagClass = 'tag amber';
                 html += `<div class="${tagClass}" style="font-size:10px;padding:2px 6px;margin-bottom:2px;">${project.name}</div>`;
+                
+                // Add comment count if available
+                if (CommentsManager) {
+                    const commentCount = CommentsManager.getCommentCount(project.id);
+                    if (commentCount > 0) {
+                        html += `<div class="project-card-comments" style="font-size:9px;padding:1px 4px;margin-top:2px;">
+                                    <svg class="ico" style="width:10px;height:10px;margin-right:2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <span>${commentCount}</span>
+                                </div>`;
+                    }
+                }
             });
         }
         
@@ -197,6 +171,9 @@ function renderCalendar() {
 function renderUpcomingDeadlines() {
     const list = document.getElementById('deadlines-list');
     if (!list) return;
+    
+    // Get projects from ProjectDataManager
+    const projectsData = ProjectDataManager.getAllProjects();
     
     // Get upcoming deadlines (next 14 days)
     const upcoming = projectsData
@@ -233,6 +210,20 @@ function renderUpcomingDeadlines() {
         
         const item = document.createElement('div');
         item.className = itemClass;
+        
+        // Get comment count
+        const commentCount = CommentsManager ? CommentsManager.getCommentCount(project.id) : 0;
+        
+        let commentBadge = '';
+        if (commentCount > 0) {
+            commentBadge = `<div class="project-card-comments" style="margin-top: 4px;">
+                <svg class="ico" style="width:14px;height:14px;margin-right:4px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span>${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}</span>
+            </div>`;
+        }
+        
         item.innerHTML = `
             <div class="deadline-info">
                 <div class="deadline-project">${project.name}</div>
@@ -240,18 +231,15 @@ function renderUpcomingDeadlines() {
                     <svg class="ico" style="width:14px;height:14px;"><use href="#ico-clock"/></svg>
                     <span>${deadlineDate} (${daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil} days`})</span>
                 </div>
+                ${commentBadge}
             </div>
-            <span class="status-badge-large ${project.status}">${getStatusLabel(project.status)}</span>
+            <span class="status-badge-large ${project.status}">${ProjectDataManager.getStatusLabel(project.status)}</span>
         `;
         
         // Make deadline item clickable to jump to video dashboard
         item.style.cursor = 'pointer';
         item.addEventListener('click', function() {
-            sessionStorage.setItem('selectedProject', JSON.stringify({
-                id: project.id,
-                name: project.name,
-                client: project.client
-            }));
+            sessionStorage.setItem('selectedProject', JSON.stringify(project));
             window.location.href = 'Vugru HTML.html';
         });
         
