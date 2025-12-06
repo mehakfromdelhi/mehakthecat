@@ -305,11 +305,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Double-check: if userType is client but email is set, verify it's actually a client email
             if (isClientUser && clientEmail) {
-                const clientExists = getClientByEmail(clientEmail);
-                if (!clientExists) {
-                    // User marked as client but not in client list - treat as regular user
-                    console.warn('User marked as client but not found in client database:', clientEmail);
-                    isClientUser = false;
+                // Make sure we have client data loaded before checking
+                if (clientsData && clientsData.length > 0) {
+                    const clientExists = getClientByEmail(clientEmail);
+                    if (!clientExists) {
+                        // User marked as client but not in client list - check default emails as fallback
+                        const defaultClientEmails = [
+                            'john.smith@example.com',
+                            'sarah.johnson@example.com',
+                            'mike.davis@example.com',
+                            'emily.chen@example.com'
+                        ];
+                        if (!defaultClientEmails.includes(clientEmail)) {
+                            console.warn('User marked as client but not found in client database:', clientEmail);
+                            // Don't change isClientUser - trust the auth data userType
+                        }
+                    }
+                } else {
+                    // No client data loaded yet, but user is marked as client - trust the auth data
+                    console.log('Client data not loaded yet, but user is marked as client:', clientEmail);
                 }
             }
         } catch (e) {
@@ -399,48 +413,7 @@ function initializeClientView(clientEmail) {
     
     if (!clientsList) return;
     
-    // Update page title with client name
-    if (pageTitle) {
-        pageTitle.textContent = client ? `Welcome, ${client.name}` : 'My Projects';
-    }
-    
-    // Update panel title
-    if (panelTitle) {
-        panelTitle.innerHTML = '<svg class="ico"><use href="#ico-video"/></svg>My Projects';
-    }
-    
-    // Hide sidebar navigation for clients - show simplified client view
-    if (sidebar) {
-        const nav = sidebar.querySelector('.nav');
-        if (nav) {
-            nav.innerHTML = `
-                <a href="clients.html" class="nav-item active"><svg class="ico"><use href="#ico-video"/></svg>My Projects</a>
-            `;
-        }
-        
-        // Update sidebar brand for client
-        const brandTitle = sidebar.querySelector('.brand-title');
-        if (brandTitle && client) {
-            // Keep brand but show it's client view
-        }
-    }
-    
-    // Update description with personalized message
-    if (description) {
-        if (client && client.company) {
-            description.textContent = `${client.company} • Click on any project to view details and provide feedback.`;
-        } else {
-            description.textContent = 'Click on any project to view details and provide feedback.';
-        }
-    }
-    
-    // Hide search (not needed for client view)
-    const searchInput = document.getElementById('client-search');
-    if (searchInput && searchInput.parentElement) {
-        searchInput.parentElement.style.display = 'none';
-    }
-    
-    // Find the logged-in client (use getClientByEmail for consistency)
+    // Find the logged-in client FIRST (before using it)
     // First try to get from sessionStorage (set during login)
     let client = null;
     try {
@@ -473,6 +446,41 @@ function initializeClientView(clientEmail) {
         console.error('Error storing currentClient:', e);
     }
     
+    // Update page title with client name (now that client is defined)
+    if (pageTitle) {
+        pageTitle.textContent = `Welcome, ${client.name}`;
+    }
+    
+    // Update panel title
+    if (panelTitle) {
+        panelTitle.innerHTML = '<svg class="ico"><use href="#ico-video"/></svg>My Projects';
+    }
+    
+    // Hide sidebar navigation for clients - show simplified client view
+    if (sidebar) {
+        const nav = sidebar.querySelector('.nav');
+        if (nav) {
+            nav.innerHTML = `
+                <a href="clients.html" class="nav-item active"><svg class="ico"><use href="#ico-video"/></svg>My Projects</a>
+            `;
+        }
+    }
+    
+    // Update description with personalized message
+    if (description) {
+        if (client && client.company) {
+            description.textContent = `${client.company} • Click on any project to view details and provide feedback.`;
+        } else {
+            description.textContent = 'Click on any project to view details and provide feedback.';
+        }
+    }
+    
+    // Hide search (not needed for client view)
+    const searchInput = document.getElementById('client-search');
+    if (searchInput && searchInput.parentElement) {
+        searchInput.parentElement.style.display = 'none';
+    }
+    
     // Clear existing content
     clientsList.innerHTML = '';
     
@@ -489,6 +497,8 @@ function initializeClientView(clientEmail) {
         const projectCard = createClientProjectCard(project, client);
         clientsList.appendChild(projectCard);
     });
+    
+    console.log('Client view successfully initialized for:', client.name);
 }
 
 function createClientProjectCard(project, client) {

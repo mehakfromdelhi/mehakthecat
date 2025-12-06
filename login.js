@@ -119,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Redirect based on user type
                 // Clients see their own client site with their projects
                 if (finalUserType === 'client') {
+                    console.log('Client login detected, preparing redirect to client site...');
+                    
                     // Store client info in sessionStorage for quick access
                     try {
                         const clientsData = localStorage.getItem('vugru_clients');
@@ -129,15 +131,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             );
                             if (client) {
                                 sessionStorage.setItem('currentClient', JSON.stringify(client));
+                                console.log('Client info stored in sessionStorage:', client.name);
+                            } else {
+                                console.warn('Client email found but client data not in localStorage');
                             }
+                        } else {
+                            console.warn('No clients data in localStorage yet');
                         }
                     } catch (e) {
                         console.error('Error storing client info:', e);
                     }
+                    
                     // Redirect to clients.html - it will show client-specific view
+                    console.log('Redirecting to clients.html...');
                     window.location.href = 'clients.html';
                 } else {
                     // Regular users/agents go to project management or video dashboard
+                    console.log('Regular user/agent login, redirecting to project management...');
                     window.location.href = 'project-management.html';
                 }
             } else {
@@ -160,18 +170,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const clientsData = localStorage.getItem('vugru_clients');
             if (clientsData) {
                 const clients = JSON.parse(clientsData);
-                const clientExists = clients.some(client => 
-                    client.email && client.email.toLowerCase().trim() === normalizedEmail
-                );
-                if (clientExists) {
-                    return true;
+                if (Array.isArray(clients) && clients.length > 0) {
+                    const clientExists = clients.some(client => 
+                        client && client.email && client.email.toLowerCase().trim() === normalizedEmail
+                    );
+                    if (clientExists) {
+                        return true;
+                    }
                 }
             }
         } catch (e) {
             console.error('Error checking clients from localStorage:', e);
         }
         
-        // Fallback to hardcoded client emails (for initial setup)
+        // Fallback to hardcoded client emails (for initial setup or if localStorage is empty)
         const defaultClientEmails = [
             'john.smith@example.com',
             'sarah.johnson@example.com',
@@ -179,7 +191,28 @@ document.addEventListener('DOMContentLoaded', () => {
             'emily.chen@example.com'
         ];
         
-        return defaultClientEmails.includes(normalizedEmail);
+        const isDefaultClient = defaultClientEmails.includes(normalizedEmail);
+        
+        // If it's a default client email but not in localStorage, initialize default data
+        if (isDefaultClient) {
+            try {
+                const existingData = localStorage.getItem('vugru_clients');
+                if (!existingData) {
+                    // Initialize default client data for this client email
+                    const defaultClients = [
+                        { id: 1, name: "John Smith", email: "john.smith@example.com", phone: "+1 (555) 123-4567", company: "Smith Realty Group", projectIds: [1], createdAt: new Date().toISOString() },
+                        { id: 2, name: "Sarah Johnson", email: "sarah.johnson@example.com", phone: "+1 (555) 234-5678", company: "Johnson Properties", projectIds: [2], createdAt: new Date().toISOString() },
+                        { id: 3, name: "Mike Davis", email: "mike.davis@example.com", phone: "+1 (555) 345-6789", company: "Davis Homes", projectIds: [3], createdAt: new Date().toISOString() },
+                        { id: 4, name: "Emily Chen", email: "emily.chen@example.com", phone: "+1 (555) 456-7890", company: "Chen Luxury Estates", projectIds: [4], createdAt: new Date().toISOString() }
+                    ];
+                    localStorage.setItem('vugru_clients', JSON.stringify(defaultClients));
+                }
+            } catch (e) {
+                console.error('Error initializing default client data:', e);
+            }
+        }
+        
+        return isDefaultClient;
     }
 
     // Authentication function (demo - replace with actual API call)
