@@ -2,13 +2,109 @@
 Mehak is a cat who likes to code.
 
 ## Project Description
-A video project management dashboard with upload functionality.
+A real estate photo project management platform with bidirectional communication between agents and clients. The platform enables agents to manage projects, upload photos, track client feedback, and manage project priorities. Clients can view photos, approve or reject them, and provide comments that agents can see in real-time.
 
 ## Features
-- **User Authentication**: Secure login page with session management
-- **Video Upload**: Upload videos from local desktop, Google Drive, or OneDrive
-- **Project Management**: View project status, revision history, and client feedback
+
+### Agent Features
+- **Project Management Dashboard**: View all projects with status, priorities, and comment counts
+- **Photo Dashboard**: Upload and manage property photos with version history
+- **Calendar View**: View project deadlines with comment indicators
+- **Priority Management**: Change project priorities (Urgent, High, Normal)
+- **Bidirectional Comments**: View and respond to client comments in real-time
+- **Comment Status Management**: Track comment status (New, In Progress, Completed)
+- **Project Status Tracking**: See project approval status (Approved, Not Approved, Under Review)
+
+### Client Features
+- **Photo Viewing**: View uploaded property photos with version history
+- **Photo Approval**: Approve or reject photos, which updates project status
+- **Comments**: Post comments that agents can see and respond to
+- **Notifications**: Receive notifications for new photo uploads, new versions, and comments
+- **Real-time Updates**: See updates from agents in real-time
+
+### Core Features
+- **User Authentication**: Secure login with role-based access (Agent/Client)
+- **Photo Upload**: Upload photos from local computer (stored as data URLs)
+- **Real-time Synchronization**: Comments and status updates sync across sessions
 - **Responsive Design**: Modern UI that works on desktop and mobile devices
+- **Session Management**: Persistent authentication and project state
+
+## User Roles
+
+### Agent Login
+- Access: Project Management Dashboard, Photo Dashboard, Calendar View
+- Credentials:
+  - `demo@vugru.com` / `demo123`
+  - `admin@vugru.com` / `admin123`
+
+### Client Login
+- Access: Client Photo Dashboard (view-only with approval/comment capabilities)
+- Credentials:
+  - `john.smith@example.com` / `client123` (123 Main St project)
+  - `sarah.johnson@example.com` / `client123` (456 Oak Ave project)
+  - `mike.davis@example.com` / `client123` (789 Pine Rd project)
+  - `emily.chen@example.com` / `client123` (321 Elm St project)
+
+## Project Structure
+
+### Key Files
+- `index.html` - Entry point (redirects to login)
+- `login.html` - Login/landing page with role-based authentication
+- `login.js` - Authentication logic with client/agent distinction
+- `project-management.html` - Agent's project overview dashboard
+- `project-management.js` - Project management logic with priority controls
+- `Vugru HTML.html` - Agent's photo dashboard
+- `Vugru JS.js` - Photo upload and management logic
+- `Clientview.html` - Client's photo viewing and approval dashboard
+- `clientviewjs.js` - Client-side photo viewing and approval logic
+- `calendar.html` - Calendar view with project deadlines
+- `calendar.js` - Calendar rendering and comment integration
+- `project-data-manager.js` - Centralized project data management
+- `comments-manager.js` - Bidirectional comment system
+- `photo-storage-manager.js` - Photo version and status management
+- `Vugru CSS.css` - Main stylesheet
+- `clientview.css` - Client dashboard styles
+
+## Usage
+
+### For Agents
+1. Login with agent credentials
+2. View projects in the Project Management Dashboard
+3. Click on a project to open the Photo Dashboard
+4. Upload photos, view client comments, and manage project status
+5. Use Calendar view to see deadlines and access projects
+
+### For Clients
+1. Login with client credentials
+2. View uploaded photos for your property
+3. Approve or reject photos
+4. Post comments for the agent
+5. Receive notifications for updates
+
+## Demo Credentials
+
+### Agent Accounts
+- Email: `demo@vugru.com` / Password: `demo123`
+- Email: `admin@vugru.com` / Password: `admin123`
+
+### Client Accounts
+- Email: `john.smith@example.com` / Password: `client123`
+- Email: `sarah.johnson@example.com` / Password: `client123`
+- Email: `mike.davis@example.com` / Password: `client123`
+- Email: `emily.chen@example.com` / Password: `client123`
+
+**Note:** In production, replace the authentication logic in `login.js` with actual API calls to your backend server.
+
+## Data Storage
+
+The application uses browser localStorage for:
+- Project data (`ProjectDataManager`)
+- Photo versions and status (`PhotoStorageManager`)
+- Comments (`CommentsManager`)
+- Authentication state
+- Notifications
+
+All data persists across browser sessions and syncs in real-time using storage events.
 
 ## Branch Structure
 
@@ -16,39 +112,11 @@ This repository uses separate branches for different parts of the application to
 
 - **`main`**: Production-ready code (stable, tested)
 - **`project-management-dashboard`**: Development branch for project management features
-- **`video-dashboard`**: Development branch for video dashboard features
+- **`video-dashboard`**: Development branch for photo dashboard features (legacy name)
 
 For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Upload Functionality
-The upload button supports three methods:
-1. **Local Desktop**: Select and upload video files directly from your computer
-2. **Google Drive**: Upload videos from your Google Drive (requires API setup)
-3. **OneDrive**: Upload videos from your OneDrive (requires API setup)
-
-## Files
-- `index.html` - Entry point (redirects to login)
-- `login.html` - Login/landing page
-- `login.js` - Login authentication logic
-- `Vugru HTML.html` - Main dashboard HTML structure
-- `Vugru CSS.css` - Styling and layout
-- `Vugru JS.js` - Interactive functionality and upload logic
-
-## Usage
-1. Open `index.html` or `login.html` in a web browser
-2. Login with your credentials (see Demo Credentials below)
-3. Access the dashboard after successful authentication
-
-## Demo Credentials
-For testing purposes, you can use any email and password (minimum 3 characters), or use these predefined credentials:
-- Email: `demo@vugru.com` / Password: `demo123`
-- Email: `admin@vugru.com` / Password: `admin123`
-- Email: `user@example.com` / Password: `password123`
-- Email: `test@test.com` / Password: `test123`
-
-**Note:** In production, replace the authentication logic in `login.js` with actual API calls to your backend server.
-
-## Deployment (Cloud Publishing)
+## Deployment
 
 This project is configured to automatically deploy to **GitHub Pages** when changes are pushed to the `main` branch.
 
