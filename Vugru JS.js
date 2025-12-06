@@ -34,14 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'login.html';
                 return false;
             }
-            
-            // Verify user is an agent (this is an agent-facing page)
-            if (authData.userType !== 'agent') {
-                // User is a client, redirect to client dashboard
-                window.location.href = 'client-dashboard.html';
-                return false;
-            }
-            
             return true;
         } catch (e) {
             console.error('Authentication check error:', e);
@@ -181,8 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadModalClose = document.getElementById('upload-modal-close');
     const uploadModalBackdrop = uploadModal?.querySelector('.upload-modal-backdrop');
     const localFileInput = document.getElementById('local-file-input');
-    const googleDriveButton = document.getElementById('google-drive-button');
-    const onedriveButton = document.getElementById('onedrive-button');
     const uploadProgress = document.getElementById('upload-progress');
     const uploadProgressFill = document.getElementById('upload-progress-fill');
     const uploadProgressText = document.getElementById('upload-progress-text');
@@ -216,6 +206,15 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.warn('Upload button not found');
     }
+    
+    // Make upload option button directly trigger file input when modal is open
+    const uploadOptionButton = document.querySelector('label[for="local-file-input"]');
+    if (uploadOptionButton) {
+        uploadOptionButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // The label will automatically trigger the file input
+        });
+    }
 
     // Close modal when close button is clicked
     if (uploadModalClose) {
@@ -241,8 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Function to simulate file upload (replace with actual upload logic)
-    // Defined before the event listener to avoid ReferenceError
+    // Function to handle file upload
     const uploadFile = (file) => {
         // Show progress
         if (uploadProgress) {
@@ -252,7 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadSuccess.style.display = 'none';
         }
 
-        // Simulate upload progress
+        // Create object URL for the video file
+        const videoUrl = URL.createObjectURL(file);
+        
+        // Simulate upload progress (in production, this would be actual upload progress)
         let progress = 0;
         const interval = setInterval(() => {
             progress += Math.random() * 15;
@@ -277,10 +278,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         uploadSuccess.style.display = 'flex';
                     }
 
-                    // In a real application, you would:
-                    // 1. Send the file to your server
-                    // 2. Update the video player with the new video
-                    // 3. Refresh the revision history
+                    // Save video to VideoStorageManager
+                    const projectId = CommentsManager.getCurrentProjectId();
+                    if (projectId && typeof VideoStorageManager !== 'undefined') {
+                        // Get author name from auth
+                        let authorName = 'Vugru (Agent)';
+                        const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+                        if (auth) {
+                            try {
+                                const authData = JSON.parse(auth);
+                                authorName = authData.email ? `Vugru (${authData.email})` : 'Vugru (Agent)';
+                            } catch (e) {
+                                console.error('Error parsing auth data:', e);
+                            }
+                        }
+                        
+                        VideoStorageManager.saveVideo(projectId, {
+                            url: videoUrl,
+                            uploadedBy: 'agent',
+                            notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+                        });
+                    }
+                    
+                    // Update video player with uploaded video
+                    updateVideoPlayer(videoUrl, file);
+                    
+                    // Update revision history
+                    updateRevisionHistory(file);
                     
                     console.log('File uploaded:', file.name, file.size, 'bytes');
                     
@@ -293,6 +317,103 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 500);
             }
         }, 200);
+    };
+
+    // Function to update video player with uploaded video
+    const updateVideoPlayer = (videoUrl, file) => {
+        const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
+        const videoPlayerPlaceholder = document.querySelector('.video-player-placeholder');
+        
+        if (videoPlayerWrapper && videoPlayerPlaceholder) {
+            // Create video element
+            const videoElement = document.createElement('video');
+            videoElement.src = videoUrl;
+            videoElement.controls = true;
+            videoElement.style.width = '100%';
+            videoElement.style.height = '100%';
+            videoElement.style.objectFit = 'contain';
+            videoElement.style.borderRadius = '0.5rem';
+            
+            // Replace placeholder with video element
+            videoPlayerPlaceholder.style.display = 'none';
+            videoPlayerWrapper.innerHTML = '';
+            videoPlayerWrapper.appendChild(videoElement);
+            
+            // Update card footer with file info
+            const cardTitle = document.querySelector('.card-footer .card-title-xl');
+            const cardSubtitle = document.querySelector('.card-footer .card-subtitle');
+            
+            if (cardTitle) {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                cardTitle.textContent = `Version ${getNextVersionNumber()} (New Upload)`;
+            }
+            
+            if (cardSubtitle) {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                cardSubtitle.textContent = `Uploaded by Vugru on ${dateStr} at ${timeStr}`;
+            }
+        }
+    };
+
+    // Function to get next version number
+    const getNextVersionNumber = () => {
+        const revisionItems = document.querySelectorAll('.revision-list-item');
+        return revisionItems.length + 1;
+    };
+
+    // Function to update revision history
+    const updateRevisionHistory = (file) => {
+        const revisionList = document.querySelector('.revision-list');
+        if (!revisionList) return;
+        
+        // Get next version number
+        const versionNumber = getNextVersionNumber();
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        // Create new revision item
+        const newRevisionItem = document.createElement('li');
+        newRevisionItem.className = 'revision-list-item';
+        newRevisionItem.innerHTML = `
+            <div>
+                <h3 class="revision-list-title-active">Version ${versionNumber}</h3>
+                <p class="revision-list-subtitle">Uploaded ${dateStr}</p>
+            </div>
+            <span class="status-badge status-badge-green">New</span>
+        `;
+        
+        // Make previous items inactive
+        const previousItems = revisionList.querySelectorAll('.revision-list-item');
+        previousItems.forEach(item => {
+            const title = item.querySelector('.revision-list-title-active, .revision-list-title');
+            if (title) {
+                title.className = 'revision-list-title';
+            }
+            const statusBadge = item.querySelector('.status-badge');
+            if (statusBadge) {
+                statusBadge.className = 'revision-list-status-old';
+                statusBadge.textContent = 'Superseded';
+            }
+        });
+        
+        // Insert new item at the top
+        revisionList.insertBefore(newRevisionItem, revisionList.firstChild);
+        
+        // Add click handler to new revision item
+        newRevisionItem.style.cursor = 'pointer';
+        newRevisionItem.addEventListener('click', () => {
+            const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
+            const video = videoPlayerWrapper?.querySelector('video');
+            if (video) {
+                // Store video URL in sessionStorage for this version
+                const videoUrl = video.src;
+                sessionStorage.setItem(`video-version-${versionNumber}`, videoUrl);
+            }
+        });
     };
 
     // Handle local file upload
@@ -320,51 +441,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle Google Drive button click
-    if (googleDriveButton) {
-        googleDriveButton.addEventListener('click', () => {
-            // TODO: Integrate Google Picker API
-            // For now, show a message
-            alert('Google Drive integration requires Google Picker API setup.\n\nTo implement:\n1. Get a Google API key\n2. Enable Google Picker API\n3. Load the Google Picker API script\n4. Implement picker initialization');
-            
-            // Example implementation structure:
-            // loadGooglePickerAPI().then(() => {
-            //     const picker = new google.picker.PickerBuilder()
-            //         .addView(google.picker.ViewId.VIDEOS)
-            //         .setOAuthToken(oauthToken)
-            //         .setCallback(pickerCallback)
-            //         .build();
-            //     picker.setVisible(true);
-            // });
-        });
-    }
-
-    // Handle OneDrive button click
-    if (onedriveButton) {
-        onedriveButton.addEventListener('click', () => {
-            // TODO: Integrate Microsoft Graph API / OneDrive File Picker
-            // For now, show a message
-            alert('OneDrive integration requires Microsoft Graph API setup.\n\nTo implement:\n1. Register your app in Azure AD\n2. Get Microsoft Graph API credentials\n3. Load Microsoft Graph SDK\n4. Implement file picker using OneDrive API');
-            
-            // Example implementation structure:
-            // MicrosoftGraphClient.init({
-            //     authProvider: authProvider
-            // }).then((client) => {
-            //     // Use OneDrive file picker
-            //     OneDrive.open({
-            //         clientId: 'your-client-id',
-            //         action: 'query',
-            //         multiSelect: false,
-            //         advanced: {
-            //             filter: 'video',
-            //         },
-            //         success: (files) => {
-            //             // Handle selected file
-            //         }
-            //     });
-            // });
-        });
-    }
 
     /*
      * -------------------------------------------
@@ -446,7 +522,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * Share with Client Functionality
      * -------------------------------------------
      */
-    const shareOptions = document.querySelectorAll('#share-menu .popover-list-item-icon');
+    // Share functionality removed - share button no longer exists
+    const shareOptions = []; // Empty array to prevent errors
     shareOptions.forEach(option => {
         option.addEventListener('click', (e) => {
             e.preventDefault();
@@ -494,56 +571,99 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    /*
-     * -------------------------------------------
-     * Status Update Functionality
-     * -------------------------------------------
-     */
-    const statusOptions = document.querySelectorAll('.popover-list-item-status');
-    statusOptions.forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-            const status = option.textContent.trim() || 'Unknown';
-            const statusButton = option.closest('.popover-wrapper')?.querySelector('.feedback-status-button');
-            
-            // Close the popover
-            const statusMenu = option.closest('.popover-menu');
-            if (statusMenu) statusMenu.classList.remove('is-open');
-            
-            // Update status button text
-            if (statusButton) {
-                statusButton.innerHTML = `Status: ${status} <svg class="icon-chevron-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>`;
-            }
-            
-            console.log(`Status updated to: ${status}`);
-            // In production, this would send an API request to update the status
-        });
-    });
+    // Comment status update functionality is now handled via event delegation in the comment system section
 
     /*
      * -------------------------------------------
-     * Notification Items Functionality
+     * Load Project Data and Update UI
      * -------------------------------------------
      */
-    const notificationItems = document.querySelectorAll('#notifications-popover .popover-list-item');
-    notificationItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const notificationText = item.querySelector('.notification-title')?.textContent || '';
+    const selectedProject = sessionStorage.getItem('selectedProject');
+    let currentProject = null;
+    
+    if (selectedProject) {
+        try {
+            currentProject = JSON.parse(selectedProject);
             
-            // Close the popover
-            const notificationsMenu = document.getElementById('notifications-popover');
-            if (notificationsMenu) notificationsMenu.classList.remove('is-open');
-            
-            console.log(`Notification clicked: ${notificationText}`);
-            // In production, this would navigate to the specific notification/comment
-            // For now, just scroll to feedback section
-            const feedbackSection = document.querySelector('.card:has(.feedback-list)');
-            if (feedbackSection) {
-                feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Update header title with project name
+            const headerTitle = document.querySelector('.header-title');
+            if (headerTitle && currentProject.name) {
+                headerTitle.textContent = currentProject.name;
             }
-        });
-    });
+            
+            // Update project status in the status card
+            const statusText = document.getElementById('project-status-text');
+            const statusBar = document.getElementById('project-status-bar');
+            const clientName = document.getElementById('project-client-name');
+            
+            if (currentProject.status && statusText) {
+                // Check video status to determine if approved or under review
+                let displayStatus = ProjectDataManager.getStatusLabel(currentProject.status);
+                let statusClass = 'blue';
+                
+                if (typeof VideoStorageManager !== 'undefined') {
+                    const currentVideo = VideoStorageManager.getCurrentVideo(projectId);
+                    if (currentVideo) {
+                        if (currentVideo.status === 'approved') {
+                            displayStatus = 'Approved';
+                            statusClass = 'green';
+                        } else if (currentVideo.status === 'not-approved') {
+                            displayStatus = 'Under Review (Not Approved)';
+                            statusClass = 'red';
+                        } else if (currentVideo.status === 'pending') {
+                            displayStatus = 'Under Review';
+                            statusClass = 'amber';
+                        }
+                    } else {
+                        // No video uploaded yet
+                        displayStatus = 'Under Review (No Video)';
+                        statusClass = 'amber';
+                    }
+                }
+                
+                statusText.textContent = displayStatus;
+                statusText.className = `status-bar-text-${statusClass}`;
+                
+                // Update status bar fill
+                if (statusBar) {
+                    statusBar.className = `status-bar-fill-${statusClass}`;
+                    statusBar.style.width = `${currentProject.progress || 0}%`;
+                }
+            }
+            
+            // Update client name
+            if (currentProject.client && clientName) {
+                clientName.textContent = currentProject.client;
+            }
+            
+            console.log('Loaded project:', currentProject);
+        } catch (e) {
+            console.error('Error parsing selected project:', e);
+        }
+    } else {
+        // If no project selected, try to get from ProjectDataManager
+        const projectId = CommentsManager.getCurrentProjectId();
+        if (projectId && typeof ProjectDataManager !== 'undefined') {
+            currentProject = ProjectDataManager.getProject(projectId);
+            if (currentProject) {
+                // Store in sessionStorage for consistency
+                sessionStorage.setItem('selectedProject', JSON.stringify({
+                    id: currentProject.id,
+                    name: currentProject.name,
+                    client: currentProject.client,
+                    clientEmail: currentProject.clientEmail,
+                    projectId: currentProject.id,
+                    status: currentProject.status
+                }));
+                
+                // Update header
+                const headerTitle = document.querySelector('.header-title');
+                if (headerTitle) {
+                    headerTitle.textContent = currentProject.name;
+                }
+            }
+        }
+    }
 
     /*
      * -------------------------------------------
@@ -579,12 +699,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
      * -------------------------------------------
-     * Comment Reply Functionality
+     * Comment System Integration (Bidirectional)
      * -------------------------------------------
      */
     const feedbackReplyInput = document.getElementById('feedback-reply-input');
     const feedbackReplySend = document.getElementById('feedback-reply-send');
+    const feedbackList = document.querySelector('.feedback-list');
     
+    // Get project ID
+    const projectId = CommentsManager.getCurrentProjectId();
+    
+    // Function to render comments in agent view style
+    const renderComments = () => {
+        if (feedbackList) {
+            // Get the parent card section
+            const feedbackCard = feedbackList.closest('.card');
+            if (feedbackCard) {
+                CommentsManager.renderCommentsAgent(projectId, feedbackCard);
+            }
+        }
+    };
+    
+    // Load and render existing comments on page load
+    renderComments();
+    
+    // Initialize sync listener for real-time updates
+    CommentsManager.initSyncListener(projectId, renderComments);
+    
+    // Listen for project status updates from video approval/rejection
+    window.addEventListener('videosUpdated', (e) => {
+        if (e.detail && e.detail.projectId === projectId) {
+            // Reload project data to get updated status
+            const updatedProject = ProjectDataManager.getProject(projectId);
+            if (updatedProject) {
+                currentProject = updatedProject;
+                // Update status display
+                const statusText = document.getElementById('project-status-text');
+                const statusBar = document.getElementById('project-status-bar');
+                
+                if (statusText && typeof VideoStorageManager !== 'undefined') {
+                    const currentVideo = VideoStorageManager.getCurrentVideo(projectId);
+                    let displayStatus = ProjectDataManager.getStatusLabel(updatedProject.status);
+                    let statusClass = 'blue';
+                    
+                    if (currentVideo) {
+                        if (currentVideo.status === 'approved') {
+                            displayStatus = 'Approved';
+                            statusClass = 'green';
+                        } else if (currentVideo.status === 'not-approved') {
+                            displayStatus = 'Under Review (Not Approved)';
+                            statusClass = 'red';
+                        } else if (currentVideo.status === 'pending') {
+                            displayStatus = 'Under Review';
+                            statusClass = 'amber';
+                        }
+                    }
+                    
+                    statusText.textContent = displayStatus;
+                    statusText.className = `status-bar-text-${statusClass}`;
+                    
+                    if (statusBar) {
+                        statusBar.className = `status-bar-fill-${statusClass}`;
+                        statusBar.style.width = `${updatedProject.progress || 0}%`;
+                    }
+                }
+            }
+        }
+    });
+    
+    /*
+     * -------------------------------------------
+     * Comment Status Update Functionality (Event Delegation)
+     * -------------------------------------------
+     * Uses event delegation to handle dynamically added status buttons
+     */
+    document.addEventListener('click', (e) => {
+        const statusOption = e.target.closest('.popover-list-item-status');
+        if (statusOption) {
+            e.preventDefault();
+            const newStatus = statusOption.getAttribute('data-status');
+            const commentId = statusOption.getAttribute('data-comment-id');
+            const projectId = CommentsManager.getCurrentProjectId();
+            
+            if (!newStatus || !commentId || !projectId) return;
+            
+            // Update comment status
+            CommentsManager.updateCommentStatus(projectId, commentId, newStatus);
+            
+            // Close the popover
+            const statusMenu = statusOption.closest('.popover-menu');
+            if (statusMenu) statusMenu.classList.remove('is-open');
+            
+            // Re-render comments to show updated status
+            renderComments();
+            
+            console.log(`Comment ${commentId} status updated to: ${newStatus}`);
+        }
+    });
+    
+    // Comment posting logic for agent
     if (feedbackReplySend) {
         feedbackReplySend.addEventListener('click', () => {
             if (!feedbackReplyInput || !feedbackReplyInput.value.trim()) {
@@ -593,37 +806,33 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const replyText = feedbackReplyInput.value.trim();
             
-            // Create new reply element
-            const feedbackList = document.querySelector('.feedback-list');
-            if (feedbackList) {
-                const newReplyItem = document.createElement('li');
-                newReplyItem.className = 'feedback-list-item';
-                newReplyItem.innerHTML = `
-                    <div class="feedback-item-comment-vugru">
-                        <div class="feedback-avatar-vugru">
-                            <span class="avatar-initials">V</span>
-                        </div>
-                        <div class="feedback-comment-bubble-container-vugru">
-                            <h4 class="feedback-author-vugru">Vugru (You)</h4>
-                            <p class="feedback-timestamp-vugru">Just now</p>
-                            <p class="feedback-comment-bubble-vugru">
-                                "${replyText}"
-                            </p>
-                        </div>
-                    </div>
-                `;
-                
-                // Append to feedback list
-                feedbackList.appendChild(newReplyItem);
-                
-                // Clear input
-                feedbackReplyInput.value = '';
-                
-                // Scroll to new reply
-                newReplyItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                
-                console.log('Reply sent:', replyText);
+            // Get user info from auth
+            const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+            let authorName = 'Vugru (Agent)';
+            if (auth) {
+                try {
+                    const authData = JSON.parse(auth);
+                    authorName = authData.email ? `Vugru (${authData.email})` : 'Vugru (Agent)';
+                } catch (e) {
+                    console.error('Error parsing auth data:', e);
+                }
             }
+            
+            // Save comment using comment manager
+            CommentsManager.saveComment(projectId, replyText, 'agent', authorName);
+            
+            // Re-render comments to show the new one
+            renderComments();
+            
+            // Clear input
+            feedbackReplyInput.value = '';
+            
+            // Scroll to bottom of feedback list
+            if (feedbackList) {
+                feedbackList.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+            
+            console.log('Comment sent:', replyText);
         });
     }
     
@@ -639,20 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Load selected project from sessionStorage
-    const selectedProject = sessionStorage.getItem('selectedProject');
-    if (selectedProject) {
-        try {
-            const project = JSON.parse(selectedProject);
-            const headerTitle = document.querySelector('.header-title');
-            if (headerTitle) {
-                headerTitle.textContent = project.name;
-            }
-            console.log('Loaded project:', project);
-        } catch (e) {
-            console.error('Error parsing selected project:', e);
-        }
-    }
+    // Project data loading is now handled above in the "Load Project Data" section
 
     // Log successful initialization with details
     console.log('Vugru Dashboard: All event listeners initialized successfully');
@@ -661,9 +857,9 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutButton: !!logoutButton,
         publishOptions: publishOptions.length,
         shareOptions: shareOptions.length,
-        statusOptions: statusOptions.length,
         revisionItems: revisionItems.length,
-        feedbackReplySend: !!feedbackReplySend
+        feedbackReplySend: !!feedbackReplySend,
+        currentProject: currentProject ? currentProject.name : 'None'
     });
 
     } catch (error) {
