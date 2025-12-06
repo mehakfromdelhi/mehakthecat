@@ -149,13 +149,36 @@ function createProjectCard(project) {
         </div>
     `;
     
+    // Generate project ID for comments (consistent format)
+    const projectId = project.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    
+    // Get comment count for this project
+    let commentCount = 0;
+    if (typeof CommentsManager !== 'undefined') {
+        commentCount = CommentsManager.getCommentCount(projectId);
+    }
+    
+    // Add comment indicator if comments exist
+    if (commentCount > 0) {
+        const commentBadge = document.createElement('div');
+        commentBadge.className = 'project-card-comments';
+        commentBadge.innerHTML = `
+            <svg class="ico" style="width:14px;height:14px;margin-right:4px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span>${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}</span>
+        `;
+        card.appendChild(commentBadge);
+    }
+    
     // Make card clickable to jump to video dashboard
     card.addEventListener('click', function() {
         // Store selected project in sessionStorage for video dashboard
         sessionStorage.setItem('selectedProject', JSON.stringify({
-            id: project.id,
+            id: projectId,
             name: project.name,
-            client: project.client
+            client: project.client,
+            projectId: projectId // Add projectId for comment manager
         }));
         // Navigate to video dashboard
         window.location.href = 'Vugru HTML.html';

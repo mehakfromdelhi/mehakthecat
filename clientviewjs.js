@@ -88,29 +88,61 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // --- Comment Posting Logic ---
+    // --- Comment System Integration ---
     const commentInput = document.getElementById('comment-input');
     const commentButton = document.getElementById('post-comment-btn');
     const commentSection = document.getElementById('comments-section');
-
+    
+    // Get project ID
+    const projectId = CommentsManager.getCurrentProjectId();
+    
+    // Function to render comments
+    const renderComments = () => {
+        if (commentSection) {
+            CommentsManager.renderCommentsClient(projectId, commentSection);
+        }
+    };
+    
+    // Load and render existing comments
+    renderComments();
+    
+    // Initialize sync listener for real-time updates
+    CommentsManager.initSyncListener(projectId, renderComments);
+    
+    // Comment posting logic
     if (commentButton && commentInput && commentSection) {
       commentButton.addEventListener('click', () => {
         const text = commentInput.value.trim();
         if (text.length === 0) return;
 
-        // Create new comment element
-        const newComment = document.createElement('div');
-        newComment.className = 'p-3 bg-gray-50 rounded-lg';
-        newComment.innerHTML = `
-          <p class="text-sm text-gray-800"><span class="font-medium">You:</span> ${text}</p>
-          <p class="text-xs text-gray-400 mt-1">Just now</p>
-        `;
+        // Get user info from auth
+        const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+        let authorName = 'Client';
+        if (auth) {
+            try {
+                const authData = JSON.parse(auth);
+                authorName = authData.email || 'Client';
+            } catch (e) {
+                console.error('Error parsing auth data:', e);
+            }
+        }
 
-        // Append to comment section
-        commentSection.appendChild(newComment);
+        // Save comment using comment manager
+        CommentsManager.saveComment(projectId, text, 'client', authorName);
+
+        // Re-render comments to show the new one
+        renderComments();
 
         // Clear input
         commentInput.value = '';
+      });
+      
+      // Allow Enter key to submit (Shift+Enter for new line)
+      commentInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              commentButton.click();
+          }
       });
     }
 
