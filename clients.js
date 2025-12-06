@@ -28,96 +28,269 @@ function checkAuthentication() {
     }
 }
 
-// Sample project data (in production, this would come from an API)
-// This should match the data structure from project-management.js
-let projectsData = [
-    {
-        id: 1,
-        name: "Sunset Ridge Luxury Estate",
-        deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-        status: "in-review",
-        progress: 30,
-        client: "John Smith"
-    },
-    {
-        id: 2,
-        name: "Downtown Loft Condo Tour",
-        deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-        status: "active",
-        progress: 85,
-        client: "Sarah Johnson"
-    },
-    {
-        id: 3,
-        name: "Mountain View Family Home",
-        deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        status: "awaiting-feedback",
-        progress: 10,
-        client: "Mike Davis"
-    },
-    {
-        id: 4,
-        name: "Oceanfront Villa Premium Listing",
-        deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-        status: "active",
-        progress: 50,
-        client: "Emily Chen"
-    }
-];
+// ===================== Data Management Functions =====================
+// Data storage keys
+const STORAGE_KEYS = {
+    PROJECTS: 'vugru_projects',
+    CLIENTS: 'vugru_clients'
+};
 
-// Client data with additional information
-let clientsData = [
-    {
-        id: 1,
-        name: "John Smith",
-        email: "john.smith@example.com",
-        phone: "+1 (555) 123-4567",
-        company: "Smith Realty Group",
-        totalProjects: 1,
-        activeProjects: 1,
-        completedProjects: 0,
-        projectIds: [1]
-    },
-    {
-        id: 2,
-        name: "Sarah Johnson",
-        email: "sarah.johnson@example.com",
-        phone: "+1 (555) 234-5678",
-        company: "Johnson Properties",
-        totalProjects: 1,
-        activeProjects: 1,
-        completedProjects: 0,
-        projectIds: [2]
-    },
-    {
-        id: 3,
-        name: "Mike Davis",
-        email: "mike.davis@example.com",
-        phone: "+1 (555) 345-6789",
-        company: "Davis Homes",
-        totalProjects: 1,
-        activeProjects: 1,
-        completedProjects: 0,
-        projectIds: [3]
-    },
-    {
-        id: 4,
-        name: "Emily Chen",
-        email: "emily.chen@example.com",
-        phone: "+1 (555) 456-7890",
-        company: "Chen Luxury Estates",
-        totalProjects: 1,
-        activeProjects: 1,
-        completedProjects: 0,
-        projectIds: [4]
+// Initialize default data if not exists
+function initializeDefaultData() {
+    // Default projects data
+    const defaultProjects = [
+        {
+            id: 1,
+            name: "Sunset Ridge Luxury Estate",
+            deadline: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+            status: "in-review",
+            progress: 30,
+            client: "John Smith"
+        },
+        {
+            id: 2,
+            name: "Downtown Loft Condo Tour",
+            deadline: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+            status: "active",
+            progress: 85,
+            client: "Sarah Johnson"
+        },
+        {
+            id: 3,
+            name: "Mountain View Family Home",
+            deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            status: "awaiting-feedback",
+            progress: 10,
+            client: "Mike Davis"
+        },
+        {
+            id: 4,
+            name: "Oceanfront Villa Premium Listing",
+            deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+            status: "active",
+            progress: 50,
+            client: "Emily Chen"
+        }
+    ];
+
+    // Default clients data
+    const defaultClients = [
+        {
+            id: 1,
+            name: "John Smith",
+            email: "john.smith@example.com",
+            phone: "+1 (555) 123-4567",
+            company: "Smith Realty Group",
+            projectIds: [1],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 2,
+            name: "Sarah Johnson",
+            email: "sarah.johnson@example.com",
+            phone: "+1 (555) 234-5678",
+            company: "Johnson Properties",
+            projectIds: [2],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 3,
+            name: "Mike Davis",
+            email: "mike.davis@example.com",
+            phone: "+1 (555) 345-6789",
+            company: "Davis Homes",
+            projectIds: [3],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 4,
+            name: "Emily Chen",
+            email: "emily.chen@example.com",
+            phone: "+1 (555) 456-7890",
+            company: "Chen Luxury Estates",
+            projectIds: [4],
+            createdAt: new Date().toISOString()
+        }
+    ];
+
+    // Initialize projects if not exists
+    if (!localStorage.getItem(STORAGE_KEYS.PROJECTS)) {
+        localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(defaultProjects));
     }
-];
+
+    // Initialize clients if not exists
+    if (!localStorage.getItem(STORAGE_KEYS.CLIENTS)) {
+        localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(defaultClients));
+    }
+}
+
+// Get projects data from localStorage
+function getProjectsData() {
+    try {
+        const data = localStorage.getItem(STORAGE_KEYS.PROJECTS);
+        if (!data) {
+            initializeDefaultData();
+            return getProjectsData();
+        }
+        const projects = JSON.parse(data);
+        // Convert deadline strings back to Date objects
+        return projects.map(p => ({
+            ...p,
+            deadline: new Date(p.deadline)
+        }));
+    } catch (e) {
+        console.error('Error loading projects:', e);
+        initializeDefaultData();
+        return getProjectsData();
+    }
+}
+
+// Save projects data to localStorage
+function saveProjectsData(projects) {
+    try {
+        // Convert Date objects to ISO strings for storage
+        const projectsToSave = projects.map(p => ({
+            ...p,
+            deadline: p.deadline instanceof Date ? p.deadline.toISOString() : p.deadline
+        }));
+        localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projectsToSave));
+        // Trigger custom event for data sync
+        window.dispatchEvent(new CustomEvent('projectsUpdated'));
+        return true;
+    } catch (e) {
+        console.error('Error saving projects:', e);
+        return false;
+    }
+}
+
+// Get clients data from localStorage
+function getClientsData() {
+    try {
+        const data = localStorage.getItem(STORAGE_KEYS.CLIENTS);
+        if (!data) {
+            initializeDefaultData();
+            return getClientsData();
+        }
+        return JSON.parse(data);
+    } catch (e) {
+        console.error('Error loading clients:', e);
+        initializeDefaultData();
+        return getClientsData();
+    }
+}
+
+// Save clients data to localStorage
+function saveClientsData(clients) {
+    try {
+        localStorage.setItem(STORAGE_KEYS.CLIENTS, JSON.stringify(clients));
+        // Trigger custom event for data sync
+        window.dispatchEvent(new CustomEvent('clientsUpdated'));
+        return true;
+    } catch (e) {
+        console.error('Error saving clients:', e);
+        return false;
+    }
+}
+
+// Calculate client statistics from projects
+function calculateClientStats(client, projects) {
+    const clientProjects = projects.filter(p => p.client === client.name);
+    const activeProjects = clientProjects.filter(p => p.status !== 'completed');
+    const completedProjects = clientProjects.filter(p => p.status === 'completed');
+    const urgentProjects = clientProjects.filter(p => {
+        const daysUntilDeadline = Math.ceil((p.deadline - Date.now()) / (24 * 60 * 60 * 1000));
+        return daysUntilDeadline <= 3 && p.status !== 'completed';
+    });
+
+    return {
+        totalProjects: clientProjects.length,
+        activeProjects: activeProjects.length,
+        completedProjects: completedProjects.length,
+        urgentProjects: urgentProjects.length,
+        clientProjects: clientProjects
+    };
+}
+
+// Update client's project IDs based on current projects
+function updateClientProjectIds(client, projects) {
+    const clientProjects = projects.filter(p => p.client === client.name);
+    return {
+        ...client,
+        projectIds: clientProjects.map(p => p.id)
+    };
+}
+
+// Get next available client ID
+function getNextClientId() {
+    const clients = getClientsData();
+    if (clients.length === 0) return 1;
+    return Math.max(...clients.map(c => c.id)) + 1;
+}
+
+// Add new client
+function addClient(clientData) {
+    const clients = getClientsData();
+    const newClient = {
+        id: getNextClientId(),
+        ...clientData,
+        projectIds: [],
+        createdAt: new Date().toISOString()
+    };
+    clients.push(newClient);
+    saveClientsData(clients);
+    return newClient;
+}
+
+// Update existing client
+function updateClient(clientId, updates) {
+    const clients = getClientsData();
+    const index = clients.findIndex(c => c.id === clientId);
+    if (index === -1) return null;
+    
+    clients[index] = { ...clients[index], ...updates, updatedAt: new Date().toISOString() };
+    saveClientsData(clients);
+    return clients[index];
+}
+
+// Delete client
+function deleteClient(clientId) {
+    const clients = getClientsData();
+    const filtered = clients.filter(c => c.id !== clientId);
+    saveClientsData(filtered);
+    return filtered.length < clients.length;
+}
+
+// Get client by email
+function getClientByEmail(email) {
+    const clients = getClientsData();
+    return clients.find(c => c.email.toLowerCase().trim() === email.toLowerCase().trim());
+}
+
+// Global data variables (will be populated dynamically)
+let projectsData = [];
+let clientsData = [];
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     if (!checkAuthentication()) {
         return;
     }
+    
+    // Initialize data storage
+    initializeDefaultData();
+    
+    // Load data dynamically
+    projectsData = getProjectsData();
+    clientsData = getClientsData();
+    
+    // Update clients with calculated stats
+    clientsData = clientsData.map(client => {
+        const stats = calculateClientStats(client, projectsData);
+        return {
+            ...client,
+            ...stats
+        };
+    });
     
     // Check if logged in user is a client
     const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
@@ -143,8 +316,49 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSearch();
     initializeLogout();
     
-    console.log('Clients Dashboard initialized');
+    // Listen for data updates
+    window.addEventListener('projectsUpdated', handleDataUpdate);
+    window.addEventListener('clientsUpdated', handleDataUpdate);
+    
+    console.log('Clients Dashboard initialized with dynamic data');
 });
+
+// Handle data updates
+function handleDataUpdate() {
+    // Reload data
+    projectsData = getProjectsData();
+    clientsData = getClientsData();
+    
+    // Update clients with calculated stats
+    clientsData = clientsData.map(client => {
+        const stats = calculateClientStats(client, projectsData);
+        return {
+            ...client,
+            ...stats
+        };
+    });
+    
+    // Re-render the page
+    const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
+    let isClientUser = false;
+    let clientEmail = null;
+    
+    if (auth) {
+        try {
+            const authData = JSON.parse(auth);
+            isClientUser = authData.userType === 'client';
+            clientEmail = authData.email ? authData.email.toLowerCase().trim() : null;
+        } catch (e) {
+            console.error('Error parsing auth data:', e);
+        }
+    }
+    
+    if (isClientUser && clientEmail) {
+        initializeClientView(clientEmail);
+    } else {
+        initializeClients();
+    }
+}
 
 // ===================== Client Directory =====================
 function initializeClients() {
@@ -202,19 +416,23 @@ function initializeClientView(clientEmail) {
         searchInput.parentElement.style.display = 'none';
     }
     
-    // Find the logged-in client
-    const client = clientsData.find(c => c.email.toLowerCase().trim() === clientEmail);
+    // Find the logged-in client (use getClientByEmail for consistency)
+    let client = getClientByEmail(clientEmail);
     
     if (!client) {
         clientsList.innerHTML = '<p class="muted">Client information not found.</p>';
         return;
     }
     
+    // Update client stats dynamically
+    const stats = calculateClientStats(client, projectsData);
+    client = { ...client, ...stats };
+    
     // Clear existing content
     clientsList.innerHTML = '';
     
-    // Get client's projects
-    const clientProjects = projectsData.filter(p => p.client === client.name);
+    // Get client's projects dynamically
+    const clientProjects = stats.clientProjects || projectsData.filter(p => p.client === client.name);
     
     if (clientProjects.length === 0) {
         clientsList.innerHTML = '<p class="muted">You don\'t have any projects yet.</p>';
@@ -295,13 +513,16 @@ function createClientCard(client) {
     const card = document.createElement('div');
     card.className = 'project-card';
     
-    // Get client's projects
+    // Get client's projects dynamically
     const clientProjects = projectsData.filter(p => p.client === client.name);
     const activeProjects = clientProjects.filter(p => p.status !== 'completed');
     const urgentProjects = clientProjects.filter(p => {
         const daysUntilDeadline = Math.ceil((p.deadline - Date.now()) / (24 * 60 * 60 * 1000));
         return daysUntilDeadline <= 3 && p.status !== 'completed';
     });
+    
+    // Use calculated stats if available, otherwise calculate on the fly
+    const stats = client.totalProjects !== undefined ? client : calculateClientStats(client, projectsData);
     
     card.innerHTML = `
         <div class="project-card-header">
@@ -321,9 +542,9 @@ function createClientCard(client) {
             </div>
         </div>
         <div style="margin: var(--s-3) 0;">
-            <span class="hint">Total Projects:</span> <b>${clientProjects.length}</b>
-            ${activeProjects.length > 0 ? `<span class="hint" style="margin-left: var(--s-3);">Active:</span> <b>${activeProjects.length}</b>` : ''}
-            ${urgentProjects.length > 0 ? `<span class="badge red-soft small" style="margin-left: var(--s-2);">${urgentProjects.length} Urgent</span>` : ''}
+            <span class="hint">Total Projects:</span> <b>${stats.totalProjects || clientProjects.length}</b>
+            ${(stats.activeProjects || activeProjects.length) > 0 ? `<span class="hint" style="margin-left: var(--s-3);">Active:</span> <b>${stats.activeProjects || activeProjects.length}</b>` : ''}
+            ${(stats.urgentProjects || urgentProjects.length) > 0 ? `<span class="badge red-soft small" style="margin-left: var(--s-2);">${stats.urgentProjects || urgentProjects.length} Urgent</span>` : ''}
         </div>
         <div style="margin-top: var(--s-3);">
             ${clientProjects.length > 0 ? clientProjects.map(p => `
@@ -408,3 +629,17 @@ function initializeLogout() {
     }
 }
 
+// ===================== Export Functions for External Use =====================
+// Make these functions available globally for potential future use
+window.ClientsDataManager = {
+    getProjects: getProjectsData,
+    saveProjects: saveProjectsData,
+    getClients: getClientsData,
+    saveClients: saveClientsData,
+    addClient: addClient,
+    updateClient: updateClient,
+    deleteClient: deleteClient,
+    getClientByEmail: getClientByEmail,
+    calculateStats: calculateClientStats,
+    initializeData: initializeDefaultData
+};
