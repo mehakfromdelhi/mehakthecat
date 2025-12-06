@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="clientview.css">
 </head>
 <body class="font-[Inter] bg-gray-50">
 
@@ -101,7 +102,7 @@
         <!-- Comments -->
         <div class="border-t border-gray-200 pt-6">
           <h3 class="font-bold text-lg text-gray-900 mb-3">Comments</h3>
-          <div class="space-y-4">
+          <div id="comments-section" class="space-y-4">
             <div class="p-3 bg-gray-50 rounded-lg">
               <p class="text-sm text-gray-800"><span class="font-medium">You:</span> Can we crop out the first few seconds?</p>
               <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
@@ -113,8 +114,8 @@
           </div>
 
           <div class="mt-4">
-            <textarea rows="3" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Leave a comment..."></textarea>
-            <button class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg">Post Comment</button>
+            <textarea id="comment-input" rows="3" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Leave a comment..."></textarea>
+            <button id="post-comment-btn" class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg">Post Comment</button>
           </div>
         </div>
 
@@ -124,12 +125,12 @@
           <ul class="space-y-2">
             <li>
               <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-200 text-sm font-medium text-indigo-800">
-                v2 – “Property_Tour_v2.mp4” (Current)
+                v2 – "Property_Tour_v2.mp4" (Current)
               </div>
             </li>
             <li>
               <div class="p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                v1 – “Property_Tour_v1.mp4”
+                v1 – "Property_Tour_v1.mp4"
               </div>
             </li>
           </ul>
@@ -139,27 +140,6 @@
 
   </main>
 
-  <!-- Notification Script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const notifBtn = document.getElementById('notif-btn');
-      const notifDropdown = document.getElementById('notif-dropdown');
-      const notifDot = document.getElementById('notif-dot');
-
-      notifBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        notifDropdown.classList.toggle('hidden');
-        notifDot.classList.add('hidden'); // mark notifications as seen
-      });
-
-      window.addEventListener('click', (e) => {
-        if (!notifDropdown.classList.contains('hidden')) {
-          notifDropdown.classList.add('hidden');
-        }
-      });
-    });
-  </script>
-
+  <script src="clientviewjs.js"></script>
 </body>
 </html>
-

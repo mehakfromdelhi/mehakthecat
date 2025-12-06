@@ -111,8 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Redirect based on user type
                 if (userType === 'client') {
-                    // Redirect to client dashboard (to be created)
-                    window.location.href = 'client-dashboard.html';
+                    // Redirect to client view
+                    window.location.href = 'Clientview.html';
                 } else {
                     // Redirect to agent dashboard (project management)
                     window.location.href = 'project-management.html';
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Already logged in, redirect based on user type
                     const userType = authData.userType || 'agent';
                     if (userType === 'client') {
-                        window.location.href = 'client-dashboard.html';
+                        window.location.href = 'Clientview.html';
                     } else {
                         window.location.href = 'project-management.html';
                     }
