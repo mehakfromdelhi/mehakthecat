@@ -130,7 +130,21 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Update video status
         updateVideoStatus(currentVideo);
+        
+        // Load version history
+        loadVersionHistory();
     }
+    
+    // Load video on page load
+    loadVideo();
+    
+    // Listen for video updates
+    window.addEventListener('videosUpdated', (e) => {
+        if (e.detail && e.detail.projectId === projectId) {
+            loadVideo();
+            loadNotifications();
+        }
+    });
 
     // --- Update Video Status Display ---
     function updateVideoStatus(video) {
@@ -354,6 +368,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize sync listener for real-time updates
     CommentsManager.initSyncListener(projectId, renderComments);
     
+    // Load notifications on page load
+    loadNotifications();
+    
+    // Refresh notifications periodically and on events
+    setInterval(loadNotifications, 5000); // Check every 5 seconds
+    window.addEventListener('videosUpdated', loadNotifications);
+    window.addEventListener('commentsUpdated', loadNotifications);
+    
     // Comment posting logic
     if (commentButton && commentInput && commentSection) {
       commentButton.addEventListener('click', () => {
@@ -368,6 +390,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Re-render comments to show the new one
         renderComments();
+        
+        // Refresh notifications to show any updates
+        loadNotifications();
 
         // Clear input
         commentInput.value = '';

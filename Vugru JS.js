@@ -293,11 +293,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                         
-                        VideoStorageManager.saveVideo(projectId, {
+                        const savedVideo = VideoStorageManager.saveVideo(projectId, {
                             url: videoUrl,
                             uploadedBy: 'agent',
                             notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
                         });
+                        
+                        // Create notification for client about new video/version
+                        if (savedVideo && typeof VideoStorageManager.addNotification === 'function') {
+                            const notificationType = savedVideo.version === 1 ? 'new-video' : 'new-version';
+                            VideoStorageManager.addNotification(projectId, notificationType, `Agent uploaded ${savedVideo.version === 1 ? 'a new video' : `version ${savedVideo.version}`}`);
+                        }
                     }
                     
                     // Update video player with uploaded video
