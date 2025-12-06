@@ -89,38 +89,38 @@ document.addEventListener('DOMContentLoaded', () => {
         clientNameDisplay.textContent = currentProject.client;
     }
 
-    // --- Load Video ---
-    function loadVideo() {
-        const videoPlayer = document.getElementById('video-player');
-        const videoPlaceholder = document.getElementById('video-placeholder');
-        const currentVideo = VideoStorageManager.getCurrentVideo(projectId);
+    // --- Load Photo ---
+    function loadPhoto() {
+        const photoViewer = document.getElementById('photo-viewer');
+        const photoPlaceholder = document.getElementById('photo-placeholder');
+        const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
         
-        if (currentVideo && currentVideo.url) {
-            if (videoPlayer) {
-                videoPlayer.src = currentVideo.url;
-                videoPlayer.classList.remove('hidden');
+        if (currentPhoto && currentPhoto.url) {
+            if (photoViewer) {
+                photoViewer.src = currentPhoto.url;
+                photoViewer.classList.remove('hidden');
             }
-            if (videoPlaceholder) {
-                videoPlaceholder.classList.add('hidden');
+            if (photoPlaceholder) {
+                photoPlaceholder.classList.add('hidden');
             }
-            updateVideoStatus(currentVideo);
+            updatePhotoStatus(currentPhoto);
         } else {
-            if (videoPlayer) {
-                videoPlayer.classList.add('hidden');
+            if (photoViewer) {
+                photoViewer.classList.add('hidden');
             }
-            if (videoPlaceholder) {
-                videoPlaceholder.classList.remove('hidden');
+            if (photoPlaceholder) {
+                photoPlaceholder.classList.remove('hidden');
             }
-            updateVideoStatus(null);
+            updatePhotoStatus(null);
         }
     }
 
-    function updateVideoStatus(video) {
+    function updatePhotoStatus(photo) {
         const statusBadge = document.getElementById('video-status-badge');
         if (!statusBadge) return;
         
-        if (!video) {
-            statusBadge.textContent = 'Status: No video uploaded';
+        if (!photo) {
+            statusBadge.textContent = 'Status: No photo uploaded';
             statusBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800';
             return;
         }
@@ -128,10 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let statusText = 'Status: Under Review';
         let statusClass = 'bg-blue-100 text-blue-800';
         
-        if (video.status === 'approved') {
+        if (photo.status === 'approved') {
             statusText = 'Status: Approved';
             statusClass = 'bg-green-100 text-green-800';
-        } else if (video.status === 'not-approved') {
+        } else if (photo.status === 'not-approved') {
             statusText = 'Status: Not Approved';
             statusClass = 'bg-red-100 text-red-800';
         }
@@ -146,9 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (approveBtn) {
         approveBtn.addEventListener('click', () => {
-            const currentVideo = VideoStorageManager.getCurrentVideo(projectId);
-            if (!currentVideo) {
-                alert('No video to approve.');
+            const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+            if (!currentPhoto) {
+                alert('No photo to approve.');
                 return;
             }
             
@@ -163,17 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            VideoStorageManager.updateVideoStatus(projectId, currentVideo.id, 'approved', approvedBy);
-            loadVideo();
-            alert('Video approved!');
+            PhotoStorageManager.updatePhotoStatus(projectId, currentPhoto.id, 'approved', approvedBy);
+            loadPhoto();
+            alert('Photo approved!');
         });
     }
     
     if (rejectBtn) {
         rejectBtn.addEventListener('click', () => {
-            const currentVideo = VideoStorageManager.getCurrentVideo(projectId);
-            if (!currentVideo) {
-                alert('No video to reject.');
+            const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+            if (!currentPhoto) {
+                alert('No photo to reject.');
                 return;
             }
             
@@ -188,9 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            VideoStorageManager.updateVideoStatus(projectId, currentVideo.id, 'not-approved', approvedBy);
-            loadVideo();
-            alert('Video marked as not approved. Please leave a comment with feedback.');
+            PhotoStorageManager.updatePhotoStatus(projectId, currentPhoto.id, 'not-approved', approvedBy);
+            loadPhoto();
+            alert('Photo marked as not approved. Please leave a comment with feedback.');
         });
     }
 
@@ -199,31 +199,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const versionHistory = document.getElementById('version-history');
         if (!versionHistory) return;
         
-        const videos = VideoStorageManager.getVideos(projectId);
-        if (videos.length === 0) {
+        const photos = PhotoStorageManager.getPhotos(projectId);
+        if (photos.length === 0) {
             versionHistory.innerHTML = '<li class="text-sm text-gray-500 italic">No versions uploaded yet.</li>';
             return;
         }
         
         // Sort by version (newest first)
-        const sortedVideos = [...videos].sort((a, b) => b.version - a.version);
-        const currentVideo = VideoStorageManager.getCurrentVideo(projectId);
+        const sortedPhotos = [...photos].sort((a, b) => b.version - a.version);
+        const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
         
         versionHistory.innerHTML = '';
-        sortedVideos.forEach(video => {
-            const isCurrent = currentVideo && video.id === currentVideo.id;
+        sortedPhotos.forEach(photo => {
+            const isCurrent = currentPhoto && photo.id === currentPhoto.id;
             const li = document.createElement('li');
             
             if (isCurrent) {
                 li.innerHTML = `
                     <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-200 text-sm font-medium text-indigo-800">
-                        v${video.version} – "${video.fileName}" (Current)
+                        v${photo.version} – "${photo.fileName}" (Current)
                     </div>
                 `;
             } else {
                 li.innerHTML = `
                     <div class="p-3 bg-white rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                        v${video.version} – "${video.fileName}"
+                        v${photo.version} – "${photo.fileName}"
                     </div>
                 `;
             }
@@ -239,8 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!notificationsList) return;
         
-        const notifications = VideoStorageManager.getNotifications(projectId);
-        const unreadCount = VideoStorageManager.getUnreadCount(projectId);
+        const notifications = PhotoStorageManager.getNotifications(projectId);
+        const unreadCount = PhotoStorageManager.getUnreadCount(projectId);
         
         // Show/hide notification dot
         if (notifDot) {
@@ -262,8 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
             li.className = `px-4 py-3 hover:bg-gray-50 ${notif.read ? '' : 'bg-blue-50'}`;
             
             let message = notif.message;
-            if (notif.type === 'new-video') {
-                message = `<span class="font-medium">New video uploaded:</span> ${notif.message}`;
+            if (notif.type === 'new-photo') {
+                message = `<span class="font-medium">New photo uploaded:</span> ${notif.message}`;
             } else if (notif.type === 'new-version') {
                 message = `<span class="font-medium">New version uploaded:</span> ${notif.message}`;
             } else if (notif.type === 'comment-awaiting') {
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             li.innerHTML = `
                 <p class="text-sm text-gray-800">${message}</p>
-                <p class="text-xs text-gray-400 mt-1">${VideoStorageManager.formatTimestamp(notif.timestamp)}</p>
+                <p class="text-xs text-gray-400 mt-1">${PhotoStorageManager.formatTimestamp(notif.timestamp)}</p>
             `;
             
             notificationsList.appendChild(li);
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const markAllReadBtn = document.getElementById('mark-all-read-btn');
     if (markAllReadBtn) {
         markAllReadBtn.addEventListener('click', () => {
-            VideoStorageManager.markNotificationsAsRead(projectId);
+            PhotoStorageManager.markNotificationsAsRead(projectId);
             loadNotifications();
         });
     }
@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
             CommentsManager.saveComment(projectId, text, 'client', authorName);
             
             // Add notification for agent
-            VideoStorageManager.addNotification(projectId, 'comment-awaiting', `Client commented: "${text}"`);
+            PhotoStorageManager.addNotification(projectId, 'comment-awaiting', `Client commented: "${text}"`);
 
             // Re-render comments to show the new one
             renderComments();
@@ -361,18 +361,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Initial Load ---
-    loadVideo();
+    loadPhoto();
     loadVersionHistory();
     loadNotifications();
     
-    // Listen for video updates
-    window.addEventListener('videosUpdated', (e) => {
-        if (e.detail.projectId === projectId) {
-            loadVideo();
+    // Listen for photo updates (real-time)
+    window.addEventListener('photosUpdated', (e) => {
+        if (e.detail && e.detail.projectId === projectId) {
+            loadPhoto();
             loadVersionHistory();
             loadNotifications();
         }
     });
+    
+    // Also poll for updates every 3 seconds as fallback
+    setInterval(() => {
+        loadVersionHistory();
+    }, 3000);
     
     // Listen for comment updates (which trigger notifications)
     window.addEventListener('commentsUpdated', (e) => {

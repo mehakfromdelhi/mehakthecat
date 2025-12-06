@@ -65,7 +65,7 @@ const CommentsManager = {
             author: userType, // 'client' or 'agent'
             authorName: authorName || (userType === 'client' ? 'Client' : 'Vugru (Agent)'),
             timestamp: Date.now(),
-            version: this.getCurrentVersion(), // Optional: link to video version
+            version: this.getCurrentVersion(), // Optional: link to photo version
             status: 'new' // Default status: 'new', 'work-in-progress', 'complete'
         };
         
@@ -120,10 +120,10 @@ const CommentsManager = {
     },
     
     /**
-     * Get current video version (if applicable)
+     * Get current photo version (if applicable)
      */
     getCurrentVersion() {
-        // Try to get from revision history or video player
+        // Try to get from revision history or photo viewer
         const versionElement = document.querySelector('.revision-list-title-active, .card-title-xl');
         if (versionElement) {
             const versionText = versionElement.textContent;
@@ -192,7 +192,7 @@ const CommentsManager = {
     },
     
     /**
-     * Render comments in agent view style (video dashboard)
+     * Render comments in agent view style (photo dashboard)
      */
     renderCommentsAgent(projectId, containerElement) {
         if (!containerElement) return;

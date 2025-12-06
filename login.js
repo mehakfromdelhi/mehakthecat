@@ -135,7 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
             'demo@vugru.com': 'demo123',
             'admin@vugru.com': 'admin123',
             'user@example.com': 'password123',
-            'test@test.com': 'test123'
+            'test@test.com': 'test123',
+            // Client login credentials from project data
+            'john.smith@example.com': 'client123',
+            'sarah.johnson@example.com': 'client123',
+            'mike.davis@example.com': 'client123',
+            'emily.chen@example.com': 'client123'
         };
 
         // Check against demo credentials first

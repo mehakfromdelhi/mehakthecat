@@ -51,11 +51,9 @@
     <!-- Video Area -->
     <div class="w-full md:w-[70%] bg-gray-100 p-4 md:p-8 flex items-center justify-center">
       <div class="w-full max-w-5xl aspect-video bg-gray-900 rounded-xl flex items-center justify-center shadow-lg relative">
-        <video id="video-player" controls class="w-full h-full rounded-xl hidden">
-          Your browser does not support the video tag.
-        </video>
-        <div id="video-placeholder" class="absolute inset-0 flex items-center justify-center text-white text-lg">
-          No video uploaded yet.
+        <img id="photo-viewer" class="w-full h-full rounded-xl object-contain hidden" alt="Property Photo">
+        <div id="photo-placeholder" class="absolute inset-0 flex items-center justify-center text-white text-lg">
+          No photo uploaded yet.
         </div>
       </div>
     </div>
@@ -112,7 +110,7 @@
 
   <script src="project-data-manager.js"></script>
   <script src="comments-manager.js"></script>
-  <script src="video-storage-manager.js"></script>
+  <script src="photo-storage-manager.js"></script>
   <script src="clientviewjs.js"></script>
 </body>
 </html>

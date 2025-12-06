@@ -373,7 +373,7 @@ function renderUpcomingDeadlines() {
             <span class="status-badge-large ${project.status}">${ProjectDataManager.getStatusLabel(project.status)}</span>
         `;
         
-        // Make deadline item clickable to jump to video dashboard
+        // Make deadline item clickable to jump to photo dashboard
         item.style.cursor = 'pointer';
         item.addEventListener('click', function() {
             sessionStorage.setItem('selectedProject', JSON.stringify({

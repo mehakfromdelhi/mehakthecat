@@ -251,8 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadSuccess.style.display = 'none';
         }
 
-        // Create object URL for the video file
-        const videoUrl = URL.createObjectURL(file);
+        // Create object URL for the photo file
+        const photoUrl = URL.createObjectURL(file);
         
         // Simulate upload progress (in production, this would be actual upload progress)
         let progress = 0;
@@ -279,20 +279,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         uploadSuccess.style.display = 'flex';
                     }
 
-                    // Save video to VideoStorageManager
-                    if (projectId && typeof VideoStorageManager !== 'undefined') {
-                        VideoStorageManager.saveVideo(projectId, {
+                    // Save photo to PhotoStorageManager
+                    if (projectId && typeof PhotoStorageManager !== 'undefined') {
+                        PhotoStorageManager.savePhoto(projectId, {
                             fileName: file.name,
-                            url: videoUrl,
+                            url: photoUrl,
                             notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
                         });
+                        
+                        // Refresh revision history immediately
+                        loadRevisionHistory();
                     }
                     
-                    // Update video player with uploaded video
-                    updateVideoPlayer(videoUrl, file);
-                    
-                    // Update revision history
-                    updateRevisionHistory(file);
+                    // Update photo viewer with uploaded photo
+                    updatePhotoViewer(photoUrl, file);
                     
                     console.log('File uploaded:', file.name, file.size, 'bytes');
                     
@@ -307,35 +307,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     };
 
-    // Function to update video player with uploaded video
-    const updateVideoPlayer = (videoUrl, file) => {
+    // Function to update photo viewer with uploaded photo
+    const updatePhotoViewer = (photoUrl, file) => {
         const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
         const videoPlayerPlaceholder = document.querySelector('.video-player-placeholder');
         
         if (videoPlayerWrapper && videoPlayerPlaceholder) {
-            // Create video element
-            const videoElement = document.createElement('video');
-            videoElement.src = videoUrl;
-            videoElement.controls = true;
-            videoElement.style.width = '100%';
-            videoElement.style.height = '100%';
-            videoElement.style.objectFit = 'contain';
-            videoElement.style.borderRadius = '0.5rem';
+            // Create image element
+            const imageElement = document.createElement('img');
+            imageElement.src = photoUrl;
+            imageElement.alt = file.name;
+            imageElement.style.width = '100%';
+            imageElement.style.height = '100%';
+            imageElement.style.objectFit = 'contain';
+            imageElement.style.borderRadius = '0.5rem';
             
-            // Replace placeholder with video element
+            // Replace placeholder with image element
             videoPlayerPlaceholder.style.display = 'none';
             videoPlayerWrapper.innerHTML = '';
-            videoPlayerWrapper.appendChild(videoElement);
+            videoPlayerWrapper.appendChild(imageElement);
             
             // Update card footer with file info
             const cardTitle = document.querySelector('.card-footer .card-title-xl');
             const cardSubtitle = document.querySelector('.card-footer .card-subtitle');
             
             if (cardTitle) {
-                const now = new Date();
-                const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                cardTitle.textContent = `Version ${getNextVersionNumber()} (New Upload)`;
+                // Get the latest photo to show version number
+                if (typeof PhotoStorageManager !== 'undefined' && projectId) {
+                    const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+                    if (currentPhoto) {
+                        cardTitle.textContent = `Version ${currentPhoto.version} (New Upload)`;
+                    } else {
+                        cardTitle.textContent = 'New Upload';
+                    }
+                } else {
+                    cardTitle.textContent = 'New Upload';
+                }
             }
             
             if (cardSubtitle) {
@@ -347,62 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Function to get next version number
-    const getNextVersionNumber = () => {
-        const revisionItems = document.querySelectorAll('.revision-list-item');
-        return revisionItems.length + 1;
-    };
-
-    // Function to update revision history
-    const updateRevisionHistory = (file) => {
-        const revisionList = document.querySelector('.revision-list');
-        if (!revisionList) return;
-        
-        // Get next version number
-        const versionNumber = getNextVersionNumber();
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        
-        // Create new revision item
-        const newRevisionItem = document.createElement('li');
-        newRevisionItem.className = 'revision-list-item';
-        newRevisionItem.innerHTML = `
-            <div>
-                <h3 class="revision-list-title-active">Version ${versionNumber}</h3>
-                <p class="revision-list-subtitle">Uploaded ${dateStr}</p>
-            </div>
-            <span class="status-badge status-badge-green">New</span>
-        `;
-        
-        // Make previous items inactive
-        const previousItems = revisionList.querySelectorAll('.revision-list-item');
-        previousItems.forEach(item => {
-            const title = item.querySelector('.revision-list-title-active, .revision-list-title');
-            if (title) {
-                title.className = 'revision-list-title';
-            }
-            const statusBadge = item.querySelector('.status-badge');
-            if (statusBadge) {
-                statusBadge.className = 'revision-list-status-old';
-                statusBadge.textContent = 'Superseded';
-            }
-        });
-        
-        // Insert new item at the top
-        revisionList.insertBefore(newRevisionItem, revisionList.firstChild);
-        
-        // Add click handler to new revision item
-        newRevisionItem.style.cursor = 'pointer';
-        newRevisionItem.addEventListener('click', () => {
-            const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
-            const video = videoPlayerWrapper?.querySelector('video');
-            if (video) {
-                // Store video URL in sessionStorage for this version
-                const videoUrl = video.src;
-                sessionStorage.setItem(`video-version-${versionNumber}`, videoUrl);
-            }
-        });
-    };
+    // Revision history is now loaded dynamically from PhotoStorageManager via loadRevisionHistory()
 
     // Handle local file upload
     if (localFileInput) {
@@ -410,16 +362,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = e.target.files[0];
             if (file) {
                 // Validate file type
-                if (!file.type.startsWith('video/')) {
-                    alert('Please select a valid video file.');
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select a valid image file.');
                     localFileInput.value = '';
                     return;
                 }
 
-                // Validate file size (e.g., max 500MB)
-                const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+                // Validate file size (e.g., max 50MB)
+                const maxSize = 50 * 1024 * 1024; // 50MB in bytes
                 if (file.size > maxSize) {
-                    alert('File size exceeds 500MB. Please select a smaller file.');
+                    alert('File size exceeds 50MB. Please select a smaller file.');
                     localFileInput.value = '';
                     return;
                 }
@@ -583,34 +535,117 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
      * -------------------------------------------
-     * Revision History Items Functionality
+     * Load Revision History from PhotoStorageManager
      * -------------------------------------------
      */
-    const revisionItems = document.querySelectorAll('.revision-list-item');
-    revisionItems.forEach(item => {
-        item.style.cursor = 'pointer';
-        item.addEventListener('click', () => {
-            const versionTitle = item.querySelector('.revision-list-title, .revision-list-title-active')?.textContent || 'Unknown';
-            const versionStatus = item.querySelector('.status-badge, .revision-list-status-old')?.textContent || '';
+    function loadRevisionHistory() {
+        const revisionList = document.querySelector('.revision-list');
+        if (!revisionList || !projectId) return;
+        
+        if (typeof PhotoStorageManager === 'undefined') {
+            revisionList.innerHTML = '<li class="revision-list-item"><div><p class="revision-list-subtitle">Loading...</p></div></li>';
+            return;
+        }
+        
+        const photos = PhotoStorageManager.getPhotos(projectId);
+        const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+        
+        if (photos.length === 0) {
+            revisionList.innerHTML = '<li class="revision-list-item"><div><p class="revision-list-subtitle">No photos uploaded yet</p></div></li>';
+            return;
+        }
+        
+        // Sort by version (newest first)
+        const sortedPhotos = [...photos].sort((a, b) => b.version - a.version);
+        
+        revisionList.innerHTML = '';
+        sortedPhotos.forEach(photo => {
+            const isCurrent = currentPhoto && photo.id === currentPhoto.id;
+            const li = document.createElement('li');
+            li.className = 'revision-list-item';
+            li.style.cursor = 'pointer';
             
-            console.log(`Viewing ${versionTitle} - ${versionStatus}`);
+            const date = new Date(photo.uploadedAt);
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             
-            // Update video player placeholder (in production, this would load the actual video)
-            const videoPlaceholder = document.querySelector('.video-player-placeholder');
-            if (videoPlaceholder) {
-                videoPlaceholder.innerHTML = `<span>Playing ${versionTitle} (${versionStatus})</span>`;
+            let statusBadge = '';
+            if (photo.status === 'approved') {
+                statusBadge = '<span class="status-badge status-badge-green">Approved</span>';
+            } else if (photo.status === 'not-approved') {
+                statusBadge = '<span class="status-badge status-badge-red">Not Approved</span>';
+            } else {
+                statusBadge = '<span class="status-badge status-badge-yellow">Under Review</span>';
             }
             
-            // Update card footer
-            const cardFooter = document.querySelector('.card-footer .card-title-xl');
-            if (cardFooter) {
-                cardFooter.textContent = `${versionTitle} (${versionStatus})`;
+            if (isCurrent) {
+                li.innerHTML = `
+                    <div>
+                        <h3 class="revision-list-title-active">Version ${photo.version}</h3>
+                        <p class="revision-list-subtitle">Uploaded ${dateStr}</p>
+                    </div>
+                    ${statusBadge}
+                `;
+            } else {
+                li.innerHTML = `
+                    <div>
+                        <h3 class="revision-list-title">Version ${photo.version}</h3>
+                        <p class="revision-list-subtitle">Uploaded ${dateStr}</p>
+                    </div>
+                    <span class="revision-list-status-old">Superseded</span>
+                `;
             }
             
-            // Highlight selected revision
-            revisionItems.forEach(rev => rev.classList.remove('revision-selected'));
-            item.classList.add('revision-selected');
+            // Add click handler
+            li.addEventListener('click', () => {
+                // Load this photo version
+                const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
+                const videoPlayerPlaceholder = document.querySelector('.video-player-placeholder');
+                
+                if (videoPlayerWrapper && photo.url) {
+                    // Remove existing image/video
+                    const existingMedia = videoPlayerWrapper.querySelector('img, video');
+                    if (existingMedia) {
+                        existingMedia.remove();
+                    }
+                    
+                    // Create and show image
+                    const imageElement = document.createElement('img');
+                    imageElement.src = photo.url;
+                    imageElement.alt = photo.fileName;
+                    imageElement.style.width = '100%';
+                    imageElement.style.height = '100%';
+                    imageElement.style.objectFit = 'contain';
+                    imageElement.style.borderRadius = '0.5rem';
+                    
+                    if (videoPlayerPlaceholder) {
+                        videoPlayerPlaceholder.style.display = 'none';
+                    }
+                    videoPlayerWrapper.appendChild(imageElement);
+                    
+                    // Update card footer
+                    const cardFooter = document.querySelector('.card-footer .card-title-xl');
+                    if (cardFooter) {
+                        cardFooter.textContent = `Version ${photo.version} (${photo.status === 'approved' ? 'Approved' : photo.status === 'not-approved' ? 'Not Approved' : 'Under Review'})`;
+                    }
+                    
+                    // Highlight selected revision
+                    document.querySelectorAll('.revision-list-item').forEach(rev => rev.classList.remove('revision-selected'));
+                    li.classList.add('revision-selected');
+                }
+            });
+            
+            revisionList.appendChild(li);
         });
+    }
+    
+    // Load revision history on page load
+    loadRevisionHistory();
+    
+    // Listen for photo updates to refresh revision history
+    window.addEventListener('photosUpdated', (e) => {
+        if (e.detail && e.detail.projectId === projectId) {
+            loadRevisionHistory();
+        }
     });
 
     /*
@@ -697,8 +732,8 @@ document.addEventListener('DOMContentLoaded', () => {
             CommentsManager.saveComment(projectId, replyText, 'agent', authorName);
             
             // Add notification for client about new agent comment
-            if (typeof VideoStorageManager !== 'undefined') {
-                VideoStorageManager.addNotification(projectId, 'comment-awaiting', `Agent commented: "${replyText}"`);
+            if (typeof PhotoStorageManager !== 'undefined') {
+                PhotoStorageManager.addNotification(projectId, 'comment-awaiting', `Agent commented: "${replyText}"`);
             }
             
             // Re-render comments to show the new one

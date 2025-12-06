@@ -1,17 +1,17 @@
 /*
  * ===========================================
- * Video Storage Manager
+ * Photo Storage Manager
  * ===========================================
- * Manages video uploads, versions, and statuses per project
+ * Manages photo uploads, versions, and statuses per project
  * Also handles notifications for clients
  */
 
-const VideoStorageManager = {
-    STORAGE_PREFIX: 'vugru-videos-',
+const PhotoStorageManager = {
+    STORAGE_PREFIX: 'vugru-photos-',
     NOTIF_PREFIX: 'vugru-notifications-',
     
     /**
-     * Get storage key for videos
+     * Get storage key for photos
      */
     getStorageKey(projectId) {
         return `${this.STORAGE_PREFIX}${projectId}`;
@@ -25,13 +25,13 @@ const VideoStorageManager = {
     },
     
     /**
-     * Add a new video to a project
+     * Add a new photo to a project
      */
-    addVideo(projectId, fileName, url) {
-        const videos = this.getVideos(projectId);
-        const newVersion = videos.length + 1;
-        const newVideo = {
-            id: `video-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    addPhoto(projectId, fileName, url) {
+        const photos = this.getPhotos(projectId);
+        const newVersion = photos.length + 1;
+        const newPhoto = {
+            id: `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             fileName,
             url,
             version: newVersion,
@@ -41,67 +41,67 @@ const VideoStorageManager = {
             approvedAt: null
         };
         
-        videos.push(newVideo);
-        localStorage.setItem(this.getStorageKey(projectId), JSON.stringify(videos));
+        photos.push(newPhoto);
+        localStorage.setItem(this.getStorageKey(projectId), JSON.stringify(photos));
         
-        // Trigger event for video updates
-        window.dispatchEvent(new CustomEvent('videosUpdated', {
-            detail: { projectId, videos }
+        // Trigger event for photo updates
+        window.dispatchEvent(new CustomEvent('photosUpdated', {
+            detail: { projectId, photos }
         }));
         
         // Add notification for client
         if (newVersion === 1) {
-            this.addNotification(projectId, 'new-video', `New video uploaded: ${fileName}`);
+            this.addNotification(projectId, 'new-photo', `New photo uploaded: ${fileName}`);
         } else {
             this.addNotification(projectId, 'new-version', `New version uploaded: ${fileName}`);
         }
         
-        return newVideo;
+        return newPhoto;
     },
     
     /**
-     * Get all videos for a project
+     * Get all photos for a project
      */
-    getVideos(projectId) {
+    getPhotos(projectId) {
         const stored = localStorage.getItem(this.getStorageKey(projectId));
         if (!stored) return [];
         
         try {
             return JSON.parse(stored);
         } catch (e) {
-            console.error('Error parsing videos:', e);
+            console.error('Error parsing photos:', e);
             return [];
         }
     },
     
     /**
-     * Get the current/latest video for a project
+     * Get the current/latest photo for a project
      */
-    getCurrentVideo(projectId) {
-        const videos = this.getVideos(projectId);
-        if (videos.length === 0) return null;
+    getCurrentPhoto(projectId) {
+        const photos = this.getPhotos(projectId);
+        if (photos.length === 0) return null;
         
         // Return the latest version
-        return videos.sort((a, b) => b.version - a.version)[0];
+        return photos.sort((a, b) => b.version - a.version)[0];
     },
     
     /**
-     * Update video status (approved/not-approved)
+     * Update photo status (approved/not-approved)
      */
-    updateVideoStatus(projectId, videoId, status, approvedBy = null) {
-        const videos = this.getVideos(projectId);
-        const video = videos.find(v => v.id === videoId);
+    updatePhotoStatus(projectId, photoId, status, approvedBy = null) {
+        const photos = this.getPhotos(projectId);
+        const photo = photos.find(p => p.id === photoId);
         
-        if (!video) {
-            console.error('Video not found:', videoId);
+        if (!photo) {
+            console.error('Photo not found:', photoId);
             return null;
         }
         
-        video.status = status; // 'approved', 'not-approved', 'under-review'
-        video.approvedBy = approvedBy;
-        video.approvedAt = status === 'approved' ? Date.now() : null;
+        photo.status = status; // 'approved', 'not-approved', 'under-review'
+        photo.approvedBy = approvedBy;
+        photo.approvedAt = status === 'approved' ? Date.now() : null;
         
-        localStorage.setItem(this.getStorageKey(projectId), JSON.stringify(videos));
+        localStorage.setItem(this.getStorageKey(projectId), JSON.stringify(photos));
         
         // Update project status in ProjectDataManager
         if (typeof ProjectDataManager !== 'undefined') {
@@ -113,21 +113,21 @@ const VideoStorageManager = {
         }
         
         // Trigger event
-        window.dispatchEvent(new CustomEvent('videosUpdated', {
-            detail: { projectId, videos }
+        window.dispatchEvent(new CustomEvent('photosUpdated', {
+            detail: { projectId, photos }
         }));
         
-        return video;
+        return photo;
     },
     
     /**
-     * Save video (used by agent upload)
+     * Save photo (used by agent upload)
      */
-    saveVideo(projectId, videoData) {
-        const fileName = videoData.fileName || videoData.notes || 'video.mp4';
-        const url = videoData.url;
+    savePhoto(projectId, photoData) {
+        const fileName = photoData.fileName || photoData.notes || 'photo.jpg';
+        const url = photoData.url;
         
-        return this.addVideo(projectId, fileName, url);
+        return this.addPhoto(projectId, fileName, url);
     },
     
     /**
@@ -154,7 +154,7 @@ const VideoStorageManager = {
         const notifications = this.getNotifications(projectId);
         const newNotif = {
             id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            type, // 'new-video', 'new-version', 'comment-awaiting'
+            type, // 'new-photo', 'new-version', 'comment-awaiting'
             message,
             commentText: message, // For comment-related notifications
             newStatus, // For comment status updates
@@ -214,3 +214,4 @@ const VideoStorageManager = {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 };
+

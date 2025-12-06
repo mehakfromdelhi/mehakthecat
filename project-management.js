@@ -103,6 +103,12 @@ function createProjectCard(project) {
         <div>
             <span class="hint">Client:</span> <b>${project.client}</b>
         </div>
+        <div class="project-card-priority-controls" style="margin-top: 0.5rem; display: flex; gap: 0.25rem; flex-wrap: wrap;">
+            <span class="hint" style="width: 100%; font-size: 0.75rem;">Priority:</span>
+            <button class="priority-btn ${project.priority === 'urgent' ? 'active' : ''}" data-priority="urgent" data-project-id="${project.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid #dc2626; background: ${project.priority === 'urgent' ? '#dc2626' : 'transparent'}; color: ${project.priority === 'urgent' ? 'white' : '#dc2626'}; border-radius: 0.25rem; cursor: pointer;">Urgent</button>
+            <button class="priority-btn ${project.priority === 'high' ? 'active' : ''}" data-priority="high" data-project-id="${project.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid #f59e0b; background: ${project.priority === 'high' ? '#f59e0b' : 'transparent'}; color: ${project.priority === 'high' ? 'white' : '#f59e0b'}; border-radius: 0.25rem; cursor: pointer;">High</button>
+            <button class="priority-btn ${project.priority === 'normal' ? 'active' : ''}" data-priority="normal" data-project-id="${project.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid #6b7280; background: ${project.priority === 'normal' ? '#6b7280' : 'transparent'}; color: ${project.priority === 'normal' ? 'white' : '#6b7280'}; border-radius: 0.25rem; cursor: pointer;">Normal</button>
+        </div>
         <div>
             <span class="project-card-status status-badge-large ${project.status}">${ProjectDataManager.getStatusLabel(project.status)}</span>
         </div>
@@ -130,9 +136,14 @@ function createProjectCard(project) {
         card.appendChild(commentBadge);
     }
     
-    // Make card clickable to jump to video dashboard
-    card.addEventListener('click', function() {
-        // Store full project data in sessionStorage for video dashboard
+    // Make card clickable to jump to photo dashboard (but not when clicking priority buttons)
+    card.addEventListener('click', function(e) {
+        // Don't navigate if clicking on priority buttons
+        if (e.target.classList.contains('priority-btn') || e.target.closest('.priority-btn')) {
+            return;
+        }
+        
+        // Store full project data in sessionStorage for photo dashboard
         sessionStorage.setItem('selectedProject', JSON.stringify({
             id: project.id,
             name: project.name,
@@ -142,8 +153,26 @@ function createProjectCard(project) {
             status: project.status,
             progress: project.progress
         }));
-        // Navigate to video dashboard
+        // Navigate to photo dashboard
         window.location.href = 'Vugru HTML.html';
+    });
+    
+    // Add priority button event listeners
+    const priorityButtons = card.querySelectorAll('.priority-btn');
+    priorityButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent card click
+            const newPriority = btn.getAttribute('data-priority');
+            const projectId = btn.getAttribute('data-project-id');
+            
+            if (projectId && newPriority) {
+                // Update project priority
+                ProjectDataManager.updateProject(projectId, { priority: newPriority });
+                
+                // Re-render projects to show updated priority
+                initializeProjects();
+            }
+        });
     });
     
     return card;
