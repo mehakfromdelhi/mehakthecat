@@ -251,61 +251,69 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadSuccess.style.display = 'none';
         }
 
-        // Create object URL for the photo file
-        const photoUrl = URL.createObjectURL(file);
-        
-        // Simulate upload progress (in production, this would be actual upload progress)
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress > 100) progress = 100;
+        // Convert file to data URL for persistence
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const photoDataUrl = e.target.result;
+            
+            // Simulate upload progress (in production, this would be actual upload progress)
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
 
-            if (uploadProgressFill) {
-                uploadProgressFill.style.width = progress + '%';
-            }
-            if (uploadProgressText) {
-                uploadProgressText.textContent = `Uploading ${file.name}... ${Math.round(progress)}%`;
-            }
+                if (uploadProgressFill) {
+                    uploadProgressFill.style.width = progress + '%';
+                }
+                if (uploadProgressText) {
+                    uploadProgressText.textContent = `Uploading ${file.name}... ${Math.round(progress)}%`;
+                }
 
-            if (progress >= 100) {
-                clearInterval(interval);
-                
-                // Show success message
-                setTimeout(() => {
-                    if (uploadProgress) {
-                        uploadProgress.style.display = 'none';
-                    }
-                    if (uploadSuccess) {
-                        uploadSuccess.style.display = 'flex';
-                    }
-
-                    // Save photo to PhotoStorageManager
-                    if (currentProjectId && typeof PhotoStorageManager !== 'undefined') {
-                        PhotoStorageManager.savePhoto(currentProjectId, {
-                            fileName: file.name,
-                            url: photoUrl,
-                            notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
-                        });
-                        
-                        // Refresh photo viewer and revision history immediately
-                        loadCurrentPhoto();
-                        loadRevisionHistory();
-                    } else {
-                        // Fallback: Update photo viewer directly if PhotoStorageManager not available
-                        updatePhotoViewer(photoUrl, file);
-                    }
+                if (progress >= 100) {
+                    clearInterval(interval);
                     
-                    console.log('File uploaded:', file.name, file.size, 'bytes');
-                    
-                    // Close modal after 2 seconds
+                    // Show success message
                     setTimeout(() => {
-                        closeUploadModal();
-                        // Reset file input
-                        if (localFileInput) localFileInput.value = '';
-                    }, 2000);
-                }, 500);
-            }
-        }, 200);
+                        if (uploadProgress) {
+                            uploadProgress.style.display = 'none';
+                        }
+                        if (uploadSuccess) {
+                            uploadSuccess.style.display = 'flex';
+                        }
+
+                        // Save photo to PhotoStorageManager with data URL
+                        if (currentProjectId && typeof PhotoStorageManager !== 'undefined') {
+                            PhotoStorageManager.savePhoto(currentProjectId, {
+                                fileName: file.name,
+                                url: photoDataUrl,
+                                notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+                            });
+                            
+                            // Refresh photo viewer and revision history immediately
+                            loadCurrentPhoto();
+                            loadRevisionHistory();
+                        } else {
+                            // Fallback: Update photo viewer directly if PhotoStorageManager not available
+                            updatePhotoViewer(photoDataUrl, file);
+                        }
+                        
+                        console.log('File uploaded:', file.name, file.size, 'bytes');
+                        
+                        // Close modal after 2 seconds
+                        setTimeout(() => {
+                            closeUploadModal();
+                            // Reset file input
+                            if (localFileInput) localFileInput.value = '';
+                        }, 2000);
+                    }, 500);
+                }
+            }, 200);
+        };
+        reader.onerror = (error) => {
+            console.error('Error reading file:', error);
+            alert('Error reading file. Please try again.');
+        };
+        reader.readAsDataURL(file);
     };
 
     // Function to update photo viewer with uploaded photo
@@ -313,8 +321,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
         const videoPlayerPlaceholder = document.querySelector('.video-player-placeholder');
         
-        if (videoPlayerWrapper && videoPlayerPlaceholder) {
-            // Create image element
+        if (videoPlayerWrapper) {
+            // Hide placeholder if it exists
+            if (videoPlayerPlaceholder) {
+                videoPlayerPlaceholder.style.display = 'none';
+            }
+            
+            // Remove any existing image/video elements
+            const existingMedia = videoPlayerWrapper.querySelector('img, video');
+            if (existingMedia) {
+                existingMedia.remove();
+            }
+            
+            // Create and append image element
             const imageElement = document.createElement('img');
             imageElement.src = photoUrl;
             imageElement.alt = file.name;
@@ -322,10 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
             imageElement.style.height = '100%';
             imageElement.style.objectFit = 'contain';
             imageElement.style.borderRadius = '0.5rem';
-            
-            // Replace placeholder with image element
-            videoPlayerPlaceholder.style.display = 'none';
-            videoPlayerWrapper.innerHTML = '';
             videoPlayerWrapper.appendChild(imageElement);
             
             // Update card footer with file info
@@ -552,13 +567,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProjectId);
         
         if (currentPhoto && currentPhoto.url) {
-            // Remove existing image/video
+            // Hide placeholder
+            if (videoPlayerPlaceholder) {
+                videoPlayerPlaceholder.style.display = 'none';
+            }
+            
+            // Remove any existing image/video elements
             const existingMedia = videoPlayerWrapper.querySelector('img, video');
             if (existingMedia) {
                 existingMedia.remove();
             }
             
-            // Create and show image
+            // Create and append new image element
             const imageElement = document.createElement('img');
             imageElement.src = currentPhoto.url;
             imageElement.alt = currentPhoto.fileName || 'Property Photo';
@@ -566,10 +586,6 @@ document.addEventListener('DOMContentLoaded', () => {
             imageElement.style.height = '100%';
             imageElement.style.objectFit = 'contain';
             imageElement.style.borderRadius = '0.5rem';
-            
-            if (videoPlayerPlaceholder) {
-                videoPlayerPlaceholder.style.display = 'none';
-            }
             videoPlayerWrapper.appendChild(imageElement);
             
             // Update card footer
@@ -590,19 +606,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardSubtitle.textContent = `Uploaded by Vugru on ${dateStr} at ${timeStr}`;
             }
         } else {
-            // No photo, show placeholder
-            if (videoPlayerPlaceholder) {
-                videoPlayerPlaceholder.style.display = 'flex';
-            }
+            // No photo, show placeholder and remove any existing media
             const existingMedia = videoPlayerWrapper.querySelector('img, video');
             if (existingMedia) {
                 existingMedia.remove();
             }
             
+            // Recreate placeholder if it was removed
+            let placeholder = videoPlayerWrapper.querySelector('.video-player-placeholder');
+            if (!placeholder) {
+                placeholder = document.createElement('div');
+                placeholder.className = 'video-player-placeholder';
+                const span = document.createElement('span');
+                span.textContent = 'Photo Viewer Placeholder';
+                placeholder.appendChild(span);
+                videoPlayerWrapper.appendChild(placeholder);
+            }
+            placeholder.style.display = 'flex';
+            
             // Update card footer
             const cardTitle = document.querySelector('.card-footer .card-title-xl');
+            const cardSubtitle = document.querySelector('.card-footer .card-subtitle');
             if (cardTitle) {
                 cardTitle.textContent = 'No photo uploaded yet';
+            }
+            if (cardSubtitle) {
+                cardSubtitle.textContent = '';
             }
         }
     }
