@@ -15,6 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const eyeOffIcon = document.getElementById('eye-off-icon');
     const loginError = document.getElementById('login-error');
     const errorMessage = document.getElementById('error-message');
+    const userTypeRadios = document.querySelectorAll('input[name="user-type"]');
+
+    // Handle user type selection styling (for browsers without :has() support)
+    userTypeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            document.querySelectorAll('.user-type-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            if (radio.checked) {
+                radio.closest('.user-type-option').classList.add('selected');
+            }
+        });
+    });
+
+    // Set initial selected state
+    const checkedRadio = document.querySelector('input[name="user-type"]:checked');
+    if (checkedRadio) {
+        checkedRadio.closest('.user-type-option').classList.add('selected');
+    }
 
     // Toggle password visibility
     if (togglePasswordButton) {
@@ -34,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const rememberMe = document.getElementById('remember-me').checked;
+            const userType = document.querySelector('input[name="user-type"]:checked')?.value || 'agent';
             const submitButton = loginForm.querySelector('button[type="submit"]');
 
             // Hide any previous errors
@@ -73,15 +93,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // Simple authentication (for demo purposes)
             // In production, this would make an API call to your backend
             if (authenticateUser(email, password)) {
-                // Check if this is a client login
-                const isClient = isClientEmail(email);
+                // Check if this is a client login (both from radio button and email check)
+                const isClientFromEmail = isClientEmail(email);
+                const selectedUserType = document.querySelector('input[name="user-type"]:checked')?.value || 'agent';
+                
+                // Determine user type: prefer radio selection, but verify with email if radio says client
+                let finalUserType = selectedUserType === 'client' || isClientFromEmail ? 'client' : 'agent';
                 
                 // Store authentication state
                 const authData = {
                     email: email,
+                    userType: finalUserType,
                     loggedIn: true,
-                    timestamp: Date.now(),
-                    userType: isClient ? 'client' : 'user'
+                    timestamp: Date.now()
                 };
 
                 if (rememberMe) {
@@ -94,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Redirect based on user type
                 // Clients see their own client site with their projects
-                if (isClient) {
+                if (finalUserType === 'client') {
                     // Store client info in sessionStorage for quick access
                     try {
                         const clientsData = localStorage.getItem('vugru_clients');
@@ -113,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Redirect to clients.html - it will show client-specific view
                     window.location.href = 'clients.html';
                 } else {
-                    // Regular users go to project management
+                    // Regular users/agents go to project management or video dashboard
                     window.location.href = 'project-management.html';
                 }
             } else {
@@ -214,7 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const oneDay = 24 * 60 * 60 * 1000;
                 if (authData.loggedIn && (Date.now() - authData.timestamp) < oneDay) {
                     // Already logged in, redirect based on user type
-                    if (authData.userType === 'client') {
+                    const userType = authData.userType || 'agent';
+                    if (userType === 'client') {
                         window.location.href = 'clients.html';
                     } else {
                         window.location.href = 'project-management.html';
