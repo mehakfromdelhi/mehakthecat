@@ -302,16 +302,30 @@ document.addEventListener('DOMContentLoaded', function() {
             const authData = JSON.parse(auth);
             isClientUser = authData.userType === 'client';
             clientEmail = authData.email ? authData.email.toLowerCase().trim() : null;
+            
+            // Double-check: if userType is client but email is set, verify it's actually a client email
+            if (isClientUser && clientEmail) {
+                const clientExists = getClientByEmail(clientEmail);
+                if (!clientExists) {
+                    // User marked as client but not in client list - treat as regular user
+                    console.warn('User marked as client but not found in client database:', clientEmail);
+                    isClientUser = false;
+                }
+            }
         } catch (e) {
             console.error('Error parsing auth data:', e);
         }
     }
     
     // Initialize all features
+    // If client is logged in, show their personalized client site with only their projects
     if (isClientUser && clientEmail) {
         initializeClientView(clientEmail);
+        console.log('Client view initialized for:', clientEmail);
     } else {
+        // Regular users (admin/staff) see the full client directory
         initializeClients();
+        console.log('Admin/Staff view - full client directory');
     }
     initializeSearch();
     initializeLogout();
@@ -385,9 +399,9 @@ function initializeClientView(clientEmail) {
     
     if (!clientsList) return;
     
-    // Update page title
+    // Update page title with client name
     if (pageTitle) {
-        pageTitle.textContent = 'My Projects';
+        pageTitle.textContent = client ? `Welcome, ${client.name}` : 'My Projects';
     }
     
     // Update panel title
@@ -395,7 +409,7 @@ function initializeClientView(clientEmail) {
         panelTitle.innerHTML = '<svg class="ico"><use href="#ico-video"/></svg>My Projects';
     }
     
-    // Hide sidebar navigation for clients
+    // Hide sidebar navigation for clients - show simplified client view
     if (sidebar) {
         const nav = sidebar.querySelector('.nav');
         if (nav) {
@@ -403,11 +417,21 @@ function initializeClientView(clientEmail) {
                 <a href="clients.html" class="nav-item active"><svg class="ico"><use href="#ico-video"/></svg>My Projects</a>
             `;
         }
+        
+        // Update sidebar brand for client
+        const brandTitle = sidebar.querySelector('.brand-title');
+        if (brandTitle && client) {
+            // Keep brand but show it's client view
+        }
     }
     
-    // Update description
+    // Update description with personalized message
     if (description) {
-        description.textContent = 'Click on any project to view details and provide feedback.';
+        if (client && client.company) {
+            description.textContent = `${client.company} • Click on any project to view details and provide feedback.`;
+        } else {
+            description.textContent = 'Click on any project to view details and provide feedback.';
+        }
     }
     
     // Hide search (not needed for client view)
@@ -417,16 +441,37 @@ function initializeClientView(clientEmail) {
     }
     
     // Find the logged-in client (use getClientByEmail for consistency)
-    let client = getClientByEmail(clientEmail);
+    // First try to get from sessionStorage (set during login)
+    let client = null;
+    try {
+        const currentClientData = sessionStorage.getItem('currentClient');
+        if (currentClientData) {
+            client = JSON.parse(currentClientData);
+        }
+    } catch (e) {
+        console.error('Error reading currentClient from sessionStorage:', e);
+    }
+    
+    // If not in sessionStorage, look up by email
+    if (!client) {
+        client = getClientByEmail(clientEmail);
+    }
     
     if (!client) {
-        clientsList.innerHTML = '<p class="muted">Client information not found.</p>';
+        clientsList.innerHTML = '<p class="muted">Client information not found. Please contact support.</p>';
         return;
     }
     
     // Update client stats dynamically
     const stats = calculateClientStats(client, projectsData);
     client = { ...client, ...stats };
+    
+    // Store updated client info in sessionStorage
+    try {
+        sessionStorage.setItem('currentClient', JSON.stringify(client));
+    } catch (e) {
+        console.error('Error storing currentClient:', e);
+    }
     
     // Clear existing content
     clientsList.innerHTML = '';

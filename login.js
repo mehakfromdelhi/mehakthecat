@@ -93,9 +93,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Redirect based on user type
+                // Clients see their own client site with their projects
                 if (isClient) {
+                    // Store client info in sessionStorage for quick access
+                    try {
+                        const clientsData = localStorage.getItem('vugru_clients');
+                        if (clientsData) {
+                            const clients = JSON.parse(clientsData);
+                            const client = clients.find(c => 
+                                c.email && c.email.toLowerCase().trim() === email.toLowerCase().trim()
+                            );
+                            if (client) {
+                                sessionStorage.setItem('currentClient', JSON.stringify(client));
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error storing client info:', e);
+                    }
+                    // Redirect to clients.html - it will show client-specific view
                     window.location.href = 'clients.html';
                 } else {
+                    // Regular users go to project management
                     window.location.href = 'project-management.html';
                 }
             } else {
@@ -113,15 +131,31 @@ document.addEventListener('DOMContentLoaded', () => {
     function isClientEmail(email) {
         const normalizedEmail = email.toLowerCase().trim();
         
-        // Client emails (matching clients.js data)
-        const clientEmails = [
+        // First, try to get client emails from localStorage (dynamic check)
+        try {
+            const clientsData = localStorage.getItem('vugru_clients');
+            if (clientsData) {
+                const clients = JSON.parse(clientsData);
+                const clientExists = clients.some(client => 
+                    client.email && client.email.toLowerCase().trim() === normalizedEmail
+                );
+                if (clientExists) {
+                    return true;
+                }
+            }
+        } catch (e) {
+            console.error('Error checking clients from localStorage:', e);
+        }
+        
+        // Fallback to hardcoded client emails (for initial setup)
+        const defaultClientEmails = [
             'john.smith@example.com',
             'sarah.johnson@example.com',
             'mike.davis@example.com',
             'emily.chen@example.com'
         ];
         
-        return clientEmails.includes(normalizedEmail);
+        return defaultClientEmails.includes(normalizedEmail);
     }
 
     // Authentication function (demo - replace with actual API call)
