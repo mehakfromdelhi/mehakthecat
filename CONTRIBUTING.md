@@ -1,5 +1,14 @@
 # Contributing to VuGru
 
+## ⚠️ Contributor Restrictions
+
+**IMPORTANT**: The following contributor is **NOT authorized** to make changes to this repository:
+- **elenatakas-code** - All contributions from this user are restricted
+
+If you see pull requests or commits from this contributor, please do not merge them without explicit approval from the repository owner.
+
+---
+
 This repository uses a branch-based workflow to allow different contributors to work on different parts of the application simultaneously.
 
 ## Branch Structure

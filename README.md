@@ -20,6 +20,8 @@ This repository uses separate branches for different parts of the application to
 
 For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+**⚠️ Important**: Please review [RESTRICTED_CONTRIBUTORS.md](RESTRICTED_CONTRIBUTORS.md) before accepting contributions.
+
 ## Upload Functionality
 The upload button supports three methods:
 1. **Local Desktop**: Select and upload video files directly from your computer
