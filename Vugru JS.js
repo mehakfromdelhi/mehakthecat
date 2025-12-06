@@ -453,28 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    /*
-     * -------------------------------------------
-     * Publish to Channels Functionality
-     * -------------------------------------------
-     */
-    const publishOptions = document.querySelectorAll('#publish-menu .popover-list-item-icon');
-    publishOptions.forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-            const channel = option.querySelector('span')?.textContent || 'Unknown';
-            
-            // Close the popover
-            const publishMenu = document.getElementById('publish-menu');
-            if (publishMenu) publishMenu.classList.remove('is-open');
-            
-            // Handle publish action
-            console.log(`Publishing to ${channel}`);
-            alert(`Publishing video to ${channel}...\n\nIn production, this would integrate with ${channel}'s API to publish the video.`);
-        });
-    });
-
-    // Share button removed - no longer needed
+    // Share button and publish functionality removed - no longer needed
 
     // Comment status update functionality is now handled via event delegation in the comment system section
 
@@ -496,23 +475,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 headerTitle.textContent = currentProject.name;
             }
             
-            // Update project status in the status card
+            // Update project status in the status card based on photo approval status
             const statusText = document.getElementById('project-status-text');
             const statusBar = document.getElementById('project-status-bar');
             const clientName = document.getElementById('project-client-name');
             
-            if (currentProject.status && statusText) {
-                statusText.textContent = ProjectDataManager.getStatusLabel(currentProject.status);
-                // Update status bar color based on status
-                const statusClass = currentProject.status === 'completed' ? 'green' : 
-                                   currentProject.status === 'in-review' ? 'amber' : 
-                                   currentProject.status === 'awaiting-feedback' ? 'yellow' : 'blue';
-                statusText.className = `status-bar-text-${statusClass}`;
-                
-                // Update status bar fill
-                if (statusBar) {
-                    statusBar.className = `status-bar-fill-${statusClass}`;
-                    statusBar.style.width = `${currentProject.progress || 0}%`;
+            // Get current photo status to determine approval status
+            let photoStatus = null;
+            if (currentProject.id && typeof PhotoStorageManager !== 'undefined') {
+                const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProject.id);
+                if (currentPhoto) {
+                    photoStatus = currentPhoto.status;
+                }
+            }
+            
+            if (statusText) {
+                // Display "Approved" or "Not Approved" based on photo status
+                if (photoStatus === 'approved') {
+                    statusText.textContent = 'Approved';
+                    statusText.className = 'status-bar-text-green';
+                    if (statusBar) {
+                        statusBar.className = 'status-bar-fill-green';
+                        statusBar.style.width = '100%';
+                    }
+                } else if (photoStatus === 'not-approved') {
+                    statusText.textContent = 'Not Approved';
+                    statusText.className = 'status-bar-text-red';
+                    if (statusBar) {
+                        statusBar.className = 'status-bar-fill-red';
+                        statusBar.style.width = '0%';
+                    }
+                } else {
+                    // No photo or under review
+                    statusText.textContent = 'Under Review';
+                    statusText.className = 'status-bar-text-yellow';
+                    if (statusBar) {
+                        statusBar.className = 'status-bar-fill-yellow';
+                        statusBar.style.width = '50%';
+                    }
                 }
             }
             
@@ -545,6 +545,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 const headerTitle = document.querySelector('.header-title');
                 if (headerTitle) {
                     headerTitle.textContent = currentProject.name;
+                }
+                
+                // Update project status based on photo approval
+                const statusText = document.getElementById('project-status-text');
+                const statusBar = document.getElementById('project-status-bar');
+                const clientName = document.getElementById('project-client-name');
+                
+                // Get current photo status
+                let photoStatus = null;
+                if (typeof PhotoStorageManager !== 'undefined') {
+                    const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+                    if (currentPhoto) {
+                        photoStatus = currentPhoto.status;
+                    }
+                }
+                
+                if (statusText) {
+                    if (photoStatus === 'approved') {
+                        statusText.textContent = 'Approved';
+                        statusText.className = 'status-bar-text-green';
+                        if (statusBar) {
+                            statusBar.className = 'status-bar-fill-green';
+                            statusBar.style.width = '100%';
+                        }
+                    } else if (photoStatus === 'not-approved') {
+                        statusText.textContent = 'Not Approved';
+                        statusText.className = 'status-bar-text-red';
+                        if (statusBar) {
+                            statusBar.className = 'status-bar-fill-red';
+                            statusBar.style.width = '0%';
+                        }
+                    } else {
+                        statusText.textContent = 'Under Review';
+                        statusText.className = 'status-bar-text-yellow';
+                        if (statusBar) {
+                            statusBar.className = 'status-bar-fill-yellow';
+                            statusBar.style.width = '50%';
+                        }
+                    }
+                }
+                
+                // Update client name
+                if (currentProject.client && clientName) {
+                    clientName.textContent = currentProject.client;
                 }
             }
         }
@@ -746,12 +790,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCurrentPhoto();
     loadRevisionHistory();
     
-    // Listen for photo updates to refresh photo viewer and revision history
+    // Listen for photo updates to refresh photo viewer, revision history, and status
     window.addEventListener('photosUpdated', (e) => {
         const currentProjectId = CommentsManager.getCurrentProjectId();
         if (e.detail && e.detail.projectId === currentProjectId) {
             loadCurrentPhoto();
             loadRevisionHistory();
+            updateProjectUI(); // Update status based on photo approval
         }
     });
 
