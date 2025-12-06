@@ -119,11 +119,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Redirect based on user type
                 // Clients see their own client site with their projects
                 if (finalUserType === 'client') {
-                    console.log('Client login detected, preparing redirect to client site...');
+                    console.log('Client login detected for:', email, '- preparing redirect to client site...');
                     
-                    // Store client info in sessionStorage for quick access
+                    // Ensure client data is initialized in localStorage first (including Jane Cooper)
                     try {
-                        const clientsData = localStorage.getItem('vugru_clients');
+                        let clientsData = localStorage.getItem('vugru_clients');
+                        if (!clientsData) {
+                            // Initialize with all default clients including Jane Cooper
+                            const defaultClients = [
+                                { id: 1, name: "John Smith", email: "john.smith@example.com", phone: "+1 (555) 123-4567", company: "Smith Realty Group", projectIds: [1], createdAt: new Date().toISOString() },
+                                { id: 2, name: "Sarah Johnson", email: "sarah.johnson@example.com", phone: "+1 (555) 234-5678", company: "Johnson Properties", projectIds: [2], createdAt: new Date().toISOString() },
+                                { id: 3, name: "Mike Davis", email: "mike.davis@example.com", phone: "+1 (555) 345-6789", company: "Davis Homes", projectIds: [3], createdAt: new Date().toISOString() },
+                                { id: 4, name: "Emily Chen", email: "emily.chen@example.com", phone: "+1 (555) 456-7890", company: "Chen Luxury Estates", projectIds: [4], createdAt: new Date().toISOString() },
+                                { id: 5, name: "Jane Cooper", email: "jane.cooper@example.com", phone: "+1 (555) 567-8901", company: "Cooper Real Estate Group", projectIds: [5], createdAt: new Date().toISOString() }
+                            ];
+                            localStorage.setItem('vugru_clients', JSON.stringify(defaultClients));
+                            clientsData = localStorage.getItem('vugru_clients');
+                            console.log('Initialized default client data in localStorage');
+                        }
+                        
+                        // Store client info in sessionStorage for quick access
                         if (clientsData) {
                             const clients = JSON.parse(clientsData);
                             const client = clients.find(c => 
@@ -131,19 +146,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             );
                             if (client) {
                                 sessionStorage.setItem('currentClient', JSON.stringify(client));
-                                console.log('Client info stored in sessionStorage:', client.name);
+                                console.log('Client info stored in sessionStorage:', client.name, '(', client.email, ')');
                             } else {
-                                console.warn('Client email found but client data not in localStorage');
+                                console.warn('Client email found but client data not in localStorage for:', email);
                             }
-                        } else {
-                            console.warn('No clients data in localStorage yet');
                         }
                     } catch (e) {
                         console.error('Error storing client info:', e);
                     }
                     
                     // Redirect to clients.html - it will show client-specific view
-                    console.log('Redirecting to clients.html...');
+                    console.log('Redirecting client to clients.html...');
                     window.location.href = 'clients.html';
                 } else {
                     // Regular users/agents go to project management or video dashboard

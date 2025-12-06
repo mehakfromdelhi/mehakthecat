@@ -331,7 +331,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             'john.smith@example.com',
                             'sarah.johnson@example.com',
                             'mike.davis@example.com',
-                            'emily.chen@example.com'
+                            'emily.chen@example.com',
+                            'jane.cooper@example.com'
                         ];
                         if (!defaultClientEmails.includes(clientEmail)) {
                             console.warn('User marked as client but not found in client database:', clientEmail);
@@ -351,12 +352,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize all features
     // If client is logged in, show their personalized client site with only their projects
     if (isClientUser && clientEmail) {
+        console.log('✓ Client user detected. Email:', clientEmail, 'UserType:', auth ? JSON.parse(auth).userType : 'N/A');
         initializeClientView(clientEmail);
-        console.log('Client view initialized for:', clientEmail);
+        console.log('✓ Client view initialized for:', clientEmail);
     } else {
         // Regular users (admin/staff) see the full client directory
+        console.log('Admin/Staff view - full client directory. Email:', clientEmail, 'IsClient:', isClientUser);
         initializeClients();
-        console.log('Admin/Staff view - full client directory');
     }
     initializeSearch();
     initializeLogout();
