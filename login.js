@@ -188,7 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'john.smith@example.com',
             'sarah.johnson@example.com',
             'mike.davis@example.com',
-            'emily.chen@example.com'
+            'emily.chen@example.com',
+            'jane.cooper@example.com'
         ];
         
         const isDefaultClient = defaultClientEmails.includes(normalizedEmail);
@@ -203,7 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         { id: 1, name: "John Smith", email: "john.smith@example.com", phone: "+1 (555) 123-4567", company: "Smith Realty Group", projectIds: [1], createdAt: new Date().toISOString() },
                         { id: 2, name: "Sarah Johnson", email: "sarah.johnson@example.com", phone: "+1 (555) 234-5678", company: "Johnson Properties", projectIds: [2], createdAt: new Date().toISOString() },
                         { id: 3, name: "Mike Davis", email: "mike.davis@example.com", phone: "+1 (555) 345-6789", company: "Davis Homes", projectIds: [3], createdAt: new Date().toISOString() },
-                        { id: 4, name: "Emily Chen", email: "emily.chen@example.com", phone: "+1 (555) 456-7890", company: "Chen Luxury Estates", projectIds: [4], createdAt: new Date().toISOString() }
+                        { id: 4, name: "Emily Chen", email: "emily.chen@example.com", phone: "+1 (555) 456-7890", company: "Chen Luxury Estates", projectIds: [4], createdAt: new Date().toISOString() },
+                        { id: 5, name: "Jane Cooper", email: "jane.cooper@example.com", phone: "+1 (555) 567-8901", company: "Cooper Real Estate Group", projectIds: [5], createdAt: new Date().toISOString() }
                     ];
                     localStorage.setItem('vugru_clients', JSON.stringify(defaultClients));
                 }
@@ -227,7 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'john.smith@example.com': 'john123',
             'sarah.johnson@example.com': 'sarah123',
             'mike.davis@example.com': 'mike123',
-            'emily.chen@example.com': 'emily123'
+            'emily.chen@example.com': 'emily123',
+            'jane.cooper@example.com': 'jane123'
         };
 
         // Check against demo credentials first

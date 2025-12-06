@@ -70,6 +70,14 @@ function initializeDefaultData() {
             status: "active",
             progress: 50,
             client: "Emily Chen"
+        },
+        {
+            id: 5,
+            name: "Park Avenue Modern Penthouse",
+            deadline: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
+            status: "active",
+            progress: 65,
+            client: "Jane Cooper"
         }
     ];
 
@@ -109,6 +117,15 @@ function initializeDefaultData() {
             phone: "+1 (555) 456-7890",
             company: "Chen Luxury Estates",
             projectIds: [4],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 5,
+            name: "Jane Cooper",
+            email: "jane.cooper@example.com",
+            phone: "+1 (555) 567-8901",
+            company: "Cooper Real Estate Group",
+            projectIds: [5],
             createdAt: new Date().toISOString()
         }
     ];
