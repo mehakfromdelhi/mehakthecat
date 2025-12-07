@@ -229,6 +229,44 @@ const ProjectDataManager = {
         projects.push(newProject);
         this.saveAllProjects(projects);
         return newProject;
+    },
+    
+    /**
+     * Delete a project by ID
+     */
+    deleteProject(projectId) {
+        const projects = this.getAllProjects();
+        const index = projects.findIndex(p => p.id === projectId);
+        
+        if (index === -1) {
+            console.error('Project not found:', projectId);
+            return false;
+        }
+        
+        // Remove project from array
+        projects.splice(index, 1);
+        this.saveAllProjects(projects);
+        
+        // Clean up related data
+        // Remove photos
+        if (typeof PhotoStorageManager !== 'undefined') {
+            const photoKey = PhotoStorageManager.getStorageKey(projectId);
+            localStorage.removeItem(photoKey);
+        }
+        
+        // Remove comments
+        if (typeof CommentsManager !== 'undefined') {
+            const commentKey = CommentsManager.getStorageKey(projectId);
+            localStorage.removeItem(commentKey);
+        }
+        
+        // Remove notifications
+        if (typeof PhotoStorageManager !== 'undefined') {
+            const notifKey = PhotoStorageManager.getNotifKey(projectId);
+            localStorage.removeItem(notifKey);
+        }
+        
+        return true;
     }
 };
 

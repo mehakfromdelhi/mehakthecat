@@ -110,8 +110,14 @@ function createProjectCard(project) {
             <button class="priority-btn ${project.priority === 'high' ? 'active' : ''}" data-priority="high" data-project-id="${project.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid #f59e0b; background: ${project.priority === 'high' ? '#f59e0b' : 'transparent'}; color: ${project.priority === 'high' ? 'white' : '#f59e0b'}; border-radius: 0.25rem; cursor: pointer;">High</button>
             <button class="priority-btn ${project.priority === 'normal' ? 'active' : ''}" data-priority="normal" data-project-id="${project.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid #6b7280; background: ${project.priority === 'normal' ? '#6b7280' : 'transparent'}; color: ${project.priority === 'normal' ? 'white' : '#6b7280'}; border-radius: 0.25rem; cursor: pointer;">Normal</button>
         </div>
-        <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
             <span class="project-card-status status-badge-large ${project.status}">${ProjectDataManager.getStatusLabel(project.status)}</span>
+            <button class="delete-project-btn" data-project-id="${project.id}" data-project-name="${project.name}" style="padding: 0.375rem 0.75rem; font-size: 0.75rem; border: 1px solid #dc2626; background: transparent; color: #dc2626; border-radius: 0.25rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; transition: all 0.2s; font-weight: 500;" title="Delete Project" onmouseover="this.style.background='#dc2626'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#dc2626';">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1rem; height: 1rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+                <span>Delete</span>
+            </button>
         </div>
     `;
     
@@ -137,10 +143,11 @@ function createProjectCard(project) {
         card.appendChild(commentBadge);
     }
     
-    // Make card clickable to jump to photo dashboard (but not when clicking priority buttons)
+    // Make card clickable to jump to photo dashboard (but not when clicking priority buttons or delete button)
     card.addEventListener('click', function(e) {
-        // Don't navigate if clicking on priority buttons
-        if (e.target.classList.contains('priority-btn') || e.target.closest('.priority-btn')) {
+        // Don't navigate if clicking on priority buttons or delete button
+        if (e.target.classList.contains('priority-btn') || e.target.closest('.priority-btn') ||
+            e.target.classList.contains('delete-project-btn') || e.target.closest('.delete-project-btn')) {
             return;
         }
         
@@ -175,6 +182,34 @@ function createProjectCard(project) {
             }
         });
     });
+    
+    // Add delete button event listener
+    const deleteButton = card.querySelector('.delete-project-btn');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent card click
+            const projectId = deleteButton.getAttribute('data-project-id');
+            const projectName = deleteButton.getAttribute('data-project-name');
+            
+            if (projectId) {
+                // Show confirmation dialog
+                if (confirm(`Are you sure you want to delete the project "${projectName}"?\n\nThis will permanently delete:\n- The project\n- All photos\n- All comments\n- All notifications\n\nThis action cannot be undone.`)) {
+                    // Delete the project
+                    const deleted = ProjectDataManager.deleteProject(projectId);
+                    
+                    if (deleted) {
+                        // Re-render projects to show updated list
+                        initializeProjects();
+                        
+                        // Show success message
+                        alert(`Project "${projectName}" has been deleted successfully.`);
+                    } else {
+                        alert('Failed to delete project. Please try again.');
+                    }
+                }
+            }
+        });
+    }
     
     return card;
 }
