@@ -348,10 +348,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageElement = document.createElement('img');
             imageElement.src = photoUrl;
             imageElement.alt = file.name;
+            // Position absolutely to match placeholder positioning
+            imageElement.style.position = 'absolute';
+            imageElement.style.top = '0';
+            imageElement.style.left = '0';
             imageElement.style.width = '100%';
             imageElement.style.height = '100%';
             imageElement.style.objectFit = 'contain';
             imageElement.style.borderRadius = '0.5rem';
+            imageElement.style.display = 'block';
+            imageElement.style.backgroundColor = '#000000'; // Match placeholder background
             videoPlayerWrapper.appendChild(imageElement);
             
             // Update card footer with file info
@@ -653,11 +659,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageElement = document.createElement('img');
             imageElement.src = currentPhoto.url;
             imageElement.alt = currentPhoto.fileName || 'Property Photo';
+            // Position absolutely to match placeholder positioning
+            imageElement.style.position = 'absolute';
+            imageElement.style.top = '0';
+            imageElement.style.left = '0';
             imageElement.style.width = '100%';
             imageElement.style.height = '100%';
             imageElement.style.objectFit = 'contain';
             imageElement.style.borderRadius = '0.5rem';
             imageElement.style.display = 'block';
+            imageElement.style.backgroundColor = '#000000'; // Match placeholder background
             
             // Add error handler in case image fails to load
             imageElement.onerror = function() {
