@@ -283,18 +283,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Save photo to PhotoStorageManager with data URL
                         if (currentProjectId && typeof PhotoStorageManager !== 'undefined') {
-                            PhotoStorageManager.savePhoto(currentProjectId, {
-                                fileName: file.name,
-                                url: photoDataUrl,
-                                notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
-                            });
-                            
-                            // Refresh photo viewer and revision history after a short delay to ensure save is complete
-                            setTimeout(() => {
+                            try {
+                                const savedPhoto = PhotoStorageManager.savePhoto(currentProjectId, {
+                                    fileName: file.name,
+                                    url: photoDataUrl,
+                                    notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+                                });
+                                
+                                console.log('Photo saved successfully:', savedPhoto);
+                                console.log('Current project ID:', currentProjectId);
+                                
+                                // Refresh photo viewer and revision history immediately
+                                // The photosUpdated event will also trigger, but we call this directly for immediate feedback
                                 loadCurrentPhoto();
                                 loadRevisionHistory();
-                            }, 100);
+                            } catch (error) {
+                                console.error('Error saving photo:', error);
+                                // Fallback: Update photo viewer directly
+                                updatePhotoViewer(photoDataUrl, file);
+                            }
                         } else {
+                            console.warn('PhotoStorageManager not available or no project ID. Current project ID:', currentProjectId);
                             // Fallback: Update photo viewer directly if PhotoStorageManager not available
                             updatePhotoViewer(photoDataUrl, file);
                         }
@@ -603,14 +612,30 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function loadCurrentPhoto() {
         const currentProjectId = CommentsManager.getCurrentProjectId();
-        if (!currentProjectId || typeof PhotoStorageManager === 'undefined') return;
+        
+        console.log('loadCurrentPhoto called with project ID:', currentProjectId);
+        
+        if (!currentProjectId) {
+            console.warn('No project ID available');
+            return;
+        }
+        
+        if (typeof PhotoStorageManager === 'undefined') {
+            console.warn('PhotoStorageManager not available');
+            return;
+        }
         
         const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
         const videoPlayerPlaceholder = document.querySelector('.video-player-placeholder');
         
-        if (!videoPlayerWrapper) return;
+        if (!videoPlayerWrapper) {
+            console.warn('Video player wrapper not found');
+            return;
+        }
         
         const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProjectId);
+        
+        console.log('Current photo retrieved:', currentPhoto);
         
         if (currentPhoto && currentPhoto.url) {
             // Hide placeholder
@@ -632,6 +657,24 @@ document.addEventListener('DOMContentLoaded', () => {
             imageElement.style.height = '100%';
             imageElement.style.objectFit = 'contain';
             imageElement.style.borderRadius = '0.5rem';
+            imageElement.style.display = 'block';
+            
+            // Add error handler in case image fails to load
+            imageElement.onerror = function() {
+                console.error('Failed to load image:', currentPhoto.url.substring(0, 50) + '...');
+                if (videoPlayerPlaceholder) {
+                    videoPlayerPlaceholder.style.display = 'flex';
+                }
+            };
+            
+            // Add load handler to ensure image is displayed
+            imageElement.onload = function() {
+                console.log('Image loaded successfully');
+                if (videoPlayerPlaceholder) {
+                    videoPlayerPlaceholder.style.display = 'none';
+                }
+            };
+            
             videoPlayerWrapper.appendChild(imageElement);
             
             // Update card footer
@@ -795,10 +838,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listen for photo updates to refresh photo viewer, revision history, and status
     window.addEventListener('photosUpdated', (e) => {
         const currentProjectId = CommentsManager.getCurrentProjectId();
-        if (e.detail && e.detail.projectId === currentProjectId) {
+        console.log('photosUpdated event received:', e.detail, 'Current project ID:', currentProjectId);
+        
+        // Update if project ID matches, or if no project ID specified (update all)
+        if (e.detail && (e.detail.projectId === currentProjectId || !e.detail.projectId)) {
+            console.log('Refreshing photo viewer for project:', currentProjectId);
             loadCurrentPhoto();
             loadRevisionHistory();
             updateProjectUI(); // Update status based on photo approval
+        } else {
+            console.log('Event project ID does not match current project ID');
         }
     });
 
