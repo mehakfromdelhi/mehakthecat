@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeProjects();
     initializeNavigation();
     initializeLogout();
+    initializeCreateProject();
     
     console.log('Project Management Dashboard initialized');
 });
@@ -195,4 +196,125 @@ function initializeLogout() {
             window.location.href = 'login.html';
         });
     }
+}
+
+// ===================== Create New Project =====================
+function initializeCreateProject() {
+    const createProjectBtn = document.getElementById('create-project-btn');
+    if (!createProjectBtn) return;
+    
+    createProjectBtn.addEventListener('click', function() {
+        openCreateProjectModal();
+    });
+}
+
+function openCreateProjectModal() {
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.id = 'create-project-modal';
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+    
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background: white; border-radius: 0.5rem; padding: 2rem; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;';
+    
+    modalContent.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin: 0;">Create New Project</h2>
+            <button id="close-create-modal" style="background: none; border: none; cursor: pointer; padding: 0.25rem; color: #6b7280; font-size: 1.5rem; line-height: 1;">&times;</button>
+        </div>
+        <form id="create-project-form" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label for="project-name" style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Project Name *</label>
+                <input type="text" id="project-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;" placeholder="e.g., Downtown Luxury Condo">
+            </div>
+            <div>
+                <label for="client-name" style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Client Name *</label>
+                <input type="text" id="client-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;" placeholder="e.g., John Smith">
+            </div>
+            <div>
+                <label for="client-email" style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Client Email *</label>
+                <input type="email" id="client-email" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;" placeholder="client@example.com">
+            </div>
+            <div>
+                <label for="project-deadline" style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Deadline *</label>
+                <input type="date" id="project-deadline" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+            </div>
+            <div>
+                <label for="project-status" style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Initial Status</label>
+                <select id="project-status" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+                    <option value="active">Active</option>
+                    <option value="in-review">In Review</option>
+                    <option value="awaiting-feedback">Awaiting Feedback</option>
+                </select>
+            </div>
+            <div>
+                <label for="project-progress" style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Progress (%)</label>
+                <input type="number" id="project-progress" min="0" max="100" value="0" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem;">
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button type="button" id="cancel-create-project" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: white; color: #374151; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button type="submit" style="flex: 1; padding: 0.75rem; border: none; border-radius: 0.5rem; background: #a855f7; color: white; font-weight: 600; cursor: pointer;">Create Project</button>
+            </div>
+        </form>
+    `;
+    
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Set minimum date to today
+    const deadlineInput = document.getElementById('project-deadline');
+    if (deadlineInput) {
+        const today = new Date().toISOString().split('T')[0];
+        deadlineInput.setAttribute('min', today);
+    }
+    
+    // Close modal handlers
+    const closeModal = () => {
+        document.body.removeChild(modal);
+    };
+    
+    document.getElementById('close-create-modal').addEventListener('click', closeModal);
+    document.getElementById('cancel-create-project').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+    
+    // Form submission
+    document.getElementById('create-project-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const projectName = document.getElementById('project-name').value.trim();
+        const clientName = document.getElementById('client-name').value.trim();
+        const clientEmail = document.getElementById('client-email').value.trim();
+        const deadline = document.getElementById('project-deadline').value;
+        const status = document.getElementById('project-status').value;
+        const progress = parseInt(document.getElementById('project-progress').value) || 0;
+        
+        if (!projectName || !clientName || !clientEmail || !deadline) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+        
+        // Create project
+        const newProject = ProjectDataManager.addProject({
+            name: projectName,
+            client: clientName,
+            clientEmail: clientEmail,
+            deadline: deadline,
+            status: status,
+            progress: progress
+        });
+        
+        console.log('New project created:', newProject);
+        
+        // Close modal
+        closeModal();
+        
+        // Refresh project list
+        initializeProjects();
+        
+        // Show success message (optional)
+        alert(`Project "${projectName}" created successfully!`);
+    });
 }

@@ -289,9 +289,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
                             });
                             
-                            // Refresh photo viewer and revision history immediately
-                            loadCurrentPhoto();
-                            loadRevisionHistory();
+                            // Refresh photo viewer and revision history after a short delay to ensure save is complete
+                            setTimeout(() => {
+                                loadCurrentPhoto();
+                                loadRevisionHistory();
+                            }, 100);
                         } else {
                             // Fallback: Update photo viewer directly if PhotoStorageManager not available
                             updatePhotoViewer(photoDataUrl, file);

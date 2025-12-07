@@ -51,7 +51,6 @@
         <nav class="nav">
             <a href="project-management.html" class="nav-item active"><svg class="ico"><use href="#ico-target"/></svg>Project Overview</a>
             <a href="calendar.html" class="nav-item"><svg class="ico"><use href="#ico-calendar"/></svg>Calendar</a>
-            <a href="Vugru HTML.html" class="nav-item highlight"><svg class="ico"><use href="#ico-video"/></svg>Photo Dashboard</a>
         </nav>
         <div class="foot">
             <button id="pm-logout-button" class="icon-btn bordered" style="width: 100%; margin-top: 1rem; justify-content: center; gap: 0.5rem;" title="Logout">
@@ -74,7 +73,15 @@
                     <span class="hint">Sorted by deadline priority</span>
                 </div>
             </div>
-            <p class="muted small">Click on any project to open the photo dashboard and start working.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <p class="muted small" style="margin: 0;">Click on any project to open the photo dashboard and start working.</p>
+                <button id="create-project-btn" class="icon-btn" style="padding: 0.5rem 1rem; background: #a855f7; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    <span>New Project</span>
+                </button>
+            </div>
 
             <div id="projects-list" class="projects-grid">
                 <!-- Projects will be dynamically inserted here by JavaScript -->
