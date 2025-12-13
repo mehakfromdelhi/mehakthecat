@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Convert file to data URL for persistence
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             const photoDataUrl = e.target.result;
             
             // Simulate upload progress (in production, this would be actual upload progress)
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     clearInterval(interval);
                     
                     // Show success message
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         if (uploadProgress) {
                             uploadProgress.style.display = 'none';
                         }
