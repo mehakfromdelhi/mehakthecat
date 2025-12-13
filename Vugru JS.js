@@ -669,10 +669,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                // Update client name
-                if (currentProject.client && clientName) {
-                    clientName.textContent = currentProject.client;
+                // Update client name - ensure we have it
+                if (clientName) {
+                    if (currentProject.client) {
+                        clientName.textContent = currentProject.client;
+                    } else {
+                        // Try to get from ProjectDataManager if missing
+                        const fullProject = ProjectDataManager.getProject(projectId);
+                        if (fullProject && fullProject.client) {
+                            clientName.textContent = fullProject.client;
+                            // Update currentProject and sessionStorage
+                            currentProject.client = fullProject.client;
+                            sessionStorage.setItem('selectedProject', JSON.stringify(currentProject));
+                        } else {
+                            clientName.textContent = 'N/A';
+                        }
+                    }
                 }
+            } catch (error) {
+                console.error('Error loading project from ProjectDataManager:', error);
             }
         }
     }
