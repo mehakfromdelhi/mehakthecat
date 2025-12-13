@@ -497,13 +497,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * -------------------------------------------
      */
     function loadProjectData() {
-        console.log('loadProjectData called');
-        console.log('Current sessionStorage selectedProject:', sessionStorage.getItem('selectedProject'));
-        
         // Wait for ProjectDataManager to be available
         if (typeof ProjectDataManager === 'undefined') {
-            console.error('ProjectDataManager is not available');
-            // Try again after a short delay
             setTimeout(loadProjectData, 100);
             return null;
         }
@@ -511,122 +506,54 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ensure ProjectDataManager is initialized
         ProjectDataManager.initialize();
         
-        // Get project ID from URL first (most reliable for unique project pages)
+        // Get project ID from URL - THIS IS THE SOURCE OF TRUTH
         const urlParams = new URLSearchParams(window.location.search);
         let projectId = urlParams.get('projectId');
-        let projectFromStorage = null;
         
-        console.log('=== LOADING PROJECT DATA ===');
-        console.log('Current URL:', window.location.href);
-        console.log('Project ID from URL:', projectId);
-        
-        // Decode URL parameter if needed
+        // Decode if needed
         if (projectId) {
             projectId = decodeURIComponent(projectId);
-            console.log('Decoded project ID:', projectId);
         }
         
-        // If no project ID from URL, try sessionStorage
+        // If no project ID in URL, try sessionStorage
         if (!projectId) {
             const selectedProject = sessionStorage.getItem('selectedProject');
             if (selectedProject) {
                 try {
-                    projectFromStorage = JSON.parse(selectedProject);
-                    projectId = projectFromStorage.id || projectFromStorage.projectId;
-                    console.log('Project ID from sessionStorage:', projectId);
-                    console.log('Project name from sessionStorage:', projectFromStorage.name);
-                    console.log('Project client from sessionStorage:', projectFromStorage.client);
-                    console.log('Full project data from sessionStorage:', projectFromStorage);
-                } catch (e) {
-                    console.error('Error parsing selected project:', e);
-                }
-            } else {
-                console.warn('No project in sessionStorage');
-            }
-        } else {
-            // If we have project ID from URL, also update sessionStorage for consistency
-            const selectedProject = sessionStorage.getItem('selectedProject');
-            if (selectedProject) {
-                try {
-                    projectFromStorage = JSON.parse(selectedProject);
+                    const parsed = JSON.parse(selectedProject);
+                    projectId = parsed.id || parsed.projectId;
                 } catch (e) {
                     console.error('Error parsing selected project:', e);
                 }
             }
         }
         
-        // If still no project ID, try CommentsManager
-        if (!projectId && typeof CommentsManager !== 'undefined') {
-            projectId = CommentsManager.getCurrentProjectId();
-            console.log('Project ID from CommentsManager:', projectId);
-        }
-        
         if (!projectId) {
-            console.error('No project ID found anywhere!');
-            // Show error in UI
+            // No project selected - show error
             const headerTitle = document.querySelector('.header-title');
-            if (headerTitle) {
-                headerTitle.textContent = 'No Project Selected';
-            }
+            if (headerTitle) headerTitle.textContent = 'No Project Selected';
             const clientName = document.getElementById('project-client-name');
-            if (clientName) {
-                clientName.textContent = 'N/A';
-            }
+            if (clientName) clientName.textContent = 'N/A';
             const statusText = document.getElementById('project-status-text');
-            if (statusText) {
-                statusText.textContent = 'No Project';
-            }
+            if (statusText) statusText.textContent = 'No Project';
             return null;
         }
         
-        // Fetch complete project data from ProjectDataManager
-        console.log('Fetching project from ProjectDataManager with ID:', projectId);
-        const allProjects = ProjectDataManager.getAllProjects();
-        console.log('All available projects:', allProjects.map(p => ({ id: p.id, name: p.name, client: p.client, status: p.status })));
-        
-        let currentProject = ProjectDataManager.getProject(projectId);
+        // Fetch project from ProjectDataManager - THIS IS THE SOURCE OF TRUTH FOR PROJECT DATA
+        const currentProject = ProjectDataManager.getProject(projectId);
         
         if (!currentProject) {
-            console.error('❌ Project not found in ProjectDataManager. Project ID:', projectId);
-            console.log('Available project IDs:', allProjects.map(p => p.id));
-            
-            // Try to use data from sessionStorage as fallback
-            if (projectFromStorage && projectFromStorage.name) {
-                console.log('⚠️ Using project data from sessionStorage as fallback');
-                currentProject = projectFromStorage;
-            } else {
-                // Show error in UI
-                const headerTitle = document.querySelector('.header-title');
-                if (headerTitle) {
-                    headerTitle.textContent = 'Project Not Found';
-                }
-                const clientName = document.getElementById('project-client-name');
-                if (clientName) {
-                    clientName.textContent = 'N/A';
-                }
-                const statusText = document.getElementById('project-status-text');
-                if (statusText) {
-                    statusText.textContent = 'Not Found';
-                }
-                return null;
-            }
-        } else {
-            console.log('✅ Project found in ProjectDataManager:');
-            console.log('  - ID:', currentProject.id);
-            console.log('  - Name:', currentProject.name);
-            console.log('  - Client:', currentProject.client);
-            console.log('  - Status:', currentProject.status);
-        }
-        
-        // CRITICAL: Ensure we're using the EXACT data from ProjectDataManager
-        // Re-fetch to make absolutely sure we have the latest data
-        currentProject = ProjectDataManager.getProject(projectId);
-        if (!currentProject) {
-            console.error('❌ Failed to fetch project even after retry');
+            // Project not found - show error
+            const headerTitle = document.querySelector('.header-title');
+            if (headerTitle) headerTitle.textContent = 'Project Not Found';
+            const clientName = document.getElementById('project-client-name');
+            if (clientName) clientName.textContent = 'N/A';
+            const statusText = document.getElementById('project-status-text');
+            if (statusText) statusText.textContent = 'Not Found';
             return null;
         }
         
-        // Update sessionStorage with complete project data from ProjectDataManager
+        // Update sessionStorage with complete project data
         sessionStorage.setItem('selectedProject', JSON.stringify({
             id: currentProject.id,
             name: currentProject.name,
@@ -639,32 +566,15 @@ document.addEventListener('DOMContentLoaded', () => {
             priority: currentProject.priority
         }));
         
-        // Update header title with project name - FORCE UPDATE
+        // Update UI with project data - SIMPLE AND DIRECT
         const headerTitle = document.querySelector('.header-title');
         if (headerTitle) {
-            const projectName = currentProject.name || 'Unknown Project';
-            headerTitle.textContent = projectName;
-            console.log('✅ Updated header title to:', projectName);
-            // Force a re-render by triggering a style change
-            headerTitle.style.display = 'none';
-            headerTitle.offsetHeight; // Trigger reflow
-            headerTitle.style.display = '';
-        } else {
-            console.error('❌ Header title element not found!');
+            headerTitle.textContent = currentProject.name;
         }
         
-        // Update client name - FORCE UPDATE
         const clientName = document.getElementById('project-client-name');
         if (clientName) {
-            const clientNameValue = currentProject.client || 'N/A';
-            clientName.textContent = clientNameValue;
-            console.log('✅ Updated client name to:', clientNameValue);
-            // Force a re-render
-            clientName.style.display = 'none';
-            clientName.offsetHeight; // Trigger reflow
-            clientName.style.display = '';
-        } else {
-            console.error('❌ Client name element not found!');
+            clientName.textContent = currentProject.client || 'N/A';
         }
         
         // Update project status - show actual project status, not just photo status
