@@ -6,15 +6,19 @@
  * falls back to localStorage otherwise
  */
 
+import { FirebaseService } from './firebase-config.js';
+import { FirebasePhotoService } from './firebase-photo-service.js';
+import { FirebaseCommentService } from './firebase-comment-service.js';
+
 const StorageAdapter = {
   /**
    * Check if Firebase is available and configured
    */
   isFirebaseAvailable() {
-    return typeof FirebaseService !== 'undefined' && 
+    return FirebaseService && 
            FirebaseService.isAvailable() &&
-           typeof FirebasePhotoService !== 'undefined' &&
-           typeof FirebaseCommentService !== 'undefined';
+           FirebasePhotoService &&
+           FirebaseCommentService;
   },
   
   /**

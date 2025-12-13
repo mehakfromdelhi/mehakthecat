@@ -3,26 +3,24 @@
  * Firebase Configuration
  * ===========================================
  * Initialize Firebase services (Firestore, Storage, Auth)
- * 
- * SETUP INSTRUCTIONS:
- * 1. Go to https://console.firebase.google.com/
- * 2. Create a new project or select existing one
- * 3. Enable Firestore Database (Start in test mode initially)
- * 4. Enable Firebase Storage
- * 5. Go to Project Settings > General > Your apps
- * 6. Add a web app and copy the config object
- * 7. Replace the placeholder config below with your actual config
+ * Uses Firebase JS SDK v12.6.0 with ES6 modules
  */
 
-// TODO: Replace with your Firebase project configuration
-// Get this from Firebase Console > Project Settings > General > Your apps > Web app
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBYT-__KNgIr1WU-0kXjxD-m9C8TnNPq-4",
+  authDomain: "vugru-96d27.firebaseapp.com",
+  projectId: "vugru-96d27",
+  storageBucket: "vugru-96d27.firebasestorage.app",
+  messagingSenderId: "1001802559480",
+  appId: "1:1001802559480:web:00517e22a119979a9e700d",
+  measurementId: "G-1L3143VXTM"
 };
 
 // Initialize Firebase
@@ -32,23 +30,13 @@ let storage; // Firebase Storage
 let auth; // Firebase Authentication
 
 try {
-  // Check if Firebase is already initialized
-  if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-    firebaseApp = firebase.app();
-    db = firebase.firestore();
-    storage = firebase.storage();
-    auth = firebase.auth();
-  } else if (typeof firebase !== 'undefined') {
-    // Initialize Firebase
-    firebaseApp = firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    storage = firebase.storage();
-    auth = firebase.auth();
-    
-    console.log('Firebase initialized successfully');
-  } else {
-    console.warn('Firebase SDK not loaded. Make sure to include Firebase scripts in your HTML.');
-  }
+  // Initialize Firebase
+  firebaseApp = initializeApp(firebaseConfig);
+  db = getFirestore(firebaseApp);
+  storage = getStorage(firebaseApp);
+  auth = getAuth(firebaseApp);
+  
+  console.log('Firebase initialized successfully');
 } catch (error) {
   console.error('Error initializing Firebase:', error);
 }
@@ -57,7 +45,7 @@ try {
 const FirebaseService = {
   // Check if Firebase is available
   isAvailable() {
-    return typeof firebase !== 'undefined' && db !== undefined;
+    return firebaseApp !== undefined && db !== undefined;
   },
   
   // Get Firestore database instance
@@ -106,8 +94,6 @@ const FirebaseService = {
   }
 };
 
-// Make FirebaseService globally available
-if (typeof window !== 'undefined') {
-  window.FirebaseService = FirebaseService;
-}
+// Export for use in other modules
+export { FirebaseService, db, storage, auth, firebaseApp };
 

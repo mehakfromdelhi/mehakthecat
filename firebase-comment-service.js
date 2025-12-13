@@ -5,6 +5,11 @@
  * Handles comments storage in Firestore with metadata
  */
 
+import { FirebaseService } from './firebase-config.js';
+import { FirebasePhotoService } from './firebase-photo-service.js';
+import { collection, doc, setDoc, getDocs, query, where, orderBy, updateDoc, serverTimestamp, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { db } from './firebase-config.js';
+
 const FirebaseCommentService = {
   /**
    * Save a new comment
@@ -24,7 +29,6 @@ const FirebaseCommentService = {
       throw new Error('Firebase is not available');
     }
     
-    const db = FirebaseService.getDb();
     const currentUser = FirebaseService.getCurrentUser();
     
     if (!currentUser) {
@@ -56,14 +60,14 @@ const FirebaseCommentService = {
         author: userType,
         authorEmail: authorEmail,
         authorDisplayName: authorDisplayName,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        timestamp: serverTimestamp(),
         status: 'new',
         version: version,
         replies: []
       };
       
       // Save to Firestore
-      await db.collection('comments').doc(commentId).set(commentData);
+      await setDoc(doc(db, 'comments', commentId), commentData);
       
       console.log('Comment saved successfully:', commentData);
       return {
@@ -89,19 +93,25 @@ const FirebaseCommentService = {
       return [];
     }
     
-    const db = FirebaseService.getDb();
     
     try {
-      let query = db.collection('comments')
-        .where('projectId', '==', projectId);
-      
+      let q;
       if (photoId) {
-        query = query.where('photoId', '==', photoId);
+        q = query(
+          collection(db, 'comments'),
+          where('projectId', '==', projectId),
+          where('photoId', '==', photoId),
+          orderBy('timestamp', 'desc')
+        );
+      } else {
+        q = query(
+          collection(db, 'comments'),
+          where('projectId', '==', projectId),
+          orderBy('timestamp', 'desc')
+        );
       }
       
-      const snapshot = await query
-        .orderBy('timestamp', 'desc')
-        .get();
+      const snapshot = await getDocs(q);
       
       return snapshot.docs.map(doc => {
         const data = doc.data();
@@ -128,20 +138,23 @@ const FirebaseCommentService = {
       throw new Error('Firebase is not available');
     }
     
-    const db = FirebaseService.getDb();
-    
     try {
-      await db.collection('comments').doc(commentId).update({
+      await updateDoc(doc(db, 'comments', commentId), {
         status: status,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        lastUpdated: serverTimestamp()
       });
       
-      const commentDoc = await db.collection('comments').doc(commentId).get();
-      return {
-        id: commentDoc.id,
-        ...commentDoc.data(),
-        timestamp: commentDoc.data().timestamp?.toDate() || new Date()
-      };
+      const commentQuery = query(collection(db, 'comments'), where('commentId', '==', commentId));
+      const commentSnapshot = await getDocs(commentQuery);
+      if (!commentSnapshot.empty) {
+        const commentData = commentSnapshot.docs[0].data();
+        return {
+          id: commentSnapshot.docs[0].id,
+          ...commentData,
+          timestamp: commentData.timestamp?.toDate() || new Date()
+        };
+      }
+      return null;
     } catch (error) {
       console.error('Error updating comment status:', error);
       throw error;
@@ -165,7 +178,6 @@ const FirebaseCommentService = {
       throw new Error('Firebase is not available');
     }
     
-    const db = FirebaseService.getDb();
     const currentUser = FirebaseService.getCurrentUser();
     
     if (!currentUser) {
@@ -188,9 +200,9 @@ const FirebaseCommentService = {
       };
       
       // Add reply to comment's replies array
-      await db.collection('comments').doc(commentId).update({
-        replies: firebase.firestore.FieldValue.arrayUnion(reply),
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+      await updateDoc(doc(db, 'comments', commentId), {
+        replies: arrayUnion(reply),
+        lastUpdated: serverTimestamp()
       });
       
       return {
@@ -224,29 +236,29 @@ const FirebaseCommentService = {
       return () => {};
     }
     
-    const db = FirebaseService.getDb();
     
-    return db.collection('comments')
-      .where('projectId', '==', projectId)
-      .orderBy('timestamp', 'desc')
-      .onSnapshot((snapshot) => {
-        const comments = snapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            ...data,
-            timestamp: data.timestamp?.toDate() || new Date()
-          };
-        });
-        callback(comments);
-      }, (error) => {
-        console.error('Error in comments listener:', error);
+    const q = query(
+      collection(db, 'comments'),
+      where('projectId', '==', projectId),
+      orderBy('timestamp', 'desc')
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const comments = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp?.toDate() || new Date()
+        };
       });
+      callback(comments);
+    }, (error) => {
+      console.error('Error in comments listener:', error);
+    });
   }
 };
 
-// Make globally available
-if (typeof window !== 'undefined') {
-  window.FirebaseCommentService = FirebaseCommentService;
-}
+// Export for use in other modules
+export { FirebaseCommentService };
 

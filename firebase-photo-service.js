@@ -6,6 +6,12 @@
  * Stores photo metadata in Firestore
  */
 
+import { FirebaseService } from './firebase-config.js';
+import { collection, doc, setDoc, getDocs, query, where, orderBy, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { db, storage } from './firebase-config.js';
+
 const FirebasePhotoService = {
   /**
    * Upload a photo to Firebase Storage and save metadata to Firestore
@@ -19,8 +25,6 @@ const FirebasePhotoService = {
       throw new Error('Firebase is not available');
     }
     
-    const db = FirebaseService.getDb();
-    const storage = FirebaseService.getStorage();
     const currentUser = FirebaseService.getCurrentUser();
     
     if (!currentUser) {
@@ -33,16 +37,13 @@ const FirebasePhotoService = {
       
       // Create storage path
       const storagePath = `projects/${projectId}/photos/${photoId}`;
-      const storageRef = storage.ref().child(storagePath);
+      const storageRef = ref(storage, storagePath);
       
       // Upload file to Firebase Storage
-      const uploadTask = storageRef.put(file);
-      
-      // Wait for upload to complete
-      const snapshot = await uploadTask;
+      const snapshot = await uploadBytes(storageRef, file);
       
       // Get download URL
-      const downloadURL = await snapshot.ref.getDownloadURL();
+      const downloadURL = await getDownloadURL(snapshot.ref);
       
       // Get file metadata
       const fileSize = file.size;
@@ -70,7 +71,7 @@ const FirebasePhotoService = {
         storagePath: storagePath,
         downloadURL: downloadURL,
         version: version,
-        uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        uploadedAt: serverTimestamp(),
         uploadedBy: uploadedBy,
         uploadedByDisplayName: uploadedByDisplayName || uploadedBy,
         status: 'under-review',
@@ -83,7 +84,7 @@ const FirebasePhotoService = {
       };
       
       // Save to Firestore
-      await db.collection('photos').doc(photoId).set(photoData);
+      await setDoc(doc(db, 'photos', photoId), photoData);
       
       // Add notification for client
       await this.addNotification(projectId, version === 1 ? 'new-photo' : 'new-version', 
@@ -108,13 +109,13 @@ const FirebasePhotoService = {
       return [];
     }
     
-    const db = FirebaseService.getDb();
-    
     try {
-      const snapshot = await db.collection('photos')
-        .where('projectId', '==', projectId)
-        .orderBy('uploadedAt', 'desc')
-        .get();
+      const q = query(
+        collection(db, 'photos'),
+        where('projectId', '==', projectId),
+        orderBy('uploadedAt', 'desc')
+      );
+      const snapshot = await getDocs(q);
       
       return snapshot.docs.map(doc => ({
         id: doc.id,
@@ -153,7 +154,6 @@ const FirebasePhotoService = {
       throw new Error('Firebase is not available');
     }
     
-    const db = FirebaseService.getDb();
     const currentUser = FirebaseService.getCurrentUser();
     
     if (!currentUser) {
@@ -163,19 +163,30 @@ const FirebasePhotoService = {
     try {
       const updateData = {
         status: status,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        lastUpdated: serverTimestamp()
       };
       
       if (status === 'approved' || status === 'not-approved') {
         updateData.approvedBy = approvedBy || currentUser.email;
-        updateData.approvedAt = firebase.firestore.FieldValue.serverTimestamp();
+        updateData.approvedAt = serverTimestamp();
       }
       
-      await db.collection('photos').doc(photoId).update(updateData);
+      // Update the photo document (photoId is the document ID)
+      await updateDoc(doc(db, 'photos', photoId), updateData);
       
       // Get updated photo
-      const photoDoc = await db.collection('photos').doc(photoId).get();
-      return { id: photoDoc.id, ...photoDoc.data() };
+      const photoDoc = await getDocs(query(collection(db, 'photos'), where('__name__', '==', photoId)));
+      if (!photoDoc.empty) {
+        const photoData = photoDoc.docs[0].data();
+        return { id: photoDoc.docs[0].id, ...photoData };
+      }
+      // Fallback: try getting by photoId field
+      const photoDoc2 = await getDocs(query(collection(db, 'photos'), where('photoId', '==', photoId)));
+      if (!photoDoc2.empty) {
+        const photoData = photoDoc2.docs[0].data();
+        return { id: photoDoc2.docs[0].id, ...photoData };
+      }
+      return null;
       
     } catch (error) {
       console.error('Error updating photo status:', error);
@@ -232,14 +243,13 @@ const FirebasePhotoService = {
   async addNotification(projectId, type, message) {
     if (!FirebaseService.isAvailable()) return;
     
-    const db = FirebaseService.getDb();
-    
     try {
-      await db.collection('notifications').add({
+      const notificationRef = doc(collection(db, 'notifications'));
+      await setDoc(notificationRef, {
         projectId: projectId,
         type: type,
         message: message,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        timestamp: serverTimestamp(),
         read: false
       });
     } catch (error) {
@@ -258,26 +268,26 @@ const FirebasePhotoService = {
       return () => {};
     }
     
-    const db = FirebaseService.getDb();
     
-    return db.collection('photos')
-      .where('projectId', '==', projectId)
-      .orderBy('uploadedAt', 'desc')
-      .onSnapshot((snapshot) => {
-        const photos = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          uploadedAt: doc.data().uploadedAt?.toDate() || new Date()
-        }));
-        callback(photos);
-      }, (error) => {
-        console.error('Error in photos listener:', error);
-      });
+    const q = query(
+      collection(db, 'photos'),
+      where('projectId', '==', projectId),
+      orderBy('uploadedAt', 'desc')
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const photos = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        uploadedAt: doc.data().uploadedAt?.toDate() || new Date()
+      }));
+      callback(photos);
+    }, (error) => {
+      console.error('Error in photos listener:', error);
+    });
   }
 };
 
-// Make globally available
-if (typeof window !== 'undefined') {
-  window.FirebasePhotoService = FirebasePhotoService;
-}
+// Export for use in other modules
+export { FirebasePhotoService };
 
