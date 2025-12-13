@@ -498,6 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function loadProjectData() {
         console.log('loadProjectData called');
+        console.log('Current sessionStorage selectedProject:', sessionStorage.getItem('selectedProject'));
         
         // Wait for ProjectDataManager to be available
         if (typeof ProjectDataManager === 'undefined') {
@@ -510,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ensure ProjectDataManager is initialized
         ProjectDataManager.initialize();
         
-        // Get project ID from sessionStorage
+        // Get project ID from sessionStorage - ALWAYS read fresh from sessionStorage
         const selectedProject = sessionStorage.getItem('selectedProject');
         let projectId = null;
         let projectFromStorage = null;
@@ -519,8 +520,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 projectFromStorage = JSON.parse(selectedProject);
                 projectId = projectFromStorage.id || projectFromStorage.projectId;
+                console.log('=== LOADING PROJECT DATA ===');
                 console.log('Project ID from sessionStorage:', projectId);
-                console.log('Project data from sessionStorage:', projectFromStorage);
+                console.log('Project name from sessionStorage:', projectFromStorage.name);
+                console.log('Project client from sessionStorage:', projectFromStorage.client);
+                console.log('Full project data from sessionStorage:', projectFromStorage);
             } catch (e) {
                 console.error('Error parsing selected project:', e);
             }
