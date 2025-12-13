@@ -945,33 +945,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackReplySend = document.getElementById('feedback-reply-send');
     const feedbackList = document.querySelector('.feedback-list');
     
-    // Get project ID - ensure we have it from the loaded project
-    let projectId = null;
-    if (currentProject) {
-        projectId = currentProject.id || currentProject.projectId;
-    }
-    
-    // Fallback to sessionStorage
-    if (!projectId) {
-        const selectedProject = sessionStorage.getItem('selectedProject');
-        if (selectedProject) {
-            try {
-                const parsed = JSON.parse(selectedProject);
-                projectId = parsed.id || parsed.projectId;
-            } catch (e) {
-                console.error('Error parsing selected project for comments:', e);
+    // Function to get project ID and initialize comments
+    function initializeComments() {
+        // Get project ID - ensure we have it from the loaded project
+        let projectId = null;
+        
+        // First try to get from currentProject (if loaded)
+        if (currentProject) {
+            projectId = currentProject.id || currentProject.projectId;
+        }
+        
+        // Fallback to sessionStorage
+        if (!projectId) {
+            const selectedProject = sessionStorage.getItem('selectedProject');
+            if (selectedProject) {
+                try {
+                    const parsed = JSON.parse(selectedProject);
+                    projectId = parsed.id || parsed.projectId;
+                } catch (e) {
+                    console.error('Error parsing selected project for comments:', e);
+                }
             }
         }
-    }
-    
-    // Fallback to CommentsManager
-    if (!projectId && typeof CommentsManager !== 'undefined') {
-        projectId = CommentsManager.getCurrentProjectId();
-    }
-    
-    if (!projectId) {
-        console.warn('No project ID available for comments');
-    } else {
+        
+        // Fallback to CommentsManager
+        if (!projectId && typeof CommentsManager !== 'undefined') {
+            projectId = CommentsManager.getCurrentProjectId();
+        }
+        
+        if (!projectId) {
+            console.warn('No project ID available for comments');
+            return;
+        }
+        
+        console.log('Initializing comments for project ID:', projectId);
+        
         // Function to render comments in agent view style
         const renderComments = () => {
             if (feedbackList) {
@@ -983,12 +991,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
         
-        // Load and render existing comments on page load
+        // Load and render existing comments
         renderComments();
         
         // Initialize sync listener for real-time updates
         CommentsManager.initSyncListener(projectId, renderComments);
+        
+        // Listen for project data loaded event to reload comments
+        window.addEventListener('projectDataLoaded', (e) => {
+            if (e.detail && e.detail.projectId) {
+                projectId = e.detail.projectId;
+                renderComments();
+            }
+        });
     }
+    
+    // Initialize comments after a short delay to ensure project data is loaded
+    setTimeout(() => {
+        initializeComments();
+    }, 300);
     
     /*
      * -------------------------------------------
