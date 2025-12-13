@@ -576,9 +576,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Update client name
-            if (currentProject.client && clientName) {
-                clientName.textContent = currentProject.client;
+            // Update client name - ensure we have it
+            if (clientName) {
+                if (currentProject.client) {
+                    clientName.textContent = currentProject.client;
+                } else {
+                    // Try to get client name from ProjectDataManager
+                    const projectId = currentProject?.id || currentProject?.projectId || CommentsManager.getCurrentProjectId();
+                    if (projectId && typeof ProjectDataManager !== 'undefined') {
+                        const fullProject = ProjectDataManager.getProject(projectId);
+                        if (fullProject && fullProject.client) {
+                            clientName.textContent = fullProject.client;
+                            // Update currentProject with client name
+                            currentProject.client = fullProject.client;
+                            sessionStorage.setItem('selectedProject', JSON.stringify(currentProject));
+                        } else {
+                            clientName.textContent = 'N/A';
+                        }
+                    } else {
+                        clientName.textContent = 'N/A';
+                    }
+                }
             }
             
             console.log('Loaded project:', currentProject);
