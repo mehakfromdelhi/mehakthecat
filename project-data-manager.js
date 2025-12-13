@@ -238,6 +238,7 @@ const ProjectDataManager = {
             status: projectData.status || 'active',
             progress: projectData.progress || 0,
             priority: this.calculatePriority(new Date(projectData.deadline)),
+            priorityManuallySet: false, // New projects start with auto-calculated priority
             createdAt: new Date(now),
             lastUpdated: new Date(now)
         };

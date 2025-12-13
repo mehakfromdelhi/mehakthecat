@@ -175,11 +175,20 @@ function renderProjects() {
     }
     
     // Update priorities based on current deadlines before filtering
+    // BUT preserve manually set priorities
     filteredProjects = filteredProjects.map(project => {
         // Ensure deadline is a Date object
         const deadline = project.deadline instanceof Date ? project.deadline : new Date(project.deadline);
-        const updatedPriority = ProjectDataManager.calculatePriority(deadline);
-        return { ...project, deadline: deadline, priority: updatedPriority };
+        
+        // Only recalculate priority if it hasn't been manually set
+        // If priorityManuallySet flag is true, preserve the existing priority
+        let priority = project.priority;
+        if (!project.priorityManuallySet) {
+            // Priority hasn't been manually set, calculate based on deadline
+            priority = ProjectDataManager.calculatePriority(deadline);
+        }
+        
+        return { ...project, deadline: deadline, priority: priority };
     });
     
     // Filter by client
@@ -338,8 +347,11 @@ function createProjectCard(project) {
             const projectId = btn.getAttribute('data-project-id');
             
             if (projectId && newPriority) {
-                // Update project priority
-                ProjectDataManager.updateProject(projectId, { priority: newPriority });
+                // Update project priority and mark it as manually set
+                ProjectDataManager.updateProject(projectId, { 
+                    priority: newPriority,
+                    priorityManuallySet: true 
+                });
                 
                 // Re-render projects to show updated priority
                 initializeProjects();
