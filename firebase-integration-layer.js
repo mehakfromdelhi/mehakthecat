@@ -251,8 +251,14 @@ const StorageAdapter = {
   }
 };
 
-// Make globally available
+// Export for use in other modules
+export { StorageAdapter };
+
+// Also make globally available for non-module scripts
 if (typeof window !== 'undefined') {
   window.StorageAdapter = StorageAdapter;
+  window.FirebaseService = FirebaseService;
+  window.FirebasePhotoService = FirebasePhotoService;
+  window.FirebaseCommentService = FirebaseCommentService;
 }
 
