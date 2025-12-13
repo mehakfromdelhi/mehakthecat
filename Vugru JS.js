@@ -636,78 +636,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return currentProject;
     }
     
-    // Load project data on page load - with retry mechanism
+    // Load project data on page load - simple retry if ProjectDataManager not ready
     let currentProject = null;
     let retryCount = 0;
-    const maxRetries = 10;
-    let lastLoadedProjectId = null;
+    const maxRetries = 5;
     
     function tryLoadProjectData() {
-        // Get the current project ID from sessionStorage to check if it changed
-        const selectedProject = sessionStorage.getItem('selectedProject');
-        let currentProjectId = null;
-        if (selectedProject) {
-            try {
-                const parsed = JSON.parse(selectedProject);
-                currentProjectId = parsed.id || parsed.projectId;
-            } catch (e) {
-                console.error('Error parsing selected project:', e);
-            }
-        }
-        
-        // If project ID changed, reset retry count and force reload
-        if (currentProjectId !== lastLoadedProjectId) {
-            console.log('Project ID changed from', lastLoadedProjectId, 'to', currentProjectId, '- forcing reload');
-            retryCount = 0;
-            lastLoadedProjectId = currentProjectId;
-        }
-        
         currentProject = loadProjectData();
         if (!currentProject && retryCount < maxRetries) {
             retryCount++;
-            console.log(`Retrying project data load (attempt ${retryCount}/${maxRetries})...`);
             setTimeout(tryLoadProjectData, 200);
-        } else if (!currentProject) {
-            console.error('Failed to load project data after', maxRetries, 'attempts');
-        } else {
-            // Successfully loaded - update last loaded project ID
-            lastLoadedProjectId = currentProject.id || currentProject.projectId;
-            console.log('Successfully loaded project:', lastLoadedProjectId);
         }
     }
     
-    // Start loading project data
+    // Start loading project data immediately
     tryLoadProjectData();
-    
-    // Listen for page visibility changes to reload when navigating back
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            // Page became visible - check if project changed
-            const selectedProject = sessionStorage.getItem('selectedProject');
-            if (selectedProject) {
-                try {
-                    const parsed = JSON.parse(selectedProject);
-                    const currentProjectId = parsed.id || parsed.projectId;
-                    if (currentProjectId !== lastLoadedProjectId) {
-                        console.log('Page visible - project changed, reloading...');
-                        retryCount = 0;
-                        tryLoadProjectData();
-                    }
-                } catch (e) {
-                    console.error('Error checking project change:', e);
-                }
-            }
-        }
-    });
-    
-    // Also listen for storage events (in case sessionStorage is updated in another tab/window)
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'selectedProject' && e.newValue) {
-            console.log('Storage event detected - project changed, reloading...');
-            retryCount = 0;
-            tryLoadProjectData();
-        }
-    });
 
     /*
      * -------------------------------------------
