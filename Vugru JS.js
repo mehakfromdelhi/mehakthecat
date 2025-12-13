@@ -655,6 +655,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log('Successfully loaded project:', currentProject);
         
+        // Trigger comments reload after project is loaded
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('projectDataLoaded', {
+                detail: { project: currentProject, projectId: currentProject.id }
+            }));
+        }
+        
         // Return project for use in other functions
         return currentProject;
     }
