@@ -45,16 +45,125 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Project Management Dashboard initialized');
 });
 
+// Filter state
+let currentFilters = {
+    client: '',
+    priority: '',
+    status: ''
+};
+
 // ===================== Project Overview =====================
 function initializeProjects() {
     const projectsList = document.getElementById('projects-list');
     if (!projectsList) return;
     
-    // Get projects from ProjectDataManager (sorted by priority)
-    const sortedProjects = ProjectDataManager.getProjectsSortedByPriority();
+    // Initialize filters
+    initializeFilters();
+    
+    // Render projects
+    renderProjects();
+}
+
+function initializeFilters() {
+    // Populate client filter
+    const clientFilter = document.getElementById('filter-client');
+    if (clientFilter) {
+        // Get clients from ProjectDataManager
+        const allProjects = ProjectDataManager.getProjects();
+        const clients = [...new Set(allProjects.map(p => p.client))].sort();
+        clients.forEach(client => {
+            const option = document.createElement('option');
+            option.value = client;
+            option.textContent = client;
+            clientFilter.appendChild(option);
+        });
+        
+        clientFilter.addEventListener('change', function() {
+            currentFilters.client = this.value;
+            updateFilters();
+        });
+    }
+    
+    // Priority filter
+    const priorityFilter = document.getElementById('filter-priority');
+    if (priorityFilter) {
+        priorityFilter.addEventListener('change', function() {
+            currentFilters.priority = this.value;
+            updateFilters();
+        });
+    }
+    
+    // Status filter
+    const statusFilter = document.getElementById('filter-status');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            currentFilters.status = this.value;
+            updateFilters();
+        });
+    }
+    
+    // Clear filters button
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', function() {
+            currentFilters = { client: '', priority: '', status: '' };
+            if (clientFilter) clientFilter.value = '';
+            if (priorityFilter) priorityFilter.value = '';
+            if (statusFilter) statusFilter.value = '';
+            updateFilters();
+        });
+    }
+}
+
+function updateFilters() {
+    // Show/hide clear filters button
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const hasActiveFilters = currentFilters.client || currentFilters.priority || currentFilters.status;
+    if (clearFiltersBtn) {
+        clearFiltersBtn.style.display = hasActiveFilters ? 'inline-flex' : 'none';
+    }
+    
+    // Re-render projects with filters
+    renderProjects();
+}
+
+function renderProjects() {
+    const projectsList = document.getElementById('projects-list');
+    if (!projectsList) return;
+    
+    // Get projects from ProjectDataManager
+    let filteredProjects = [...ProjectDataManager.getProjects()];
+    
+    // Filter by client
+    if (currentFilters.client) {
+        filteredProjects = filteredProjects.filter(p => p.client === currentFilters.client);
+    }
+    
+    // Filter by priority
+    if (currentFilters.priority) {
+        filteredProjects = filteredProjects.filter(project => {
+            return project.priority === currentFilters.priority;
+        });
+    }
+    
+    // Filter by status
+    if (currentFilters.status) {
+        filteredProjects = filteredProjects.filter(p => p.status === currentFilters.status);
+    }
+    
+    // Sort projects by deadline (most urgent first)
+    const sortedProjects = filteredProjects.sort((a, b) => {
+        return new Date(a.deadline) - new Date(b.deadline);
+    });
     
     // Clear existing projects
     projectsList.innerHTML = '';
+    
+    // Show message if no projects match
+    if (sortedProjects.length === 0) {
+        projectsList.innerHTML = '<div class="no-projects-message"><p class="muted">No projects match the selected filters.</p></div>';
+        return;
+    }
     
     // Render each project
     sortedProjects.forEach(project => {
@@ -101,6 +210,25 @@ function createProjectCard(project) {
                 <span style="width:${project.progress}%"></span>
             </div>
         </div>
+<<<<<<< HEAD
+        <div>
+            <span class="hint">Client:</span> <b>${project.client}</b>
+        </div>
+        <div class="project-card-priority-controls" style="margin-top: 0.5rem; display: flex; gap: 0.25rem; flex-wrap: wrap;">
+            <span class="hint" style="width: 100%; font-size: 0.75rem;">Priority:</span>
+            <button class="priority-btn ${project.priority === 'urgent' ? 'active' : ''}" data-priority="urgent" data-project-id="${project.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid #dc2626; background: ${project.priority === 'urgent' ? '#dc2626' : 'transparent'}; color: ${project.priority === 'urgent' ? 'white' : '#dc2626'}; border-radius: 0.25rem; cursor: pointer;">Urgent</button>
+            <button class="priority-btn ${project.priority === 'high' ? 'active' : ''}" data-priority="high" data-project-id="${project.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid #f59e0b; background: ${project.priority === 'high' ? '#f59e0b' : 'transparent'}; color: ${project.priority === 'high' ? 'white' : '#f59e0b'}; border-radius: 0.25rem; cursor: pointer;">High</button>
+            <button class="priority-btn ${project.priority === 'normal' ? 'active' : ''}" data-priority="normal" data-project-id="${project.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid #6b7280; background: ${project.priority === 'normal' ? '#6b7280' : 'transparent'}; color: ${project.priority === 'normal' ? 'white' : '#6b7280'}; border-radius: 0.25rem; cursor: pointer;">Normal</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+            <span class="project-card-status status-badge-large ${project.status}">${ProjectDataManager.getStatusLabel(project.status)}</span>
+            <button class="delete-project-btn" data-project-id="${project.id}" data-project-name="${project.name}" style="padding: 0.375rem 0.75rem; font-size: 0.75rem; border: 1px solid #dc2626; background: transparent; color: #dc2626; border-radius: 0.25rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; transition: all 0.2s; font-weight: 500;" title="Delete Project" onmouseover="this.style.background='#dc2626'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='#dc2626';">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1rem; height: 1rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+                <span>Delete</span>
+            </button>
+=======
         <div>
             <span class="hint">Client:</span> <b>${project.client}</b>
         </div>

@@ -37,6 +37,9 @@
         <symbol id="ico-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <polyline points="6 9 12 15 18 9" stroke-width="1.5"/>
         </symbol>
+        <symbol id="ico-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke-width="1.5"/>
+        </symbol>
     </svg>
 
     <!-- Sidebar -->
@@ -69,8 +72,39 @@
         <section id="overview" class="panel">
             <div class="panel-head">
                 <h2 class="panel-title"><svg class="ico"><use href="#ico-target"/></svg>Project Overview</h2>
-                <div class="sort-controls">
-                    <span class="hint">Sorted by deadline priority</span>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="filter-client" class="filter-label">
+                            <svg class="ico filter-icon"><use href="#ico-filter"/></svg>
+                            <select id="filter-client" class="filter-select">
+                                <option value="">All Clients</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-priority" class="filter-label">
+                            <svg class="ico filter-icon"><use href="#ico-filter"/></svg>
+                            <select id="filter-priority" class="filter-select">
+                                <option value="">All Priorities</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="high">High</option>
+                                <option value="normal">Normal</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-status" class="filter-label">
+                            <svg class="ico filter-icon"><use href="#ico-filter"/></svg>
+                            <select id="filter-status" class="filter-select">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="in-review">In Review</option>
+                                <option value="awaiting-feedback">Awaiting Feedback</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </label>
+                    </div>
+                    <button id="clear-filters" class="button-secondary" style="display:none;">Clear Filters</button>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
