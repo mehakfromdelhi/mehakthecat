@@ -55,7 +55,17 @@ let currentFilters = {
 // ===================== Project Overview =====================
 function initializeProjects() {
     const projectsList = document.getElementById('projects-list');
-    if (!projectsList) return;
+    if (!projectsList) {
+        console.error('projects-list element not found in initializeProjects');
+        return;
+    }
+    
+    // Ensure ProjectDataManager is initialized
+    if (typeof ProjectDataManager !== 'undefined') {
+        ProjectDataManager.initialize();
+    } else {
+        console.error('ProjectDataManager is not available');
+    }
     
     // Initialize filters
     initializeFilters();
@@ -129,15 +139,37 @@ function updateFilters() {
 
 function renderProjects() {
     const projectsList = document.getElementById('projects-list');
-    if (!projectsList) return;
+    if (!projectsList) {
+        console.error('projects-list element not found');
+        return;
+    }
+    
+    // Ensure ProjectDataManager is initialized
+    if (typeof ProjectDataManager === 'undefined') {
+        console.error('ProjectDataManager is not defined');
+        projectsList.innerHTML = '<div class="no-projects-message"><p class="muted">Error: ProjectDataManager not loaded. Please refresh the page.</p></div>';
+        return;
+    }
     
     // Get projects from ProjectDataManager
     let filteredProjects = [...ProjectDataManager.getAllProjects()];
     
+    console.log('Total projects loaded:', filteredProjects.length);
+    
+    // If no projects, ensure default projects are initialized
+    if (filteredProjects.length === 0) {
+        console.log('No projects found, initializing default projects...');
+        ProjectDataManager.initialize();
+        filteredProjects = [...ProjectDataManager.getAllProjects()];
+        console.log('Projects after initialization:', filteredProjects.length);
+    }
+    
     // Update priorities based on current deadlines before filtering
     filteredProjects = filteredProjects.map(project => {
-        const updatedPriority = ProjectDataManager.calculatePriority(project.deadline);
-        return { ...project, priority: updatedPriority };
+        // Ensure deadline is a Date object
+        const deadline = project.deadline instanceof Date ? project.deadline : new Date(project.deadline);
+        const updatedPriority = ProjectDataManager.calculatePriority(deadline);
+        return { ...project, deadline: deadline, priority: updatedPriority };
     });
     
     // Filter by client
@@ -159,7 +191,9 @@ function renderProjects() {
     
     // Sort projects by deadline (most urgent first)
     const sortedProjects = filteredProjects.sort((a, b) => {
-        return new Date(a.deadline) - new Date(b.deadline);
+        const deadlineA = a.deadline instanceof Date ? a.deadline : new Date(a.deadline);
+        const deadlineB = b.deadline instanceof Date ? b.deadline : new Date(b.deadline);
+        return deadlineA - deadlineB;
     });
     
     // Clear existing projects
@@ -170,6 +204,8 @@ function renderProjects() {
         projectsList.innerHTML = '<div class="no-projects-message"><p class="muted">No projects match the selected filters.</p></div>';
         return;
     }
+    
+    console.log('Rendering', sortedProjects.length, 'projects');
     
     // Render each project
     sortedProjects.forEach(project => {
@@ -186,9 +222,12 @@ function createProjectCard(project) {
     const priorityClass = `priority-${project.priority}`;
     card.classList.add(priorityClass);
     
+    // Ensure deadline is a Date object
+    const deadline = project.deadline instanceof Date ? project.deadline : new Date(project.deadline);
+    
     // Get deadline info
-    const deadlineText = ProjectDataManager.formatDeadline(project.deadline);
-    const daysUntilDeadline = ProjectDataManager.getDaysUntilDeadline(project.deadline);
+    const deadlineText = ProjectDataManager.formatDeadline(deadline);
+    const daysUntilDeadline = ProjectDataManager.getDaysUntilDeadline(deadline);
     let deadlineClass = '';
     
     if (daysUntilDeadline <= 1) {
@@ -197,7 +236,7 @@ function createProjectCard(project) {
         deadlineClass = 'due-soon';
     }
     
-    const deadlineDate = project.deadline.toLocaleDateString('en-US', { 
+    const deadlineDate = deadline.toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric',
         year: 'numeric'
