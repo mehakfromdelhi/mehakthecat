@@ -655,10 +655,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log('Successfully loaded project:', currentProject);
         
+        // Ensure projectId is available - use the extracted projectId variable if currentProject.id is missing
+        const finalProjectId = currentProject.id || currentProject.projectId || projectId;
+        
         // Trigger comments reload after project is loaded
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && finalProjectId) {
             window.dispatchEvent(new CustomEvent('projectDataLoaded', {
-                detail: { project: currentProject, projectId: currentProject.id }
+                detail: { project: currentProject, projectId: finalProjectId }
             }));
         }
         
