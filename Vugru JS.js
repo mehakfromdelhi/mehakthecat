@@ -281,30 +281,47 @@ document.addEventListener('DOMContentLoaded', () => {
                             uploadSuccess.style.display = 'flex';
                         }
 
-                        // Save photo to PhotoStorageManager with data URL
-                        if (currentProjectId && typeof PhotoStorageManager !== 'undefined') {
+                        // Save photo using StorageAdapter (Firebase or localStorage)
+                        if (currentProjectId) {
                             try {
-                                const savedPhoto = PhotoStorageManager.savePhoto(currentProjectId, {
-                                    fileName: file.name,
-                                    url: photoDataUrl,
-                                    notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
-                                });
-                                
-                                console.log('Photo saved successfully:', savedPhoto);
-                                console.log('Current project ID:', currentProjectId);
-                                
-                                // Refresh photo viewer and revision history immediately
-                                // The photosUpdated event will also trigger, but we call this directly for immediate feedback
-                                loadCurrentPhoto();
-                                loadRevisionHistory();
+                                // Use StorageAdapter which handles Firebase/localStorage automatically
+                                if (typeof StorageAdapter !== 'undefined') {
+                                    const savedPhoto = await StorageAdapter.uploadPhoto(currentProjectId, file, {
+                                        notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+                                    });
+                                    
+                                    console.log('Photo saved successfully:', savedPhoto);
+                                    console.log('Current project ID:', currentProjectId);
+                                    
+                                    // Use the download URL from Firebase or data URL from localStorage
+                                    const photoUrl = savedPhoto.downloadURL || savedPhoto.url || photoDataUrl;
+                                    
+                                    // Refresh photo viewer and revision history immediately
+                                    loadCurrentPhoto();
+                                    loadRevisionHistory();
+                                } else if (typeof PhotoStorageManager !== 'undefined') {
+                                    // Fallback to direct PhotoStorageManager
+                                    const savedPhoto = PhotoStorageManager.savePhoto(currentProjectId, {
+                                        fileName: file.name,
+                                        url: photoDataUrl,
+                                        notes: `Uploaded: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+                                    });
+                                    
+                                    console.log('Photo saved successfully:', savedPhoto);
+                                    loadCurrentPhoto();
+                                    loadRevisionHistory();
+                                } else {
+                                    // Last resort: just update viewer
+                                    updatePhotoViewer(photoDataUrl, file);
+                                }
                             } catch (error) {
                                 console.error('Error saving photo:', error);
                                 // Fallback: Update photo viewer directly
                                 updatePhotoViewer(photoDataUrl, file);
                             }
                         } else {
-                            console.warn('PhotoStorageManager not available or no project ID. Current project ID:', currentProjectId);
-                            // Fallback: Update photo viewer directly if PhotoStorageManager not available
+                            console.warn('No project ID. Current project ID:', currentProjectId);
+                            // Fallback: Update photo viewer directly
                             updatePhotoViewer(photoDataUrl, file);
                         }
                         
