@@ -497,77 +497,117 @@ document.addEventListener('DOMContentLoaded', () => {
      * -------------------------------------------
      */
     function loadProjectData() {
-        // Ensure ProjectDataManager is initialized
-        if (typeof ProjectDataManager !== 'undefined') {
-            ProjectDataManager.initialize();
+        console.log('loadProjectData called');
+        
+        // Wait for ProjectDataManager to be available
+        if (typeof ProjectDataManager === 'undefined') {
+            console.error('ProjectDataManager is not available');
+            // Try again after a short delay
+            setTimeout(loadProjectData, 100);
+            return null;
         }
         
-        // Get project ID from sessionStorage or try to get from CommentsManager
+        // Ensure ProjectDataManager is initialized
+        ProjectDataManager.initialize();
+        
+        // Get project ID from sessionStorage
         const selectedProject = sessionStorage.getItem('selectedProject');
         let projectId = null;
+        let projectFromStorage = null;
         
         if (selectedProject) {
             try {
-                const parsed = JSON.parse(selectedProject);
-                projectId = parsed.id || parsed.projectId;
+                projectFromStorage = JSON.parse(selectedProject);
+                projectId = projectFromStorage.id || projectFromStorage.projectId;
+                console.log('Project ID from sessionStorage:', projectId);
+                console.log('Project data from sessionStorage:', projectFromStorage);
             } catch (e) {
                 console.error('Error parsing selected project:', e);
             }
+        } else {
+            console.warn('No project in sessionStorage');
         }
         
         // If no project ID from sessionStorage, try CommentsManager
         if (!projectId && typeof CommentsManager !== 'undefined') {
             projectId = CommentsManager.getCurrentProjectId();
+            console.log('Project ID from CommentsManager:', projectId);
         }
         
-        // If still no project ID, try to get from header title
         if (!projectId) {
+            console.error('No project ID found anywhere!');
+            // Show error in UI
             const headerTitle = document.querySelector('.header-title');
-            if (headerTitle && headerTitle.textContent && headerTitle.textContent !== 'Loading...') {
-                // Try to find project by name
-                const allProjects = ProjectDataManager.getAllProjects();
-                const projectByName = allProjects.find(p => p.name === headerTitle.textContent.trim());
-                if (projectByName) {
-                    projectId = projectByName.id;
-                }
+            if (headerTitle) {
+                headerTitle.textContent = 'No Project Selected';
             }
+            const clientName = document.getElementById('project-client-name');
+            if (clientName) {
+                clientName.textContent = 'N/A';
+            }
+            const statusText = document.getElementById('project-status-text');
+            if (statusText) {
+                statusText.textContent = 'No Project';
+            }
+            return null;
         }
         
         // Fetch complete project data from ProjectDataManager
-        let currentProject = null;
-        if (projectId && typeof ProjectDataManager !== 'undefined') {
-            currentProject = ProjectDataManager.getProject(projectId);
-            if (currentProject) {
-                // Update sessionStorage with complete project data
-                sessionStorage.setItem('selectedProject', JSON.stringify({
-                    id: currentProject.id,
-                    name: currentProject.name,
-                    client: currentProject.client,
-                    clientEmail: currentProject.clientEmail,
-                    projectId: currentProject.id,
-                    status: currentProject.status,
-                    progress: currentProject.progress,
-                    deadline: currentProject.deadline,
-                    priority: currentProject.priority
-                }));
-            }
-        }
+        let currentProject = ProjectDataManager.getProject(projectId);
         
         if (!currentProject) {
-            console.warn('No project found. Project ID:', projectId);
-            return;
+            console.error('Project not found in ProjectDataManager. Project ID:', projectId);
+            console.log('Available projects:', ProjectDataManager.getAllProjects().map(p => ({ id: p.id, name: p.name })));
+            
+            // Try to use data from sessionStorage as fallback
+            if (projectFromStorage && projectFromStorage.name) {
+                console.log('Using project data from sessionStorage as fallback');
+                currentProject = projectFromStorage;
+            } else {
+                // Show error in UI
+                const headerTitle = document.querySelector('.header-title');
+                if (headerTitle) {
+                    headerTitle.textContent = 'Project Not Found';
+                }
+                const clientName = document.getElementById('project-client-name');
+                if (clientName) {
+                    clientName.textContent = 'N/A';
+                }
+                const statusText = document.getElementById('project-status-text');
+                if (statusText) {
+                    statusText.textContent = 'Not Found';
+                }
+                return null;
+            }
+        } else {
+            console.log('Project found in ProjectDataManager:', currentProject);
         }
+        
+        // Update sessionStorage with complete project data
+        sessionStorage.setItem('selectedProject', JSON.stringify({
+            id: currentProject.id,
+            name: currentProject.name,
+            client: currentProject.client,
+            clientEmail: currentProject.clientEmail,
+            projectId: currentProject.id,
+            status: currentProject.status,
+            progress: currentProject.progress,
+            deadline: currentProject.deadline,
+            priority: currentProject.priority
+        }));
         
         // Update header title with project name
         const headerTitle = document.querySelector('.header-title');
         if (headerTitle) {
-            headerTitle.textContent = currentProject.name;
+            headerTitle.textContent = currentProject.name || 'Unknown Project';
+            console.log('Updated header title to:', currentProject.name);
         }
         
         // Update client name
         const clientName = document.getElementById('project-client-name');
         if (clientName) {
             clientName.textContent = currentProject.client || 'N/A';
+            console.log('Updated client name to:', currentProject.client);
         }
         
         // Update project status - show actual project status, not just photo status
@@ -576,19 +616,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Get project status from project data
         const projectStatus = currentProject.status || 'active';
-        
-        // Also get photo status for additional context
-        let photoStatus = null;
-        if (typeof PhotoStorageManager !== 'undefined') {
-            try {
-                const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
-                if (currentPhoto) {
-                    photoStatus = currentPhoto.status;
-                }
-            } catch (e) {
-                console.warn('Error getting photo status:', e);
-            }
-        }
         
         if (statusText) {
             // Show project status (active, in-review, awaiting-feedback, completed)
@@ -601,6 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const statusLabel = statusLabels[projectStatus] || projectStatus;
             statusText.textContent = statusLabel;
+            console.log('Updated status to:', statusLabel);
             
             // Set status bar color based on project status
             if (statusBar) {
@@ -625,14 +653,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        console.log('Loaded project:', currentProject);
+        console.log('Successfully loaded project:', currentProject);
         
         // Return project for use in other functions
         return currentProject;
     }
     
-    // Load project data on page load
-    const currentProject = loadProjectData();
+    // Load project data on page load - with retry mechanism
+    let currentProject = null;
+    let retryCount = 0;
+    const maxRetries = 10;
+    
+    function tryLoadProjectData() {
+        currentProject = loadProjectData();
+        if (!currentProject && retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying project data load (attempt ${retryCount}/${maxRetries})...`);
+            setTimeout(tryLoadProjectData, 200);
+        } else if (!currentProject) {
+            console.error('Failed to load project data after', maxRetries, 'attempts');
+        }
+    }
+    
+    // Start loading project data
+    tryLoadProjectData();
 
     /*
      * -------------------------------------------
