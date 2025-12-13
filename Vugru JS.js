@@ -566,15 +566,23 @@ document.addEventListener('DOMContentLoaded', () => {
             priority: currentProject.priority
         }));
         
-        // Update UI with project data - SIMPLE AND DIRECT
+        // Update UI with project data - FORCE UPDATE IMMEDIATELY
         const headerTitle = document.querySelector('.header-title');
         if (headerTitle) {
             headerTitle.textContent = currentProject.name;
+            // Force browser to update
+            headerTitle.style.visibility = 'hidden';
+            headerTitle.offsetHeight; // Trigger reflow
+            headerTitle.style.visibility = 'visible';
         }
         
         const clientName = document.getElementById('project-client-name');
         if (clientName) {
             clientName.textContent = currentProject.client || 'N/A';
+            // Force browser to update
+            clientName.style.visibility = 'hidden';
+            clientName.offsetHeight; // Trigger reflow
+            clientName.style.visibility = 'visible';
         }
         
         // Update project status - show actual project status, not just photo status
