@@ -334,8 +334,8 @@ function createProjectCard(project) {
             status: project.status,
             progress: project.progress
         }));
-        // Navigate to photo dashboard
-        window.location.href = 'Vugru HTML.html';
+        // Navigate to photo dashboard with project ID in URL to ensure unique URLs and proper reload
+        window.location.href = `Vugru HTML.html?projectId=${encodeURIComponent(project.id)}`;
     });
     
     // Add priority button event listeners

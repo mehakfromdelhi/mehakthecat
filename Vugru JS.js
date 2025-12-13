@@ -511,28 +511,44 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ensure ProjectDataManager is initialized
         ProjectDataManager.initialize();
         
-        // Get project ID from sessionStorage - ALWAYS read fresh from sessionStorage
-        const selectedProject = sessionStorage.getItem('selectedProject');
-        let projectId = null;
+        // Get project ID from URL first (most reliable for unique project pages)
+        const urlParams = new URLSearchParams(window.location.search);
+        let projectId = urlParams.get('projectId');
         let projectFromStorage = null;
         
-        if (selectedProject) {
-            try {
-                projectFromStorage = JSON.parse(selectedProject);
-                projectId = projectFromStorage.id || projectFromStorage.projectId;
-                console.log('=== LOADING PROJECT DATA ===');
-                console.log('Project ID from sessionStorage:', projectId);
-                console.log('Project name from sessionStorage:', projectFromStorage.name);
-                console.log('Project client from sessionStorage:', projectFromStorage.client);
-                console.log('Full project data from sessionStorage:', projectFromStorage);
-            } catch (e) {
-                console.error('Error parsing selected project:', e);
+        console.log('=== LOADING PROJECT DATA ===');
+        console.log('Project ID from URL:', projectId);
+        
+        // If no project ID from URL, try sessionStorage
+        if (!projectId) {
+            const selectedProject = sessionStorage.getItem('selectedProject');
+            if (selectedProject) {
+                try {
+                    projectFromStorage = JSON.parse(selectedProject);
+                    projectId = projectFromStorage.id || projectFromStorage.projectId;
+                    console.log('Project ID from sessionStorage:', projectId);
+                    console.log('Project name from sessionStorage:', projectFromStorage.name);
+                    console.log('Project client from sessionStorage:', projectFromStorage.client);
+                    console.log('Full project data from sessionStorage:', projectFromStorage);
+                } catch (e) {
+                    console.error('Error parsing selected project:', e);
+                }
+            } else {
+                console.warn('No project in sessionStorage');
             }
         } else {
-            console.warn('No project in sessionStorage');
+            // If we have project ID from URL, also update sessionStorage for consistency
+            const selectedProject = sessionStorage.getItem('selectedProject');
+            if (selectedProject) {
+                try {
+                    projectFromStorage = JSON.parse(selectedProject);
+                } catch (e) {
+                    console.error('Error parsing selected project:', e);
+                }
+            }
         }
         
-        // If no project ID from sessionStorage, try CommentsManager
+        // If still no project ID, try CommentsManager
         if (!projectId && typeof CommentsManager !== 'undefined') {
             projectId = CommentsManager.getCurrentProjectId();
             console.log('Project ID from CommentsManager:', projectId);
