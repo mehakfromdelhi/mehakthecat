@@ -325,7 +325,7 @@ function createProjectCard(project) {
         }
         
         // Store full project data in sessionStorage for photo dashboard
-        sessionStorage.setItem('selectedProject', JSON.stringify({
+        const projectData = {
             id: project.id,
             name: project.name,
             client: project.client,
@@ -333,9 +333,21 @@ function createProjectCard(project) {
             projectId: project.id,
             status: project.status,
             progress: project.progress
-        }));
+        };
+        
+        console.log('=== CLICKING PROJECT CARD ===');
+        console.log('Project ID:', project.id);
+        console.log('Project Name:', project.name);
+        console.log('Project Client:', project.client);
+        console.log('Project Status:', project.status);
+        console.log('Full project data being stored:', projectData);
+        
+        sessionStorage.setItem('selectedProject', JSON.stringify(projectData));
+        
         // Navigate to photo dashboard with project ID in URL to ensure unique URLs and proper reload
-        window.location.href = `Vugru HTML.html?projectId=${encodeURIComponent(project.id)}`;
+        const url = `Vugru HTML.html?projectId=${encodeURIComponent(project.id)}`;
+        console.log('Navigating to:', url);
+        window.location.href = url;
     });
     
     // Add priority button event listeners
