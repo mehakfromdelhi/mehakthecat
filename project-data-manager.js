@@ -33,48 +33,48 @@ const ProjectDataManager = {
                 name: 'Sunset Ridge Luxury Estate',
                 client: 'John Smith',
                 clientEmail: 'john.smith@example.com',
-                deadline: now + (2 * 24 * 60 * 60 * 1000), // 2 days from now
+                deadline: new Date(now + (2 * 24 * 60 * 60 * 1000)), // 2 days from now
                 status: 'in-review',
                 progress: 30,
                 priority: 'high',
-                createdAt: now - (5 * 24 * 60 * 60 * 1000), // 5 days ago
-                lastUpdated: now - (1 * 24 * 60 * 60 * 1000) // 1 day ago
+                createdAt: new Date(now - (5 * 24 * 60 * 60 * 1000)), // 5 days ago
+                lastUpdated: new Date(now - (1 * 24 * 60 * 60 * 1000)) // 1 day ago
             },
             {
                 id: 'downtown-loft-condo',
                 name: 'Downtown Loft Condo Tour',
                 client: 'Sarah Johnson',
                 clientEmail: 'sarah.johnson@example.com',
-                deadline: now + (1 * 24 * 60 * 60 * 1000), // 1 day from now
+                deadline: new Date(now + (1 * 24 * 60 * 60 * 1000)), // 1 day from now
                 status: 'active',
                 progress: 85,
                 priority: 'urgent',
-                createdAt: now - (7 * 24 * 60 * 60 * 1000), // 7 days ago
-                lastUpdated: now - (2 * 60 * 60 * 1000) // 2 hours ago
+                createdAt: new Date(now - (7 * 24 * 60 * 60 * 1000)), // 7 days ago
+                lastUpdated: new Date(now - (2 * 60 * 60 * 1000)) // 2 hours ago
             },
             {
                 id: 'mountain-view-family',
                 name: 'Mountain View Family Home',
                 client: 'Mike Davis',
                 clientEmail: 'mike.davis@example.com',
-                deadline: now + (7 * 24 * 60 * 60 * 1000), // 7 days from now
+                deadline: new Date(now + (7 * 24 * 60 * 60 * 1000)), // 7 days from now
                 status: 'awaiting-feedback',
                 progress: 10,
                 priority: 'normal',
-                createdAt: now - (3 * 24 * 60 * 60 * 1000), // 3 days ago
-                lastUpdated: now - (12 * 60 * 60 * 1000) // 12 hours ago
+                createdAt: new Date(now - (3 * 24 * 60 * 60 * 1000)), // 3 days ago
+                lastUpdated: new Date(now - (12 * 60 * 60 * 1000)) // 12 hours ago
             },
             {
                 id: 'oceanfront-villa',
                 name: 'Oceanfront Villa Premium Listing',
                 client: 'Emily Chen',
                 clientEmail: 'emily.chen@example.com',
-                deadline: now + (5 * 24 * 60 * 60 * 1000), // 5 days from now
+                deadline: new Date(now + (5 * 24 * 60 * 60 * 1000)), // 5 days from now
                 status: 'active',
                 progress: 50,
                 priority: 'high',
-                createdAt: now - (10 * 24 * 60 * 60 * 1000), // 10 days ago
-                lastUpdated: now - (6 * 60 * 60 * 1000) // 6 hours ago
+                createdAt: new Date(now - (10 * 24 * 60 * 60 * 1000)), // 10 days ago
+                lastUpdated: new Date(now - (6 * 60 * 60 * 1000)) // 6 hours ago
             }
         ];
     },
@@ -84,17 +84,26 @@ const ProjectDataManager = {
      */
     getAllProjects() {
         const stored = localStorage.getItem(this.STORAGE_KEY);
-        if (!stored) return [];
+        if (!stored) {
+            console.log('No projects in localStorage');
+            return [];
+        }
         
         try {
             const projects = JSON.parse(stored);
+            console.log('Retrieved projects from localStorage:', projects.length);
             // Convert deadline strings back to dates
-            return projects.map(p => ({
-                ...p,
-                deadline: new Date(p.deadline),
-                createdAt: new Date(p.createdAt),
-                lastUpdated: new Date(p.lastUpdated)
-            }));
+            return projects.map(p => {
+                const deadline = p.deadline ? new Date(p.deadline) : new Date();
+                const createdAt = p.createdAt ? new Date(p.createdAt) : new Date();
+                const lastUpdated = p.lastUpdated ? new Date(p.lastUpdated) : new Date();
+                return {
+                    ...p,
+                    deadline: deadline,
+                    createdAt: createdAt,
+                    lastUpdated: lastUpdated
+                };
+            });
         } catch (e) {
             console.error('Error parsing projects:', e);
             return [];
@@ -105,7 +114,14 @@ const ProjectDataManager = {
      * Save all projects
      */
     saveAllProjects(projects) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(projects));
+        // Convert Date objects to ISO strings for storage
+        const projectsToSave = projects.map(p => ({
+            ...p,
+            deadline: p.deadline instanceof Date ? p.deadline.toISOString() : (typeof p.deadline === 'number' ? new Date(p.deadline).toISOString() : p.deadline),
+            createdAt: p.createdAt instanceof Date ? p.createdAt.toISOString() : (typeof p.createdAt === 'number' ? new Date(p.createdAt).toISOString() : p.createdAt),
+            lastUpdated: p.lastUpdated instanceof Date ? p.lastUpdated.toISOString() : (typeof p.lastUpdated === 'number' ? new Date(p.lastUpdated).toISOString() : p.lastUpdated)
+        }));
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(projectsToSave));
     },
     
     /**

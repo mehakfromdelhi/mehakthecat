@@ -159,9 +159,19 @@ function renderProjects() {
     // If no projects, ensure default projects are initialized
     if (filteredProjects.length === 0) {
         console.log('No projects found, initializing default projects...');
-        ProjectDataManager.initialize();
+        const initialized = ProjectDataManager.initialize();
+        console.log('Initialized projects:', initialized);
         filteredProjects = [...ProjectDataManager.getAllProjects()];
         console.log('Projects after initialization:', filteredProjects.length);
+        
+        // If still no projects, force create them
+        if (filteredProjects.length === 0) {
+            console.warn('Still no projects after initialization, forcing creation...');
+            const defaultProjects = ProjectDataManager.getDefaultProjects();
+            ProjectDataManager.saveAllProjects(defaultProjects);
+            filteredProjects = [...ProjectDataManager.getAllProjects()];
+            console.log('Projects after force creation:', filteredProjects.length);
+        }
     }
     
     // Update priorities based on current deadlines before filtering
