@@ -573,15 +573,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Fetch complete project data from ProjectDataManager
+        console.log('Fetching project from ProjectDataManager with ID:', projectId);
+        const allProjects = ProjectDataManager.getAllProjects();
+        console.log('All available projects:', allProjects.map(p => ({ id: p.id, name: p.name, client: p.client, status: p.status })));
+        
         let currentProject = ProjectDataManager.getProject(projectId);
         
         if (!currentProject) {
-            console.error('Project not found in ProjectDataManager. Project ID:', projectId);
-            console.log('Available projects:', ProjectDataManager.getAllProjects().map(p => ({ id: p.id, name: p.name })));
+            console.error('❌ Project not found in ProjectDataManager. Project ID:', projectId);
+            console.log('Available project IDs:', allProjects.map(p => p.id));
             
             // Try to use data from sessionStorage as fallback
             if (projectFromStorage && projectFromStorage.name) {
-                console.log('Using project data from sessionStorage as fallback');
+                console.log('⚠️ Using project data from sessionStorage as fallback');
                 currentProject = projectFromStorage;
             } else {
                 // Show error in UI
@@ -600,10 +604,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 return null;
             }
         } else {
-            console.log('Project found in ProjectDataManager:', currentProject);
+            console.log('✅ Project found in ProjectDataManager:');
+            console.log('  - ID:', currentProject.id);
+            console.log('  - Name:', currentProject.name);
+            console.log('  - Client:', currentProject.client);
+            console.log('  - Status:', currentProject.status);
         }
         
-        // Update sessionStorage with complete project data
+        // CRITICAL: Ensure we're using the EXACT data from ProjectDataManager
+        // Re-fetch to make absolutely sure we have the latest data
+        currentProject = ProjectDataManager.getProject(projectId);
+        if (!currentProject) {
+            console.error('❌ Failed to fetch project even after retry');
+            return null;
+        }
+        
+        // Update sessionStorage with complete project data from ProjectDataManager
         sessionStorage.setItem('selectedProject', JSON.stringify({
             id: currentProject.id,
             name: currentProject.name,
@@ -616,18 +632,32 @@ document.addEventListener('DOMContentLoaded', () => {
             priority: currentProject.priority
         }));
         
-        // Update header title with project name
+        // Update header title with project name - FORCE UPDATE
         const headerTitle = document.querySelector('.header-title');
         if (headerTitle) {
-            headerTitle.textContent = currentProject.name || 'Unknown Project';
-            console.log('Updated header title to:', currentProject.name);
+            const projectName = currentProject.name || 'Unknown Project';
+            headerTitle.textContent = projectName;
+            console.log('✅ Updated header title to:', projectName);
+            // Force a re-render by triggering a style change
+            headerTitle.style.display = 'none';
+            headerTitle.offsetHeight; // Trigger reflow
+            headerTitle.style.display = '';
+        } else {
+            console.error('❌ Header title element not found!');
         }
         
-        // Update client name
+        // Update client name - FORCE UPDATE
         const clientName = document.getElementById('project-client-name');
         if (clientName) {
-            clientName.textContent = currentProject.client || 'N/A';
-            console.log('Updated client name to:', currentProject.client);
+            const clientNameValue = currentProject.client || 'N/A';
+            clientName.textContent = clientNameValue;
+            console.log('✅ Updated client name to:', clientNameValue);
+            // Force a re-render
+            clientName.style.display = 'none';
+            clientName.offsetHeight; // Trigger reflow
+            clientName.style.display = '';
+        } else {
+            console.error('❌ Client name element not found!');
         }
         
         // Update project status - show actual project status, not just photo status
