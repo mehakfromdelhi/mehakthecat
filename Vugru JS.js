@@ -517,7 +517,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let projectFromStorage = null;
         
         console.log('=== LOADING PROJECT DATA ===');
+        console.log('Current URL:', window.location.href);
         console.log('Project ID from URL:', projectId);
+        
+        // Decode URL parameter if needed
+        if (projectId) {
+            projectId = decodeURIComponent(projectId);
+            console.log('Decoded project ID:', projectId);
+        }
         
         // If no project ID from URL, try sessionStorage
         if (!projectId) {
