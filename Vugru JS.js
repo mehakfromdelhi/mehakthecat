@@ -486,9 +486,30 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             currentProject = JSON.parse(selectedProject);
             
+            // Ensure project has required fields
+            if (!currentProject || (!currentProject.id && !currentProject.projectId)) {
+                console.warn('Project data missing ID, attempting to get from ProjectDataManager');
+                const projectId = CommentsManager.getCurrentProjectId();
+                if (projectId && typeof ProjectDataManager !== 'undefined') {
+                    const projectFromManager = ProjectDataManager.getProject(projectId);
+                    if (projectFromManager) {
+                        currentProject = {
+                            ...currentProject,
+                            id: projectFromManager.id,
+                            name: projectFromManager.name || currentProject?.name,
+                            client: projectFromManager.client || currentProject?.client,
+                            clientEmail: projectFromManager.clientEmail || currentProject?.clientEmail,
+                            projectId: projectFromManager.id
+                        };
+                        // Update sessionStorage with complete project data
+                        sessionStorage.setItem('selectedProject', JSON.stringify(currentProject));
+                    }
+                }
+            }
+            
             // Update header title with project name
             const headerTitle = document.querySelector('.header-title');
-            if (headerTitle && currentProject.name) {
+            if (headerTitle && currentProject?.name) {
                 headerTitle.textContent = currentProject.name;
             }
             
@@ -499,10 +520,15 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Get current photo status to determine approval status
             let photoStatus = null;
-            if (currentProject.id && typeof PhotoStorageManager !== 'undefined') {
-                const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProject.id);
-                if (currentPhoto) {
-                    photoStatus = currentPhoto.status;
+            const projectId = currentProject?.id || currentProject?.projectId || CommentsManager.getCurrentProjectId();
+            if (projectId && typeof PhotoStorageManager !== 'undefined') {
+                try {
+                    const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+                    if (currentPhoto) {
+                        photoStatus = currentPhoto.status;
+                    }
+                } catch (e) {
+                    console.warn('Error getting photo status:', e);
                 }
             }
             
@@ -546,37 +572,42 @@ document.addEventListener('DOMContentLoaded', () => {
         // If no project selected, try to get from ProjectDataManager
         const projectId = CommentsManager.getCurrentProjectId();
         if (projectId && typeof ProjectDataManager !== 'undefined') {
-            currentProject = ProjectDataManager.getProject(projectId);
-            if (currentProject) {
-                // Store in sessionStorage for consistency
-                sessionStorage.setItem('selectedProject', JSON.stringify({
-                    id: currentProject.id,
-                    name: currentProject.name,
-                    client: currentProject.client,
-                    clientEmail: currentProject.clientEmail,
-                    projectId: currentProject.id,
-                    status: currentProject.status
-                }));
-                
-                // Update header
-                const headerTitle = document.querySelector('.header-title');
-                if (headerTitle) {
-                    headerTitle.textContent = currentProject.name;
-                }
-                
-                // Update project status based on photo approval
-                const statusText = document.getElementById('project-status-text');
-                const statusBar = document.getElementById('project-status-bar');
-                const clientName = document.getElementById('project-client-name');
-                
-                // Get current photo status
-                let photoStatus = null;
-                if (typeof PhotoStorageManager !== 'undefined') {
-                    const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
-                    if (currentPhoto) {
-                        photoStatus = currentPhoto.status;
+            try {
+                currentProject = ProjectDataManager.getProject(projectId);
+                if (currentProject) {
+                    // Store in sessionStorage for consistency
+                    sessionStorage.setItem('selectedProject', JSON.stringify({
+                        id: currentProject.id,
+                        name: currentProject.name,
+                        client: currentProject.client,
+                        clientEmail: currentProject.clientEmail,
+                        projectId: currentProject.id,
+                        status: currentProject.status
+                    }));
+                    
+                    // Update header
+                    const headerTitle = document.querySelector('.header-title');
+                    if (headerTitle) {
+                        headerTitle.textContent = currentProject.name;
                     }
-                }
+                    
+                    // Update project status based on photo approval
+                    const statusText = document.getElementById('project-status-text');
+                    const statusBar = document.getElementById('project-status-bar');
+                    const clientName = document.getElementById('project-client-name');
+                    
+                    // Get current photo status
+                    let photoStatus = null;
+                    if (typeof PhotoStorageManager !== 'undefined') {
+                        try {
+                            const currentPhoto = PhotoStorageManager.getCurrentPhoto(projectId);
+                            if (currentPhoto) {
+                                photoStatus = currentPhoto.status;
+                            }
+                        } catch (e) {
+                            console.warn('Error getting photo status:', e);
+                        }
+                    }
                 
                 if (statusText) {
                     if (photoStatus === 'approved') {
