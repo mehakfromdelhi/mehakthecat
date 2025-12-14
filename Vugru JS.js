@@ -897,9 +897,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Load current photo and revision history on page load
-    loadCurrentPhoto();
-    loadRevisionHistory();
+    // Load current photo and revision history on page load - but only after project data is loaded
+    // Wait a bit to ensure project data is loaded first
+    setTimeout(() => {
+        try {
+            loadCurrentPhoto();
+            loadRevisionHistory();
+        } catch (error) {
+            console.error('Error loading photo/revision history:', error);
+        }
+    }, 500);
     
     // Listen for photo updates to refresh photo viewer, revision history, and status
     window.addEventListener('photosUpdated', (e) => {
