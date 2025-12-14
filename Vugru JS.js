@@ -497,93 +497,94 @@ document.addEventListener('DOMContentLoaded', () => {
      * -------------------------------------------
      */
     function loadProjectData() {
-        // Wait for ProjectDataManager to be available
-        if (typeof ProjectDataManager === 'undefined') {
-            setTimeout(loadProjectData, 100);
-            return null;
-        }
-        
-        // Ensure ProjectDataManager is initialized
-        ProjectDataManager.initialize();
-        
-        // Get project ID from URL - THIS IS THE SOURCE OF TRUTH
-        const urlParams = new URLSearchParams(window.location.search);
-        let projectId = urlParams.get('projectId');
-        
-        // Decode if needed
-        if (projectId) {
-            projectId = decodeURIComponent(projectId);
-        }
-        
-        // If no project ID in URL, try sessionStorage
-        if (!projectId) {
-            const selectedProject = sessionStorage.getItem('selectedProject');
-            if (selectedProject) {
-                try {
-                    const parsed = JSON.parse(selectedProject);
-                    projectId = parsed.id || parsed.projectId;
-                } catch (e) {
-                    console.error('Error parsing selected project:', e);
+        try {
+            // Wait for ProjectDataManager to be available
+            if (typeof ProjectDataManager === 'undefined') {
+                setTimeout(loadProjectData, 100);
+                return null;
+            }
+            
+            // Ensure ProjectDataManager is initialized
+            ProjectDataManager.initialize();
+            
+            // Get project ID from URL - THIS IS THE SOURCE OF TRUTH
+            const urlParams = new URLSearchParams(window.location.search);
+            let projectId = urlParams.get('projectId');
+            
+            // Decode if needed
+            if (projectId) {
+                projectId = decodeURIComponent(projectId);
+            }
+            
+            // If no project ID in URL, try sessionStorage
+            if (!projectId) {
+                const selectedProject = sessionStorage.getItem('selectedProject');
+                if (selectedProject) {
+                    try {
+                        const parsed = JSON.parse(selectedProject);
+                        projectId = parsed.id || parsed.projectId;
+                    } catch (e) {
+                        console.error('Error parsing selected project:', e);
+                    }
                 }
             }
-        }
-        
-        if (!projectId) {
-            // No project selected - show error
+            
+            if (!projectId) {
+                // No project selected - show error
+                const headerTitle = document.querySelector('.header-title');
+                if (headerTitle) headerTitle.textContent = 'No Project Selected';
+                const clientName = document.getElementById('project-client-name');
+                if (clientName) clientName.textContent = 'N/A';
+                const statusText = document.getElementById('project-status-text');
+                if (statusText) statusText.textContent = 'No Project';
+                return null;
+            }
+            
+            // Fetch project from ProjectDataManager - THIS IS THE SOURCE OF TRUTH FOR PROJECT DATA
+            const currentProject = ProjectDataManager.getProject(projectId);
+            
+            if (!currentProject) {
+                // Project not found - show error
+                const headerTitle = document.querySelector('.header-title');
+                if (headerTitle) headerTitle.textContent = 'Project Not Found';
+                const clientName = document.getElementById('project-client-name');
+                if (clientName) clientName.textContent = 'N/A';
+                const statusText = document.getElementById('project-status-text');
+                if (statusText) statusText.textContent = 'Not Found';
+                return null;
+            }
+            
+            // Update sessionStorage with complete project data
+            sessionStorage.setItem('selectedProject', JSON.stringify({
+                id: currentProject.id,
+                name: currentProject.name,
+                client: currentProject.client,
+                clientEmail: currentProject.clientEmail,
+                projectId: currentProject.id,
+                status: currentProject.status,
+                progress: currentProject.progress,
+                deadline: currentProject.deadline,
+                priority: currentProject.priority
+            }));
+            
+            // Update UI with project data - FORCE UPDATE IMMEDIATELY
             const headerTitle = document.querySelector('.header-title');
-            if (headerTitle) headerTitle.textContent = 'No Project Selected';
+            if (headerTitle) {
+                headerTitle.textContent = currentProject.name;
+                // Force browser to update
+                headerTitle.style.visibility = 'hidden';
+                headerTitle.offsetHeight; // Trigger reflow
+                headerTitle.style.visibility = 'visible';
+            }
+            
             const clientName = document.getElementById('project-client-name');
-            if (clientName) clientName.textContent = 'N/A';
-            const statusText = document.getElementById('project-status-text');
-            if (statusText) statusText.textContent = 'No Project';
-            return null;
-        }
-        
-        // Fetch project from ProjectDataManager - THIS IS THE SOURCE OF TRUTH FOR PROJECT DATA
-        const currentProject = ProjectDataManager.getProject(projectId);
-        
-        if (!currentProject) {
-            // Project not found - show error
-            const headerTitle = document.querySelector('.header-title');
-            if (headerTitle) headerTitle.textContent = 'Project Not Found';
-            const clientName = document.getElementById('project-client-name');
-            if (clientName) clientName.textContent = 'N/A';
-            const statusText = document.getElementById('project-status-text');
-            if (statusText) statusText.textContent = 'Not Found';
-            return null;
-        }
-        
-        // Update sessionStorage with complete project data
-        sessionStorage.setItem('selectedProject', JSON.stringify({
-            id: currentProject.id,
-            name: currentProject.name,
-            client: currentProject.client,
-            clientEmail: currentProject.clientEmail,
-            projectId: currentProject.id,
-            status: currentProject.status,
-            progress: currentProject.progress,
-            deadline: currentProject.deadline,
-            priority: currentProject.priority
-        }));
-        
-        // Update UI with project data - FORCE UPDATE IMMEDIATELY
-        const headerTitle = document.querySelector('.header-title');
-        if (headerTitle) {
-            headerTitle.textContent = currentProject.name;
-            // Force browser to update
-            headerTitle.style.visibility = 'hidden';
-            headerTitle.offsetHeight; // Trigger reflow
-            headerTitle.style.visibility = 'visible';
-        }
-        
-        const clientName = document.getElementById('project-client-name');
-        if (clientName) {
-            clientName.textContent = currentProject.client || 'N/A';
-            // Force browser to update
-            clientName.style.visibility = 'hidden';
-            clientName.offsetHeight; // Trigger reflow
-            clientName.style.visibility = 'visible';
-        }
+            if (clientName) {
+                clientName.textContent = currentProject.client || 'N/A';
+                // Force browser to update
+                clientName.style.visibility = 'hidden';
+                clientName.offsetHeight; // Trigger reflow
+                clientName.style.visibility = 'visible';
+            }
         
         // Update project status - show actual project status, not just photo status
         const statusText = document.getElementById('project-status-text');
