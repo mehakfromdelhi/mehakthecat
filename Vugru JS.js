@@ -603,7 +603,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const statusLabel = statusLabels[projectStatus] || projectStatus;
             statusText.textContent = statusLabel;
-            console.log('Updated status to:', statusLabel);
             
             // Set status bar color based on project status
             if (statusBar) {
@@ -627,8 +626,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        
-        console.log('Successfully loaded project:', currentProject);
         
         // Ensure projectId is available - use the extracted projectId variable if currentProject.id is missing
         const finalProjectId = currentProject.id || currentProject.projectId || projectId;
