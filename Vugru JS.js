@@ -626,20 +626,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusBar.style.width = currentProject.progress ? `${currentProject.progress}%` : '30%';
                 }
             }
+            }
+            
+            // Ensure projectId is available - use the extracted projectId variable if currentProject.id is missing
+            const finalProjectId = currentProject.id || currentProject.projectId || projectId;
+            
+            // Trigger comments reload after project is loaded
+            if (typeof window !== 'undefined' && finalProjectId) {
+                window.dispatchEvent(new CustomEvent('projectDataLoaded', {
+                    detail: { project: currentProject, projectId: finalProjectId }
+                }));
+            }
+            
+            // Return project for use in other functions
+            return currentProject;
+        } catch (error) {
+            console.error('Error in loadProjectData:', error);
+            return null;
         }
-        
-        // Ensure projectId is available - use the extracted projectId variable if currentProject.id is missing
-        const finalProjectId = currentProject.id || currentProject.projectId || projectId;
-        
-        // Trigger comments reload after project is loaded
-        if (typeof window !== 'undefined' && finalProjectId) {
-            window.dispatchEvent(new CustomEvent('projectDataLoaded', {
-                detail: { project: currentProject, projectId: finalProjectId }
-            }));
-        }
-        
-        // Return project for use in other functions
-        return currentProject;
     }
     
     // Load project data on page load - simple retry if ProjectDataManager not ready
