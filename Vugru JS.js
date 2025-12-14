@@ -497,12 +497,16 @@ document.addEventListener('DOMContentLoaded', () => {
      * -------------------------------------------
      */
     function loadProjectData() {
+        console.log('=== loadProjectData called ===');
         try {
             // Wait for ProjectDataManager to be available
             if (typeof ProjectDataManager === 'undefined') {
+                console.log('ProjectDataManager not available, retrying...');
                 setTimeout(loadProjectData, 100);
                 return null;
             }
+            
+            console.log('ProjectDataManager is available');
             
             // Ensure ProjectDataManager is initialized
             ProjectDataManager.initialize();
@@ -510,19 +514,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Get project ID from URL - THIS IS THE SOURCE OF TRUTH
             const urlParams = new URLSearchParams(window.location.search);
             let projectId = urlParams.get('projectId');
+            console.log('Project ID from URL:', projectId);
             
             // Decode if needed
             if (projectId) {
                 projectId = decodeURIComponent(projectId);
+                console.log('Decoded project ID:', projectId);
             }
             
             // If no project ID in URL, try sessionStorage
             if (!projectId) {
                 const selectedProject = sessionStorage.getItem('selectedProject');
+                console.log('Selected project from sessionStorage:', selectedProject);
                 if (selectedProject) {
                     try {
                         const parsed = JSON.parse(selectedProject);
                         projectId = parsed.id || parsed.projectId;
+                        console.log('Project ID from sessionStorage:', projectId);
                     } catch (e) {
                         console.error('Error parsing selected project:', e);
                     }
@@ -530,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (!projectId) {
+                console.error('No project ID found!');
                 // No project selected - show error
                 const headerTitle = document.querySelector('.header-title');
                 if (headerTitle) headerTitle.textContent = 'No Project Selected';
@@ -541,9 +550,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Fetch project from ProjectDataManager - THIS IS THE SOURCE OF TRUTH FOR PROJECT DATA
+            console.log('Fetching project with ID:', projectId);
             const currentProject = ProjectDataManager.getProject(projectId);
+            console.log('Project found:', currentProject);
             
             if (!currentProject) {
+                console.error('Project not found in ProjectDataManager!');
+                // List all available projects for debugging
+                const allProjects = ProjectDataManager.getAllProjects();
+                console.log('All available projects:', allProjects.map(p => ({ id: p.id, name: p.name })));
+                
                 // Project not found - show error
                 const headerTitle = document.querySelector('.header-title');
                 if (headerTitle) headerTitle.textContent = 'Project Not Found';
