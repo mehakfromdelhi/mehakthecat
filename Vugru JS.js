@@ -1086,8 +1086,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
         console.error('Error initializing Vugru Dashboard:', error);
         console.error('Error stack:', error.stack);
-        // Show user-friendly error message
-        alert('There was an error loading the dashboard. Please check the console for details and refresh the page.');
+        // Don't show alert - just log the error and continue
+        // The page should still work even if some features fail to initialize
     }
 
 });
