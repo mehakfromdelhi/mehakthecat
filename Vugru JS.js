@@ -647,10 +647,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxRetries = 5;
     
     function tryLoadProjectData() {
-        currentProject = loadProjectData();
-        if (!currentProject && retryCount < maxRetries) {
-            retryCount++;
-            setTimeout(tryLoadProjectData, 200);
+        try {
+            currentProject = loadProjectData();
+            if (!currentProject && retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(tryLoadProjectData, 200);
+            }
+        } catch (error) {
+            console.error('Error in tryLoadProjectData:', error);
+            // Retry if we haven't exceeded max retries
+            if (retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(tryLoadProjectData, 200);
+            }
         }
     }
     
