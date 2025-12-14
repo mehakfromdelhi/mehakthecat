@@ -654,14 +654,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load project data on page load - simple retry if ProjectDataManager not ready
     let currentProject = null;
     let retryCount = 0;
-    const maxRetries = 5;
+    const maxRetries = 10;
     
     function tryLoadProjectData() {
         try {
             currentProject = loadProjectData();
-            if (!currentProject && retryCount < maxRetries) {
+            if (currentProject) {
+                // Successfully loaded - update UI immediately
+                console.log('Project loaded successfully:', currentProject.name);
+            } else if (retryCount < maxRetries) {
                 retryCount++;
                 setTimeout(tryLoadProjectData, 200);
+            } else {
+                console.error('Failed to load project data after', maxRetries, 'attempts');
             }
         } catch (error) {
             console.error('Error in tryLoadProjectData:', error);
@@ -673,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Start loading project data immediately
+    // Start loading project data immediately - don't wait
     tryLoadProjectData();
 
     /*
