@@ -567,71 +567,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 priority: currentProject.priority
             }));
             
-            // Update UI with project data - FORCE UPDATE IMMEDIATELY
-            const headerTitle = document.querySelector('.header-title');
-            if (headerTitle) {
-                headerTitle.textContent = currentProject.name;
-                // Force browser to update
-                headerTitle.style.visibility = 'hidden';
-                headerTitle.offsetHeight; // Trigger reflow
-                headerTitle.style.visibility = 'visible';
-            }
-            
-            const clientName = document.getElementById('project-client-name');
-            if (clientName) {
-                clientName.textContent = currentProject.client || 'N/A';
-                // Force browser to update
-                clientName.style.visibility = 'hidden';
-                clientName.offsetHeight; // Trigger reflow
-                clientName.style.visibility = 'visible';
-            }
-            
-            // Update project status - show actual project status, not just photo status
-            const statusText = document.getElementById('project-status-text');
-            const statusBar = document.getElementById('project-status-bar');
-            
-            // Get project status from project data
-            const projectStatus = currentProject.status || 'active';
-            
-            if (statusText) {
-                // Show project status (active, in-review, awaiting-feedback, completed)
-                const statusLabels = {
-                    'active': 'Active',
-                    'in-review': 'In Review',
-                    'awaiting-feedback': 'Awaiting Feedback',
-                    'completed': 'Completed'
-                };
+            // Update UI with project data - IMMEDIATE UPDATE
+            // Use requestAnimationFrame to ensure DOM is ready
+            requestAnimationFrame(() => {
+                const headerTitle = document.querySelector('.header-title');
+                if (headerTitle) {
+                    headerTitle.textContent = currentProject.name;
+                }
                 
-                const statusLabel = statusLabels[projectStatus] || projectStatus;
-                statusText.textContent = statusLabel;
+                const clientName = document.getElementById('project-client-name');
+                if (clientName) {
+                    clientName.textContent = currentProject.client || 'N/A';
+                }
                 
-                // Force browser to update
-                statusText.style.visibility = 'hidden';
-                statusText.offsetHeight; // Trigger reflow
-                statusText.style.visibility = 'visible';
+                // Update project status - show actual project status, not just photo status
+                const statusText = document.getElementById('project-status-text');
+                const statusBar = document.getElementById('project-status-bar');
                 
-                // Set status bar color based on project status
-                if (statusBar) {
-                    if (projectStatus === 'completed') {
-                        statusText.className = 'status-bar-text-green';
-                        statusBar.className = 'status-bar-fill-green';
-                        statusBar.style.width = '100%';
-                    } else if (projectStatus === 'in-review') {
-                        statusText.className = 'status-bar-text-yellow';
-                        statusBar.className = 'status-bar-fill-yellow';
-                        statusBar.style.width = '75%';
-                    } else if (projectStatus === 'awaiting-feedback') {
-                        statusText.className = 'status-bar-text-yellow';
-                        statusBar.className = 'status-bar-fill-yellow';
-                        statusBar.style.width = '50%';
-                    } else {
-                        // active
-                        statusText.className = 'status-bar-text-yellow';
-                        statusBar.className = 'status-bar-fill-yellow';
-                        statusBar.style.width = currentProject.progress ? `${currentProject.progress}%` : '30%';
+                // Get project status from project data
+                const projectStatus = currentProject.status || 'active';
+                
+                if (statusText) {
+                    // Show project status (active, in-review, awaiting-feedback, completed)
+                    const statusLabels = {
+                        'active': 'Active',
+                        'in-review': 'In Review',
+                        'awaiting-feedback': 'Awaiting Feedback',
+                        'completed': 'Completed'
+                    };
+                    
+                    const statusLabel = statusLabels[projectStatus] || projectStatus;
+                    statusText.textContent = statusLabel;
+                    
+                    // Set status bar color based on project status
+                    if (statusBar) {
+                        if (projectStatus === 'completed') {
+                            statusText.className = 'status-bar-text-green';
+                            statusBar.className = 'status-bar-fill-green';
+                            statusBar.style.width = '100%';
+                        } else if (projectStatus === 'in-review') {
+                            statusText.className = 'status-bar-text-yellow';
+                            statusBar.className = 'status-bar-fill-yellow';
+                            statusBar.style.width = '75%';
+                        } else if (projectStatus === 'awaiting-feedback') {
+                            statusText.className = 'status-bar-text-yellow';
+                            statusBar.className = 'status-bar-fill-yellow';
+                            statusBar.style.width = '50%';
+                        } else {
+                            // active
+                            statusText.className = 'status-bar-text-yellow';
+                            statusBar.className = 'status-bar-fill-yellow';
+                            statusBar.style.width = currentProject.progress ? `${currentProject.progress}%` : '30%';
+                        }
                     }
                 }
-            }
+            });
             
             // Ensure projectId is available - use the extracted projectId variable if currentProject.id is missing
             const finalProjectId = currentProject.id || currentProject.projectId || projectId;
