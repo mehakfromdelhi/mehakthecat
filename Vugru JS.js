@@ -672,122 +672,142 @@ document.addEventListener('DOMContentLoaded', () => {
      * -------------------------------------------
      */
     function loadCurrentPhoto() {
-        const currentProjectId = CommentsManager.getCurrentProjectId();
-        
-        console.log('loadCurrentPhoto called with project ID:', currentProjectId);
-        
-        if (!currentProjectId) {
-            console.warn('No project ID available');
-            return;
-        }
-        
-        if (typeof PhotoStorageManager === 'undefined') {
-            console.warn('PhotoStorageManager not available');
-            return;
-        }
-        
-        const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
-        const videoPlayerPlaceholder = document.querySelector('.video-player-placeholder');
-        
-        if (!videoPlayerWrapper) {
-            console.warn('Video player wrapper not found');
-            return;
-        }
-        
-        const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProjectId);
-        
-        console.log('Current photo retrieved:', currentPhoto);
-        
-        if (currentPhoto && currentPhoto.url) {
-            // Hide placeholder
-            if (videoPlayerPlaceholder) {
-                videoPlayerPlaceholder.style.display = 'none';
+        try {
+            // Try to get project ID from multiple sources
+            let currentProjectId = null;
+            
+            // First try URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            currentProjectId = urlParams.get('projectId');
+            if (currentProjectId) {
+                currentProjectId = decodeURIComponent(currentProjectId);
             }
             
-            // Remove any existing image/video elements
-            const existingMedia = videoPlayerWrapper.querySelector('img, video');
-            if (existingMedia) {
-                existingMedia.remove();
-            }
-            
-            // Create and append new image element
-            const imageElement = document.createElement('img');
-            imageElement.src = currentPhoto.url;
-            imageElement.alt = currentPhoto.fileName || 'Property Photo';
-            // Position absolutely to match placeholder positioning
-            imageElement.style.position = 'absolute';
-            imageElement.style.top = '0';
-            imageElement.style.left = '0';
-            imageElement.style.width = '100%';
-            imageElement.style.height = '100%';
-            imageElement.style.objectFit = 'contain';
-            imageElement.style.borderRadius = '0.5rem';
-            imageElement.style.display = 'block';
-            imageElement.style.backgroundColor = '#000000'; // Match placeholder background
-            
-            // Add error handler in case image fails to load
-            imageElement.onerror = function() {
-                console.error('Failed to load image:', currentPhoto.url.substring(0, 50) + '...');
-                if (videoPlayerPlaceholder) {
-                    videoPlayerPlaceholder.style.display = 'flex';
+            // If not in URL, try sessionStorage
+            if (!currentProjectId) {
+                const selectedProject = sessionStorage.getItem('selectedProject');
+                if (selectedProject) {
+                    try {
+                        const parsed = JSON.parse(selectedProject);
+                        currentProjectId = parsed.id || parsed.projectId;
+                    } catch (e) {
+                        // Ignore parse errors
+                    }
                 }
-            };
+            }
             
-            // Add load handler to ensure image is displayed
-            imageElement.onload = function() {
-                console.log('Image loaded successfully');
+            // Last resort: CommentsManager
+            if (!currentProjectId && typeof CommentsManager !== 'undefined') {
+                currentProjectId = CommentsManager.getCurrentProjectId();
+            }
+            
+            if (!currentProjectId) {
+                console.warn('No project ID available for loading photo');
+                return;
+            }
+            
+            if (typeof PhotoStorageManager === 'undefined') {
+                console.warn('PhotoStorageManager not available');
+                return;
+            }
+            
+            const videoPlayerWrapper = document.querySelector('.video-player-wrapper');
+            const videoPlayerPlaceholder = document.querySelector('.video-player-placeholder');
+            
+            if (!videoPlayerWrapper) {
+                console.warn('Video player wrapper not found');
+                return;
+            }
+            
+            const currentPhoto = PhotoStorageManager.getCurrentPhoto(currentProjectId);
+            
+            if (currentPhoto && currentPhoto.url) {
+                // Hide placeholder
                 if (videoPlayerPlaceholder) {
                     videoPlayerPlaceholder.style.display = 'none';
                 }
-            };
-            
-            videoPlayerWrapper.appendChild(imageElement);
-            
-            // Update card footer
-            const cardTitle = document.querySelector('.card-footer .card-title-xl');
-            const cardSubtitle = document.querySelector('.card-footer .card-subtitle');
-            
-            if (cardTitle) {
-                const statusText = currentPhoto.status === 'approved' ? 'Approved' : 
-                                  currentPhoto.status === 'not-approved' ? 'Not Approved' : 
-                                  'Under Review';
-                cardTitle.textContent = `Version ${currentPhoto.version} (${statusText})`;
+                
+                // Remove any existing image/video elements
+                const existingMedia = videoPlayerWrapper.querySelector('img, video');
+                if (existingMedia) {
+                    existingMedia.remove();
+                }
+                
+                // Create and append new image element
+                const imageElement = document.createElement('img');
+                imageElement.src = currentPhoto.url;
+                imageElement.alt = currentPhoto.fileName || 'Property Photo';
+                imageElement.style.position = 'absolute';
+                imageElement.style.top = '0';
+                imageElement.style.left = '0';
+                imageElement.style.width = '100%';
+                imageElement.style.height = '100%';
+                imageElement.style.objectFit = 'contain';
+                imageElement.style.borderRadius = '0.5rem';
+                imageElement.style.display = 'block';
+                imageElement.style.backgroundColor = '#000000';
+                
+                imageElement.onerror = function() {
+                    console.error('Failed to load image');
+                    if (videoPlayerPlaceholder) {
+                        videoPlayerPlaceholder.style.display = 'flex';
+                    }
+                };
+                
+                imageElement.onload = function() {
+                    if (videoPlayerPlaceholder) {
+                        videoPlayerPlaceholder.style.display = 'none';
+                    }
+                };
+                
+                videoPlayerWrapper.appendChild(imageElement);
+                
+                // Update card footer
+                const cardTitle = document.querySelector('.card-footer .card-title-xl');
+                const cardSubtitle = document.querySelector('.card-footer .card-subtitle');
+                
+                if (cardTitle) {
+                    const statusText = currentPhoto.status === 'approved' ? 'Approved' : 
+                                      currentPhoto.status === 'not-approved' ? 'Not Approved' : 
+                                      'Under Review';
+                    cardTitle.textContent = `Version ${currentPhoto.version} (${statusText})`;
+                }
+                
+                if (cardSubtitle && currentPhoto.uploadedAt) {
+                    const date = new Date(currentPhoto.uploadedAt);
+                    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    cardSubtitle.textContent = `Uploaded by Vugru on ${dateStr} at ${timeStr}`;
+                }
+            } else {
+                // No photo, show placeholder
+                const existingMedia = videoPlayerWrapper.querySelector('img, video');
+                if (existingMedia) {
+                    existingMedia.remove();
+                }
+                
+                let placeholder = videoPlayerWrapper.querySelector('.video-player-placeholder');
+                if (!placeholder) {
+                    placeholder = document.createElement('div');
+                    placeholder.className = 'video-player-placeholder';
+                    const span = document.createElement('span');
+                    span.textContent = 'Photo Viewer Placeholder';
+                    placeholder.appendChild(span);
+                    videoPlayerWrapper.appendChild(placeholder);
+                }
+                placeholder.style.display = 'flex';
+                
+                const cardTitle = document.querySelector('.card-footer .card-title-xl');
+                const cardSubtitle = document.querySelector('.card-footer .card-subtitle');
+                if (cardTitle) {
+                    cardTitle.textContent = 'No photo uploaded yet';
+                }
+                if (cardSubtitle) {
+                    cardSubtitle.textContent = '';
+                }
             }
-            
-            if (cardSubtitle && currentPhoto.uploadedAt) {
-                const date = new Date(currentPhoto.uploadedAt);
-                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                cardSubtitle.textContent = `Uploaded by Vugru on ${dateStr} at ${timeStr}`;
-            }
-        } else {
-            // No photo, show placeholder and remove any existing media
-            const existingMedia = videoPlayerWrapper.querySelector('img, video');
-            if (existingMedia) {
-                existingMedia.remove();
-            }
-            
-            // Recreate placeholder if it was removed
-            let placeholder = videoPlayerWrapper.querySelector('.video-player-placeholder');
-            if (!placeholder) {
-                placeholder = document.createElement('div');
-                placeholder.className = 'video-player-placeholder';
-                const span = document.createElement('span');
-                span.textContent = 'Photo Viewer Placeholder';
-                placeholder.appendChild(span);
-                videoPlayerWrapper.appendChild(placeholder);
-            }
-            placeholder.style.display = 'flex';
-            
-            // Update card footer
-            const cardTitle = document.querySelector('.card-footer .card-title-xl');
-            const cardSubtitle = document.querySelector('.card-footer .card-subtitle');
-            if (cardTitle) {
-                cardTitle.textContent = 'No photo uploaded yet';
-            }
-            if (cardSubtitle) {
-                cardSubtitle.textContent = '';
-            }
+        } catch (error) {
+            console.error('Error in loadCurrentPhoto:', error);
         }
     }
 
@@ -895,18 +915,29 @@ document.addEventListener('DOMContentLoaded', () => {
             
             revisionList.appendChild(li);
         });
+        } catch (error) {
+            console.error('Error in loadRevisionHistory:', error);
+        }
     }
     
     // Load current photo and revision history on page load - but only after project data is loaded
-    // Wait a bit to ensure project data is loaded first
-    setTimeout(() => {
-        try {
-            loadCurrentPhoto();
-            loadRevisionHistory();
-        } catch (error) {
-            console.error('Error loading photo/revision history:', error);
+    // Wait for project data to be loaded first
+    function loadPhotoDataAfterProjectLoad() {
+        if (currentProject) {
+            try {
+                loadCurrentPhoto();
+                loadRevisionHistory();
+            } catch (error) {
+                console.error('Error loading photo/revision history:', error);
+            }
+        } else {
+            // Retry after a short delay if project not loaded yet
+            setTimeout(loadPhotoDataAfterProjectLoad, 200);
         }
-    }, 500);
+    }
+    
+    // Start loading photo data after project is loaded
+    setTimeout(loadPhotoDataAfterProjectLoad, 300);
     
     // Listen for photo updates to refresh photo viewer, revision history, and status
     window.addEventListener('photosUpdated', (e) => {
