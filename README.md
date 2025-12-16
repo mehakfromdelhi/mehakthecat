@@ -1,5 +1,5 @@
-# mehakthecat
-Mehak is a cat who likes to code.
+# Ellie, Mehak, and Elena's Vugru Project
+
 
 ## Project Description
 A real estate photo project management platform with bidirectional communication between agents and clients. The platform enables agents to manage projects, upload photos, track client feedback, and manage project priorities. Clients can view photos, approve or reject them, and provide comments that agents can see in real-time.
