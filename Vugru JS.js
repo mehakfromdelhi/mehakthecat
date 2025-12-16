@@ -962,9 +962,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             revisionList.appendChild(li);
         });
-        } catch (error) {
-            console.error('Error in loadRevisionHistory:', error);
-        }
     }
     
     // Load current photo and revision history on page load - but only after project data is loaded
@@ -1010,6 +1007,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackReplyInput = document.getElementById('feedback-reply-input');
     const feedbackReplySend = document.getElementById('feedback-reply-send');
     const feedbackList = document.querySelector('.feedback-list');
+
+    // Keep the active comments project ID and renderer in outer scope
+    let commentsProjectId = null;
+    let renderComments = null;
     
     // Function to get project ID and initialize comments
     function initializeComments() {
@@ -1044,15 +1045,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        console.log('Initializing comments for project ID:', projectId);
+        commentsProjectId = projectId;
+        
+        console.log('Initializing comments for project ID:', commentsProjectId);
         
         // Function to render comments in agent view style
-        const renderComments = () => {
+        renderComments = () => {
             if (feedbackList) {
                 // Get the parent card section
                 const feedbackCard = feedbackList.closest('.card');
                 if (feedbackCard) {
-                    CommentsManager.renderCommentsAgent(projectId, feedbackCard);
+                    CommentsManager.renderCommentsAgent(commentsProjectId, feedbackCard);
                 }
             }
         };
@@ -1061,12 +1064,12 @@ document.addEventListener('DOMContentLoaded', () => {
         renderComments();
         
         // Initialize sync listener for real-time updates
-        CommentsManager.initSyncListener(projectId, renderComments);
+        CommentsManager.initSyncListener(commentsProjectId, renderComments);
         
         // Listen for project data loaded event to reload comments
         window.addEventListener('projectDataLoaded', (e) => {
             if (e.detail && e.detail.projectId) {
-                projectId = e.detail.projectId;
+                commentsProjectId = e.detail.projectId;
                 renderComments();
             }
         });
@@ -1089,7 +1092,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const newStatus = statusOption.getAttribute('data-status');
             const commentId = statusOption.getAttribute('data-comment-id');
-            const projectId = CommentsManager.getCurrentProjectId();
+            const projectId = commentsProjectId || (typeof CommentsManager !== 'undefined' ? CommentsManager.getCurrentProjectId() : null);
             
             if (!newStatus || !commentId || !projectId) return;
             
@@ -1126,6 +1129,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     console.error('Error parsing auth data:', e);
                 }
+            }
+            
+            // Ensure we have a project ID for comments
+            const projectId = commentsProjectId || (typeof CommentsManager !== 'undefined' ? CommentsManager.getCurrentProjectId() : null);
+            if (!projectId) {
+                console.warn('No project ID available when trying to send agent reply');
+                return;
             }
             
             // Save comment using comment manager
@@ -1170,9 +1180,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Buttons initialized:', {
         uploadButton: !!uploadButton,
         logoutButton: !!logoutButton,
-        publishOptions: publishOptions.length,
-        shareOptions: shareOptions.length,
-        revisionItems: revisionItems.length,
         feedbackReplySend: !!feedbackReplySend,
         currentProject: currentProject ? currentProject.name : 'None'
     });
