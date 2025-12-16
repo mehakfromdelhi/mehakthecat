@@ -90,6 +90,46 @@ A real estate photo project management platform with bidirectional communication
 4. Post comments for the agent
 5. Receive notifications for updates
 
+### End-to-End Flow Walkthroughs
+
+#### Agent Flow
+1. **Sign in** on `login.html` using an agent account (for example, `demo@vugru.com` / `demo123`).  
+2. **Review projects** on `project-management.html`:
+   - See each project's deadline, progress, priority, status, and comment count.
+   - Adjust priority (Urgent / High / Normal) directly on the project card if needed.
+3. **Open a project** by clicking its card:
+   - You are taken to `Vugru HTML.html?projectId=...` with the project stored in `sessionStorage` as `selectedProject`.
+4. **Work in the Photo Dashboard** (`Vugru HTML.html`):
+   - The header and Project Status card update with the project name, client name, and project status (Active / In Review / Awaiting Feedback / Completed).
+   - The large viewer shows the current photo (latest version) or a placeholder if none exist.
+   - The Revision History list shows all versions and their approval status.
+5. **Upload a new photo**:
+   - Click **Upload New Photo** → the upload modal appears.
+   - Choose a local image; progress is shown, and on completion:
+     - A new version is created (via `StorageAdapter` → Firebase or `PhotoStorageManager`).
+     - The viewer switches to the new image and Revision History updates.
+6. **Review client feedback**:
+   - The **Client Feedback** section shows all comments (from `CommentsManager` or `FirebaseCommentService` behind `StorageAdapter`).
+   - Use the reply box to respond; replies appear in the thread and trigger a notification for the client.
+7. **Monitor status**:
+   - When clients approve or reject photos, project and photo status update; the Project Status bar and version badges reflect the current state.
+
+#### Client Flow
+1. **Sign in** on `login.html` using a client account (for example, `john.smith@example.com` / `client123`).  
+2. **Auto-routing to your project**:
+   - `clientviewjs.js` looks up the project by your email via `ProjectDataManager.getAllProjects()` and stores it as `selectedProject`.
+3. **View the latest photo** in `Clientview.html`:
+   - The main viewer shows the current version for your project (via `PhotoStorageManager` or Firebase through `StorageAdapter`).
+   - The status badge indicates Approved / Not Approved / Under Review.
+4. **Approve or reject**:
+   - Use the **Approve** / **Not Approved** buttons to update photo status.
+   - These actions trigger status changes for the project and notify the agent.
+5. **Leave comments**:
+   - Type feedback in the Comments box and post it.
+   - Comments are saved for the project, visible to agents, and kept in sync across sessions.
+6. **Stay informed**:
+   - The notification bell shows new uploads, new versions, and agent replies (backed by local notifications or Firebase `notifications` documents).
+
 ## Demo Credentials
 
 ### Agent Accounts
