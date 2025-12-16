@@ -13,7 +13,7 @@ A real estate photo project management platform with bidirectional communication
 - **Priority Management**: Change project priorities (Urgent, High, Normal)
 - **Bidirectional Comments**: View and respond to client comments in real-time
 - **Comment Status Management**: Track comment status (New, In Progress, Completed)
-- **Project Status Tracking**: See project approval status (Approved, Not Approved, Under Review)
+- **Project Status Tracking**: See project approval status and overall project state (Active, In Review, Awaiting Feedback, Completed) from the photo dashboard
 
 ### Client Features
 - **Photo Viewing**: View uploaded property photos with version history
@@ -28,6 +28,7 @@ A real estate photo project management platform with bidirectional communication
 - **Real-time Synchronization**: Comments and status updates sync across sessions
 - **Responsive Design**: Modern UI that works on desktop and mobile devices
 - **Session Management**: Persistent authentication and project state
+- **Firebase Integration (Optional)**: When configured, photos, comments, and notifications are stored in **Firebase Firestore & Storage**, with real-time listeners; when not configured, the app transparently falls back to browser `localStorage` via a unified adapter
 
 ## User Roles
 
@@ -52,9 +53,9 @@ A real estate photo project management platform with bidirectional communication
 - `login.html` - Login/landing page with role-based authentication
 - `login.js` - Authentication logic with client/agent distinction
 - `project-management.html` - Agent's project overview dashboard
-- `project-management.js` - Project management logic with priority controls
-- `Vugru HTML.html` - Agent's photo dashboard
-- `Vugru JS.js` - Photo upload and management logic
+- `project-management.js` - Project management logic with priority controls and navigation into the photo dashboard
+- `Vugru HTML.html` - Agent's photo dashboard (sidebar, photo viewer, revision history, client feedback, reply box)
+- `Vugru JS.js` - Agent dashboard logic: authentication, sidebar toggle, upload modal, photo viewer, revision history, project status UI, and agent-side comments
 - `Clientview.html` - Client's photo viewing and approval dashboard
 - `clientviewjs.js` - Client-side photo viewing and approval logic
 - `calendar.html` - Calendar view with project deadlines
@@ -65,13 +66,21 @@ A real estate photo project management platform with bidirectional communication
 - `Vugru CSS.css` - Main stylesheet
 - `clientview.css` - Client dashboard styles
 
+### Firebase Integration Files (Optional)
+- `firebase-config.js` - Initializes Firebase App, Firestore, Storage, and Auth; exposes `FirebaseService`
+- `firebase-photo-service.js` - Uploads photos to Firebase Storage and stores photo metadata in Firestore (versions, status, etc.)
+- `firebase-comment-service.js` - Stores comments and comment metadata in Firestore, with status and replies
+- `firebase-integration-layer.js` - Defines `StorageAdapter`, which uses Firebase when available and falls back to `PhotoStorageManager` / `CommentsManager` otherwise
+- `QUICK_START.md` - 5-minute guide to creating a Firebase project and wiring in your config
+- `FIREBASE_SETUP.md` / `FIREBASE_STRUCTURE.md` - Detailed setup, recommended Firestore/Storage structure, and security rules
+
 ## Usage
 
 ### For Agents
 1. Login with agent credentials
 2. View projects in the Project Management Dashboard
-3. Click on a project to open the Photo Dashboard
-4. Upload photos, view client comments, and manage project status
+3. Click on a project card to open the Photo Dashboard (passes `projectId` and selected project into the photo view)
+4. Upload photos, view client comments, and manage project status from the photo dashboard
 5. Use Calendar view to see deadlines and access projects
 
 ### For Clients
@@ -97,14 +106,23 @@ A real estate photo project management platform with bidirectional communication
 
 ## Data Storage
 
-The application uses browser localStorage for:
-- Project data (`ProjectDataManager`)
-- Photo versions and status (`PhotoStorageManager`)
-- Comments (`CommentsManager`)
-- Authentication state
-- Notifications
+The application supports **two storage modes**:
 
-All data persists across browser sessions and syncs in real-time using storage events.
+1. **Firebase-backed mode (recommended in production)**  
+   - Project data: still managed by `ProjectDataManager` (in-memory + local persisted seed data)  
+   - Photos + versions: `firebase-photo-service.js` (Firestore + Storage)  
+   - Comments: `firebase-comment-service.js` (Firestore)  
+   - Notifications: Firestore `notifications` collection  
+   - Accessed through the unified `StorageAdapter` in `firebase-integration-layer.js`
+
+2. **Local mode (no Firebase configured)**  
+   - Project data: `ProjectDataManager`
+   - Photo versions and status: `PhotoStorageManager`
+   - Comments: `CommentsManager`
+   - Authentication state and notifications: `localStorage` / `sessionStorage`
+   - Real-time-ish sync via browser `storage` events
+
+The `StorageAdapter` automatically chooses Firebase when available and falls back to local storage when Firebase is not configured or fails, so the rest of the UI code does not need to know which backend is in use.
 
 ## Branch Structure
 

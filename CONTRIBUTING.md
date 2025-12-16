@@ -34,6 +34,7 @@ VuGru is a real estate photo project management platform with:
 - **Files**:
   - `Vugru HTML.html` (Agent photo dashboard)
   - `Vugru JS.js` (Agent photo management)
+  - `firebase-config.js` / `firebase-photo-service.js` / `firebase-comment-service.js` / `firebase-integration-layer.js` (photo + comment backend integration via Firebase and localStorage)
   - `Clientview.html` (Client photo dashboard)
   - `clientviewjs.js` (Client photo viewing and approval)
   - `comments-manager.js` (Bidirectional comment system)
@@ -136,8 +137,10 @@ Some files are shared across the entire application:
 - `login.html` / `login.js` - Authentication with role-based access (coordinate changes)
 - `index.html` - Entry point (coordinate changes)
 - `project-data-manager.js` - Centralized project data (used by all dashboards)
-- `comments-manager.js` - Bidirectional comment system (used by agent and client dashboards)
-- `photo-storage-manager.js` - Photo version and status management (used by agent and client dashboards)
+- `comments-manager.js` - Bidirectional comment system (used by agent and client dashboards; also used as fallback when Firebase is not available)
+- `photo-storage-manager.js` - Photo version and status management (used by agent and client dashboards; also used as fallback when Firebase is not available)
+- `firebase-config.js` / `firebase-photo-service.js` / `firebase-comment-service.js` - Firebase-based implementations for photos and comments
+- `firebase-integration-layer.js` - `StorageAdapter` that routes photo/comment operations to Firebase or localStorage
 - `Vugru CSS.css` - Main stylesheet (shared styles)
 - `README.md` - Documentation
 - `.github/workflows/` - CI/CD configuration
@@ -181,15 +184,18 @@ If you have questions about the workflow or need help:
 
 ### Data Management
 - Use `ProjectDataManager` for all project data operations
-- Use `CommentsManager` for comment-related operations
-- Use `PhotoStorageManager` for photo version and status management
-- Never directly modify localStorage - use the manager functions
+- For photos and comments, prefer the **unified adapter**:
+  - Use `StorageAdapter` (from `firebase-integration-layer.js`) for uploads, reads, and status updates
+  - `StorageAdapter` will call `FirebasePhotoService` / `FirebaseCommentService` when Firebase is available, or fall back to `PhotoStorageManager` / `CommentsManager` otherwise
+- Do **not** bypass the adapter to talk directly to Firebase or localStorage from UI code unless you are extending the adapter itself
+- Never directly modify `localStorage` keys used by the managers; use the manager functions instead
 
 ### Client-Agent Communication
 - Comments are bidirectional - test from both agent and client perspectives
 - Photo approval status updates project status automatically
 - Notifications are triggered by photo uploads and comments
-- Use storage events for real-time synchronization
+- In local mode, use `storage` events for real-time synchronization
+- In Firebase mode, use the real-time listeners exposed by `FirebasePhotoService` / `FirebaseCommentService` via `StorageAdapter`
 
 ### Testing Checklist
 Before submitting a PR, ensure:
@@ -200,4 +206,5 @@ Before submitting a PR, ensure:
 - [ ] Notifications appear correctly
 - [ ] No console errors
 - [ ] Responsive design works on mobile
+- [ ] If you changed photo/comment persistence, test both with Firebase configured (cloud mode) and without Firebase (local mode) to ensure `StorageAdapter` continues to work in both cases
 
